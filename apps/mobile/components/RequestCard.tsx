@@ -76,6 +76,14 @@ export function RequestCard({ request, variant, onPress }: RequestCardProps) {
   const isUrgent = request.urgency === "urgent";
   const timeAgo = getTimeAgo(request.createdAt);
 
+  // Generate title to match design: "Urgent: B- Needed" or "O+ Needed"
+  const title = isUrgent
+    ? `Urgent: ${request.bloodType} Needed`
+    : `${request.bloodType} Needed`;
+
+  // Get location display text
+  const locationText = request.city || request.seeker?.city || null;
+
   return (
     <TouchableOpacity
       style={[styles.card, isUrgent && styles.cardUrgent]}
@@ -92,33 +100,19 @@ export function RequestCard({ request, variant, onPress }: RequestCardProps) {
 
       {/* Content */}
       <View style={styles.content}>
-        {/* Top row: urgency + time */}
-        <View style={styles.topRow}>
-          <View
-            style={[
-              styles.urgencyBadge,
-              isUrgent ? styles.urgencyBadgeUrgent : styles.urgencyBadgeNormal,
-            ]}
-          >
-            <Text
-              style={[
-                styles.urgencyText,
-                isUrgent ? styles.urgencyTextUrgent : styles.urgencyTextNormal,
-              ]}
-            >
-              {isUrgent ? "URGENT" : "Normal"}
-            </Text>
-          </View>
-          <Text style={styles.timeAgo}>{timeAgo}</Text>
+        {/* Title row with urgency indicator */}
+        <View style={styles.titleRow}>
+          <Text style={styles.title} numberOfLines={1}>{title}</Text>
+          {isUrgent && <View style={styles.urgentDot} />}
         </View>
 
-        {/* City if provided */}
-        {request.city && (
-          <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={14} color="#6b7280" />
-            <Text style={styles.locationText}>{request.city}</Text>
-          </View>
+        {/* Location */}
+        {locationText && (
+          <Text style={styles.location}>{locationText}</Text>
         )}
+
+        {/* Time/distance row */}
+        <Text style={styles.meta}>Posted {timeAgo}</Text>
 
         {/* Seeker variant: show status */}
         {variant === "seeker" && (
@@ -144,10 +138,6 @@ export function RequestCard({ request, variant, onPress }: RequestCardProps) {
           </View>
         )}
 
-        {/* Donor variant: show seeker city if available */}
-        {variant === "donor" && request.seeker?.city && (
-          <Text style={styles.seekerCity}>Seeker in {request.seeker.city}</Text>
-        )}
       </View>
 
       {/* Chevron */}
@@ -201,47 +191,32 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 16,
   },
-  topRow: {
+  titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  urgencyBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+  title: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+    flex: 1,
+  },
+  urgentDot: {
+    width: 8,
+    height: 8,
     borderRadius: 4,
+    backgroundColor: "#dc2626",
+    marginLeft: 8,
   },
-  urgencyBadgeUrgent: {
-    backgroundColor: "#fef2f2",
-  },
-  urgencyBadgeNormal: {
-    backgroundColor: "#f3f4f6",
-  },
-  urgencyText: {
-    fontSize: 11,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  urgencyTextUrgent: {
-    color: "#dc2626",
-  },
-  urgencyTextNormal: {
-    color: "#6b7280",
-  },
-  timeAgo: {
-    fontSize: 12,
-    color: "#9ca3af",
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  locationText: {
+  location: {
     fontSize: 14,
     color: "#6b7280",
-    marginLeft: 4,
+    marginBottom: 2,
+  },
+  meta: {
+    fontSize: 12,
+    color: "#9ca3af",
   },
   statusRow: {
     flexDirection: "row",
@@ -262,10 +237,5 @@ const styles = StyleSheet.create({
     color: "#22c55e",
     fontWeight: "500",
     marginLeft: 8,
-  },
-  seekerCity: {
-    fontSize: 13,
-    color: "#6b7280",
-    marginTop: 4,
   },
 });

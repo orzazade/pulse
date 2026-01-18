@@ -58,15 +58,17 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
     gap: spacing(4), // 16px between buttons
   },
   socialButton: {
-    width: 64,
-    height: 48,
+    flex: 1,
+    height: 56,
     borderWidth: 1,
     borderColor: borderColors.default,
-    borderRadius: radius.md, // 8px
+    borderRadius: radius.lg, // 12px - matches design
     backgroundColor: colors.background,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

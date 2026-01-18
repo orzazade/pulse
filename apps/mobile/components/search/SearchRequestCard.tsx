@@ -70,8 +70,10 @@ export function SearchRequestCard({ request, onPress }: SearchRequestCardProps) 
   const badgeColors = getBloodTypeBadgeColors(request.bloodType);
   const isUrgent = request.urgency === 'urgent';
 
-  // Generate title from blood type if not provided
-  const title = request.title || `${request.bloodType} Blood Needed`;
+  // Generate title with urgency prefix to match design: "Urgent: A+ Needed"
+  const title = request.title || (isUrgent
+    ? `Urgent: ${request.bloodType} Needed`
+    : `${request.bloodType} Needed`);
 
   // Format location/subtitle
   const subtitle = request.location || request.city || 'Location not specified';
