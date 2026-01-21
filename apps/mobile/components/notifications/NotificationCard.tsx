@@ -8,6 +8,7 @@ import {
   shadows,
   spacing,
   radius,
+  iconSpec,
 } from "@/theme/tokens";
 import { Id } from "@convex/_generated/dataModel";
 
@@ -73,15 +74,16 @@ function getTimeDisplay(timestamp: number): string {
 function getIconForType(type: NotificationType): keyof typeof Ionicons.glyphMap {
   switch (type) {
     case "request_match":
-      return "megaphone"; // Urgent request - megaphone icon (matching PNG)
+      return "water"; // Blood drop for blood request
     case "request_accepted":
       return "checkmark-circle"; // Green checkmark
     case "eligibility_reminder":
-      return "shield-checkmark"; // Blue shield with check (Profile Verified)
+      return "calendar"; // Calendar for eligibility
     case "thank_you":
+      return "heart"; // Heart for thank you
     case "general":
     default:
-      return "information-circle"; // Blue info circle
+      return "notifications"; // Bell for general notifications
   }
 }
 
@@ -91,15 +93,16 @@ function getIconForType(type: NotificationType): keyof typeof Ionicons.glyphMap 
 function getIconColorForType(type: NotificationType): string {
   switch (type) {
     case "request_match":
-      return "#DC2626"; // Red for urgent
+      return primaryColors.primary; // #E53935 - Red for blood request
     case "request_accepted":
       return "#10B981"; // Green for success
     case "eligibility_reminder":
-      return "#3B82F6"; // Blue for info
+      return "#3B82F6"; // Blue for eligibility
     case "thank_you":
+      return "#EC4899"; // Pink for thank you
     case "general":
     default:
-      return "#3B82F6"; // Blue for general
+      return "#6B7280"; // Gray for general
   }
 }
 
@@ -115,17 +118,18 @@ function getIconBackgroundForType(type: NotificationType): string {
     case "eligibility_reminder":
       return "#DBEAFE"; // Light blue
     case "thank_you":
+      return "#FCE7F3"; // Light pink
     case "general":
     default:
-      return "#DBEAFE"; // Light blue
+      return "#F3F4F6"; // Light gray
   }
 }
 
 /**
  * Notification card component matching Notifications.png design
- * - Left: Colored circular icon (44px)
+ * - Left: Colored circular icon (48px container, 24px icon)
  * - Center: Title (bold), Body (regular), Timestamp (caption)
- * - Right: Unread indicator (red dot, 8px)
+ * - Right: Unread indicator (red dot, 10px with white border)
  */
 export function NotificationCard({ notification, onPress }: NotificationCardProps) {
   const isUnread = !notification.read;
@@ -142,7 +146,7 @@ export function NotificationCard({ notification, onPress }: NotificationCardProp
     >
       {/* Icon container */}
       <View style={[styles.iconContainer, { backgroundColor: iconBackground }]}>
-        <Ionicons name={iconName} size={22} color={iconColor} />
+        <Ionicons name={iconName} size={iconSpec.md} color={iconColor} />
       </View>
 
       {/* Content */}
@@ -173,9 +177,9 @@ const styles = StyleSheet.create({
     ...shadows.light,
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22, // Full circle
+    width: 48,
+    height: 48,
+    borderRadius: 24, // Full circle
     justifyContent: "center",
     alignItems: "center",
   },
@@ -203,10 +207,12 @@ const styles = StyleSheet.create({
     color: textColors.tertiary, // #9CA3AF
   },
   unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: primaryColors.primary, // #E53935
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
     marginTop: spacing(1), // 4px offset from top
   },
 });
