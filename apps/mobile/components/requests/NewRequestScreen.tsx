@@ -25,6 +25,7 @@ import {
   inputSpec,
   headingStyles,
   fontWeight,
+  shadows,
 } from '@/theme/tokens';
 import { BloodTypeSelector } from './BloodTypeSelector';
 import { UnitsStepper } from './UnitsStepper';
@@ -233,11 +234,12 @@ const styles = StyleSheet.create({
     borderTopColor: borderColors.default,
   },
   submitButton: {
-    height: buttonSpec.primary.height,
+    height: buttonSpec.primary.height, // 52px
     borderRadius: buttonSpec.primary.borderRadius,
     backgroundColor: buttonSpec.primary.backgroundColor,
     justifyContent: 'center',
     alignItems: 'center',
+    ...shadows.medium,
   },
   submitButtonDisabled: {
     opacity: 0.5,

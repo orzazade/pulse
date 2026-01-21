@@ -7,6 +7,7 @@ import {
   borderColors,
   fontWeight,
   semanticColors,
+  touchTargetSpec,
 } from '@/theme/tokens';
 
 type UrgencyLevel = 'critical' | 'urgent' | 'standard';
@@ -108,6 +109,7 @@ const styles = StyleSheet.create({
     gap: spacing(3),
   },
   option: {
+    minHeight: touchTargetSpec.large, // 52px minimum height
     borderWidth: 1,
     borderColor: borderColors.default,
     borderRadius: 12,
@@ -124,9 +126,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 24, // Updated from 22px to 24px
+    height: 24, // Updated from 22px to 24px
+    borderRadius: 12, // Updated from 11px
     borderWidth: 2,
     borderColor: borderColors.default,
     justifyContent: 'center',
