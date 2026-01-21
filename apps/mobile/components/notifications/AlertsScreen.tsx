@@ -16,6 +16,7 @@ import {
   headingStyles,
   bodyStyles,
   spacing,
+  iconSpec,
 } from "@/theme/tokens";
 import { SectionHeader } from "./SectionHeader";
 import { NotificationCard } from "./NotificationCard";
@@ -152,7 +153,7 @@ export function AlertsScreen({
     <View style={styles.emptyContainer}>
       <Ionicons
         name="notifications-off-outline"
-        size={64}
+        size={iconSpec.xl}
         color={textColors.tertiary}
       />
       <Text style={styles.emptyTitle}>No notifications yet</Text>

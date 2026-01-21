@@ -25,8 +25,10 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   title: {
-    ...bodyStyles.label,
+    fontSize: 14,
     fontWeight: "600",
     color: textColors.secondary, // #6B7280
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 });
