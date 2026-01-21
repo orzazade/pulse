@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-import { colors, spacing, tabBarSpec } from '../../theme';
+import { colors, spacing, tabBarSpec, animationSpec, iconSpec, touchTargetSpec } from '../../theme';
 
 // =============================================================================
 // CONSTANTS
@@ -75,7 +75,7 @@ function TabItem({
       <View style={styles.iconContainer}>
         <Ionicons
           name={iconName as keyof typeof Ionicons.glyphMap}
-          size={tabBarSpec.iconSize}
+          size={iconSpec.md}
           color={color}
         />
         {badge !== undefined && badge !== 0 && (
@@ -118,9 +118,9 @@ export function AnimatedTabBar({
   useEffect(() => {
     Animated.spring(translateX, {
       toValue: getIndicatorPosition(state.index),
-      damping: 20,
-      stiffness: 200,
-      mass: 0.5,
+      damping: animationSpec.spring.damping,
+      stiffness: animationSpec.spring.stiffness,
+      mass: animationSpec.spring.mass,
       useNativeDriver: true,
     }).start();
   }, [state.index, translateX]);
@@ -227,13 +227,14 @@ const styles = StyleSheet.create({
 
   tabsContainer: {
     flexDirection: 'row',
-    height: 48,
+    height: touchTargetSpec.comfortable,
   },
 
   tab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: touchTargetSpec.comfortable,
     zIndex: 1,
   },
 
@@ -265,6 +266,8 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 9,
     backgroundColor: colors.primary,
+    borderWidth: 2,
+    borderColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
@@ -273,7 +276,8 @@ const styles = StyleSheet.create({
   badgeText: {
     color: colors.onPrimary,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
+    includeFontPadding: false,
   },
 });
 

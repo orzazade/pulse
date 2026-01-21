@@ -23,7 +23,7 @@ import {
   TextStyle,
 } from 'react-native';
 
-import { colors, radius, spacing, fontWeight, shadows } from '../../theme';
+import { colors, radius, spacing, fontWeight, shadows, touchTargetSpec, animationSpec } from '../../theme';
 
 // =============================================================================
 // TYPES
