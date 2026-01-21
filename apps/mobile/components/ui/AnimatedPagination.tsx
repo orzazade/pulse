@@ -15,7 +15,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 
-import { paginationSpec, spacing } from '../../theme';
+import { paginationSpec, spacing, animationSpec } from '../../theme';
 
 // =============================================================================
 // TYPES
@@ -59,9 +59,9 @@ export function AnimatedPagination({ total, current }: AnimatedPaginationProps) 
   useEffect(() => {
     Animated.spring(translateX, {
       toValue: getPillPosition(current),
-      damping: 20,
-      stiffness: 200,
-      mass: 0.5,
+      damping: animationSpec.spring.damping,
+      stiffness: animationSpec.spring.stiffness,
+      mass: animationSpec.spring.mass,
       useNativeDriver: true,
     }).start();
   }, [current, translateX]);

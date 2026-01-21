@@ -15,6 +15,7 @@ import {
   colors,
   fontWeight,
   bloodTypeBadgeSpec,
+  shadows,
 } from '../../theme';
 
 // =============================================================================
@@ -92,12 +93,14 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadows.light,
   },
 
   text: {
     color: colors.onPrimary,
     fontWeight: fontWeight.bold,
     textAlign: 'center',
+    includeFontPadding: false, // Android: removes extra padding for proper centering
   },
 });
 
