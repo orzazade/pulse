@@ -23,6 +23,7 @@ import {
   spacing,
   fontWeight,
   filterChipSpec,
+  touchTargetSpec,
 } from '../../theme';
 
 // =============================================================================
@@ -76,12 +77,20 @@ export function Chip({
     textStyle,
   ];
 
+  // Calculate hitSlop to meet 44px minimum touch target
+  // Current height is 36px (default) or 28px (small)
+  // Add 4px top/bottom for default (36 + 8 = 44), 8px for small (28 + 16 = 44)
+  const hitSlop = size === 'small'
+    ? { top: 8, bottom: 8, left: 4, right: 4 }
+    : { top: 4, bottom: 4, left: 4, right: 4 };
+
   return (
     <TouchableOpacity
       style={containerStyle}
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.7}
+      hitSlop={hitSlop}
       accessibilityRole="button"
       accessibilityState={{ selected: active, disabled }}
     >

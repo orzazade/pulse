@@ -12,6 +12,19 @@ import {
   Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  primaryColors,
+  backgroundColors,
+  textColors,
+  borderColors,
+  fontWeight,
+  spacing,
+  radius,
+  shadows,
+  touchTargetSpec,
+  iconSpec,
+} from "@/theme/tokens";
 
 interface AddDonationModalProps {
   visible: boolean;
@@ -93,13 +106,19 @@ export function AddDonationModal({
         style={styles.container}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} disabled={isSaving}>
-            <Text style={[styles.headerButton, isSaving && styles.disabled]}>
-              Cancel
-            </Text>
+          <TouchableOpacity
+            onPress={onClose}
+            disabled={isSaving}
+            style={styles.closeButton}
+          >
+            <Ionicons name="close" size={iconSpec.md} color={textColors.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Log Donation</Text>
-          <TouchableOpacity onPress={handleAdd} disabled={isSaving}>
+          <TouchableOpacity
+            onPress={handleAdd}
+            disabled={isSaving}
+            style={styles.saveButtonContainer}
+          >
             <Text
               style={[
                 styles.headerButton,
@@ -173,71 +192,86 @@ export function AddDonationModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9fafb",
+    backgroundColor: backgroundColors.input,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: spacing(4),
+    paddingVertical: spacing(3),
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    backgroundColor: "white",
+    borderBottomColor: borderColors.default,
+    backgroundColor: backgroundColors.background,
+  },
+  closeButton: {
+    width: touchTargetSpec.minimum,
+    height: touchTargetSpec.minimum,
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 18,
+    fontWeight: fontWeight.semibold,
+    color: textColors.primary,
+  },
+  saveButtonContainer: {
+    minWidth: touchTargetSpec.minimum,
+    minHeight: touchTargetSpec.minimum,
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerButton: {
-    fontSize: 17,
-    color: "#6b7280",
+    fontSize: 16,
+    fontWeight: fontWeight.medium,
+    color: textColors.secondary,
   },
   saveButton: {
-    color: "#dc2626",
-    fontWeight: "600",
+    color: primaryColors.primary,
+    fontWeight: fontWeight.semibold,
   },
   disabled: {
     opacity: 0.5,
   },
   form: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: spacing(5),
+    paddingTop: spacing(5),
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: spacing(5),
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
-    marginBottom: 8,
+    fontWeight: fontWeight.medium,
+    color: textColors.primary,
+    marginBottom: spacing(2),
   },
   input: {
-    backgroundColor: "white",
+    backgroundColor: backgroundColors.background,
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    padding: 12,
+    borderColor: borderColors.default,
+    borderRadius: radius.md,
+    padding: spacing(3),
     fontSize: 16,
-    color: "#111827",
+    color: textColors.primary,
   },
   notesInput: {
     minHeight: 80,
   },
   dateButton: {
-    backgroundColor: "white",
+    backgroundColor: backgroundColors.background,
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    padding: 12,
+    borderColor: borderColors.default,
+    borderRadius: radius.md,
+    padding: spacing(3),
   },
   dateButtonText: {
     fontSize: 16,
-    color: "#111827",
+    color: textColors.primary,
   },
   datePicker: {
-    backgroundColor: "white",
-    borderRadius: 8,
+    backgroundColor: backgroundColors.background,
+    borderRadius: radius.md,
   },
 });

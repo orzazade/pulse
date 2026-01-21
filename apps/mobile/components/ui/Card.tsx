@@ -23,6 +23,7 @@ import {
   spacing,
   shadows,
   requestCardSpec,
+  touchTargetSpec,
 } from '../../theme';
 
 // =============================================================================

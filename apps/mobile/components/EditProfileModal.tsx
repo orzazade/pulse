@@ -18,7 +18,12 @@ import {
   fontWeight,
   spacing,
   headingStyles,
+  touchTargetSpec,
+  radius,
+  shadows,
+  iconSpec,
 } from "@/theme/tokens";
+import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@/components/ui/Input";
 
 interface EditProfileModalProps {
@@ -79,10 +84,12 @@ export function EditProfileModal({
         style={styles.container}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} disabled={isSaving}>
-            <Text style={[styles.headerButton, isSaving && styles.disabled]}>
-              Cancel
-            </Text>
+          <TouchableOpacity
+            onPress={onClose}
+            disabled={isSaving}
+            style={styles.closeButton}
+          >
+            <Ionicons name="close" size={iconSpec.md} color={textColors.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Profile</Text>
           <TouchableOpacity onPress={handleSave} disabled={isSaving}>
@@ -148,13 +155,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: spacing(4),
+    paddingHorizontal: spacing(4),
+    paddingVertical: spacing(3),
     borderBottomWidth: 1,
     borderBottomColor: borderColors.default,
     backgroundColor: backgroundColors.background,
   },
+  closeButton: {
+    width: touchTargetSpec.minimum,
+    height: touchTargetSpec.minimum,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: {
-    fontSize: headingStyles.cardTitle.fontSize,
+    fontSize: 18,
     fontWeight: fontWeight.semibold,
     color: textColors.primary,
   },
@@ -172,15 +186,17 @@ const styles = StyleSheet.create({
   saveButtonContent: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: spacing(2),
-    paddingHorizontal: spacing(1),
+    minWidth: touchTargetSpec.minimum,
+    minHeight: touchTargetSpec.minimum,
+    justifyContent: "center",
   },
   disabled: {
     opacity: 0.5,
   },
   form: {
     flex: 1,
-    padding: spacing(5),
+    paddingHorizontal: spacing(5),
+    paddingTop: spacing(5),
   },
   inputWrapper: {
     marginBottom: spacing(5),
