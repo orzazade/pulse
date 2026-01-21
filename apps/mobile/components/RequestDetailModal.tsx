@@ -193,7 +193,7 @@ export function RequestDetailModal({
             style={styles.closeButton}
             activeOpacity={0.7}
           >
-            <Ionicons name="close" size={24} color={textColors.primary} />
+            <Ionicons name="close" size={iconSpec.md} color={textColors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -366,16 +366,16 @@ const styles = StyleSheet.create({
     backgroundColor: backgroundColors.background,
   },
   headerSpacer: {
-    width: 40,
+    width: touchTargetSpec.minimum,
   },
   headerTitle: {
-    fontSize: 17,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: fontWeight.semibold,
     color: textColors.primary,
   },
   closeButton: {
-    width: 40,
-    height: 40,
+    width: touchTargetSpec.minimum,
+    height: touchTargetSpec.minimum,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
   },
   declineButton: {
     flex: 1,
-    height: 52,
+    height: touchTargetSpec.large,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: borderColors.default,
@@ -503,25 +503,26 @@ const styles = StyleSheet.create({
   },
   declineButtonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: textColors.primary,
   },
   acceptButton: {
     flex: 1.5,
-    height: 52,
+    height: touchTargetSpec.large,
     borderRadius: radius.lg,
     backgroundColor: primaryColors.primary,
     justifyContent: "center",
     alignItems: "center",
+    ...shadows.medium,
   },
   acceptButtonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: textColors.onPrimary,
   },
   cancelButton: {
     width: "100%",
-    height: 52,
+    height: touchTargetSpec.large,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: borderColors.default,
@@ -531,7 +532,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
     color: textColors.primary,
   },
   emptyContainer: {

@@ -9,6 +9,18 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Id } from "@convex/_generated/dataModel";
+import {
+  primaryColors,
+  backgroundColors,
+  textColors,
+  borderColors,
+  fontWeight,
+  spacing,
+  radius,
+  shadows,
+  touchTargetSpec,
+  iconSpec,
+} from "@/theme/tokens";
 
 interface Donor {
   _id: Id<"users">;
@@ -55,7 +67,7 @@ export function DonorPreviewModal({
             style={styles.closeButton}
             activeOpacity={0.7}
           >
-            <Ionicons name="close" size={24} color="#374151" />
+            <Ionicons name="close" size={iconSpec.md} color={textColors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -125,105 +137,108 @@ export function DonorPreviewModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9fafb",
+    backgroundColor: backgroundColors.input,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: spacing(4),
+    paddingVertical: spacing(3),
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    backgroundColor: "#fff",
+    borderBottomColor: borderColors.default,
+    backgroundColor: backgroundColors.background,
   },
   headerSpacer: {
-    width: 40,
+    width: touchTargetSpec.minimum,
   },
   headerTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 18,
+    fontWeight: fontWeight.semibold,
+    color: textColors.primary,
   },
   closeButton: {
-    width: 40,
-    height: 40,
+    width: touchTargetSpec.minimum,
+    height: touchTargetSpec.minimum,
     justifyContent: "center",
     alignItems: "center",
   },
   content: {
     flex: 1,
-    padding: 24,
+    paddingHorizontal: spacing(5),
+    paddingTop: spacing(6),
     alignItems: "center",
   },
   bloodTypeContainer: {
-    marginTop: 24,
-    marginBottom: 16,
+    marginTop: spacing(6),
+    marginBottom: spacing(4),
   },
   bloodTypeCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#dc2626",
+    backgroundColor: primaryColors.primary,
     justifyContent: "center",
     alignItems: "center",
+    ...shadows.medium,
   },
   bloodTypeText: {
     fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: fontWeight.bold,
+    color: textColors.onPrimary,
   },
   availabilityBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingHorizontal: spacing(4),
+    paddingVertical: spacing(2),
     borderRadius: 16,
-    marginBottom: 24,
+    marginBottom: spacing(6),
   },
   availableBadge: {
     backgroundColor: "#dcfce7",
   },
   unavailableBadge: {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: backgroundColors.chipInactive,
   },
   availabilityText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: fontWeight.medium,
   },
   availableText: {
     color: "#22c55e",
   },
   unavailableText: {
-    color: "#9ca3af",
+    color: textColors.tertiary,
   },
   locationContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 32,
-    gap: 8,
+    marginBottom: spacing(8),
+    gap: spacing(2),
   },
   locationText: {
     fontSize: 16,
-    color: "#374151",
+    color: textColors.primary,
   },
   requestButton: {
-    backgroundColor: "#dc2626",
+    backgroundColor: primaryColors.primary,
     width: "100%",
-    height: 50,
-    borderRadius: 12,
+    height: touchTargetSpec.large,
+    borderRadius: radius.lg,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: spacing(4),
+    ...shadows.medium,
   },
   requestButtonText: {
-    color: "#fff",
+    color: textColors.onPrimary,
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: fontWeight.semibold,
   },
   privacyNote: {
     fontSize: 13,
-    color: "#6b7280",
+    color: textColors.secondary,
     textAlign: "center",
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing(6),
   },
   emptyContainer: {
     flex: 1,
@@ -232,6 +247,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: "#6b7280",
+    color: textColors.secondary,
   },
 });

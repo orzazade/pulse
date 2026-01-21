@@ -12,8 +12,21 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import {
+  primaryColors,
+  backgroundColors,
+  textColors,
+  borderColors,
+  fontWeight,
+  spacing,
+  radius,
+  shadows,
+  touchTargetSpec,
+  iconSpec,
+} from "@/theme/tokens";
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
@@ -98,10 +111,12 @@ export function CreateRequestModal({
         style={styles.container}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} disabled={isSubmitting}>
-            <Text style={[styles.headerButton, isSubmitting && styles.disabled]}>
-              Cancel
-            </Text>
+          <TouchableOpacity
+            onPress={handleClose}
+            disabled={isSubmitting}
+            style={styles.closeButton}
+          >
+            <Ionicons name="close" size={iconSpec.md} color={textColors.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Create Blood Request</Text>
           <View style={styles.headerSpacer} />
@@ -211,18 +226,20 @@ export function CreateRequestModal({
           </View>
 
           {/* Submit Button */}
-          <TouchableOpacity
-            style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-            activeOpacity={0.8}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Text style={styles.submitButtonText}>Post Request</Text>
-            )}
-          </TouchableOpacity>
+          <View style={styles.submitButtonContainer}>
+            <TouchableOpacity
+              style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+              activeOpacity={0.8}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text style={styles.submitButtonText}>Post Request</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
@@ -232,44 +249,53 @@ export function CreateRequestModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9fafb",
+    backgroundColor: backgroundColors.input,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: spacing(4),
+    paddingVertical: spacing(3),
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    backgroundColor: "white",
+    borderBottomColor: borderColors.default,
+    backgroundColor: backgroundColors.background,
+  },
+  closeButton: {
+    width: touchTargetSpec.minimum,
+    height: touchTargetSpec.minimum,
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 18,
+    fontWeight: fontWeight.semibold,
+    color: textColors.primary,
   },
   headerButton: {
-    fontSize: 17,
-    color: "#6b7280",
+    fontSize: 16,
+    fontWeight: fontWeight.medium,
+    color: textColors.secondary,
   },
   headerSpacer: {
-    width: 50, // Balance the header layout
+    width: touchTargetSpec.minimum, // Balance the header layout
   },
   disabled: {
     opacity: 0.5,
   },
   form: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: spacing(5),
+    paddingTop: spacing(5),
   },
   inputGroup: {
-    marginBottom: 24,
+    marginBottom: spacing(5),
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
-    marginBottom: 12,
+    fontWeight: fontWeight.medium,
+    color: textColors.primary,
+    marginBottom: spacing(3),
   },
   bloodTypeGrid: {
     flexDirection: "row",
@@ -335,13 +361,13 @@ const styles = StyleSheet.create({
     color: "white",
   },
   input: {
-    backgroundColor: "white",
+    backgroundColor: backgroundColors.background,
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    padding: 12,
+    borderColor: borderColors.default,
+    borderRadius: radius.md,
+    padding: spacing(3),
     fontSize: 16,
-    color: "#111827",
+    color: textColors.primary,
   },
   textArea: {
     height: 100,
@@ -349,25 +375,28 @@ const styles = StyleSheet.create({
   },
   charCount: {
     fontSize: 12,
-    color: "#9ca3af",
+    color: textColors.tertiary,
     textAlign: "right",
-    marginTop: 4,
+    marginTop: spacing(1),
+  },
+  submitButtonContainer: {
+    marginTop: spacing(2),
+    marginBottom: spacing(10),
   },
   submitButton: {
-    backgroundColor: "#dc2626",
-    height: 50,
-    borderRadius: 10,
+    backgroundColor: primaryColors.primary,
+    height: touchTargetSpec.large,
+    borderRadius: radius.lg,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 8,
-    marginBottom: 40,
+    ...shadows.medium,
   },
   submitButtonDisabled: {
     opacity: 0.7,
   },
   submitButtonText: {
-    color: "white",
-    fontSize: 17,
-    fontWeight: "600",
+    color: textColors.onPrimary,
+    fontSize: 16,
+    fontWeight: fontWeight.semibold,
   },
 });
