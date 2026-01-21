@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { filterChipSpec } from '@/theme/tokens';
+import { filterChipSpec, touchTargetSpec, fontWeight } from '@/theme/tokens';
 
 interface FilterChipProps {
   label: string;
@@ -22,7 +22,7 @@ export function FilterChip({ label, active, onPress }: FilterChipProps) {
 
 const styles = StyleSheet.create({
   chip: {
-    height: filterChipSpec.height,
+    minHeight: touchTargetSpec.minimum,
     paddingHorizontal: filterChipSpec.paddingHorizontal,
     borderRadius: filterChipSpec.borderRadius,
     backgroundColor: filterChipSpec.inactive.backgroundColor,
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: filterChipSpec.fontSize,
-    fontWeight: filterChipSpec.fontWeight,
+    fontWeight: fontWeight.medium,
     color: filterChipSpec.inactive.textColor,
   },
   labelActive: {

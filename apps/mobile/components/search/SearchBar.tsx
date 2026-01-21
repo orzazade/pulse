@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   backgroundColors,
@@ -8,6 +8,8 @@ import {
   spacing,
   radius,
   inputSpec,
+  iconSpec,
+  touchTargetSpec,
 } from '@/theme/tokens';
 
 interface SearchBarProps {
@@ -21,11 +23,15 @@ export function SearchBar({
   onChangeText,
   placeholder = 'Search hospital, city or blood type',
 }: SearchBarProps) {
+  const handleClear = () => {
+    onChangeText('');
+  };
+
   return (
     <View style={styles.container}>
       <Ionicons
         name="search"
-        size={20}
+        size={iconSpec.sm}
         color={textColors.tertiary}
         style={styles.icon}
       />
@@ -39,6 +45,19 @@ export function SearchBar({
         autoCorrect={false}
         returnKeyType="search"
       />
+      {value.length > 0 && (
+        <TouchableOpacity
+          onPress={handleClear}
+          style={styles.clearButton}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons
+            name="close-circle"
+            size={iconSpec.sm}
+            color={textColors.tertiary}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -47,7 +66,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 48,
+    height: inputSpec.height,
     borderWidth: 1,
     borderColor: borderColors.default,
     borderRadius: radius.full,
@@ -62,5 +81,12 @@ const styles = StyleSheet.create({
     fontSize: inputSpec.fontSize,
     color: textColors.primary,
     height: '100%',
+  },
+  clearButton: {
+    width: touchTargetSpec.minimum,
+    height: touchTargetSpec.minimum,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: spacing(1),
   },
 });
