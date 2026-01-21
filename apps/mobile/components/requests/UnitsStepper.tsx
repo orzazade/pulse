@@ -7,6 +7,9 @@ import {
   borderColors,
   fontWeight,
   headingStyles,
+  primaryColors,
+  touchTargetSpec,
+  radius,
 } from '@/theme/tokens';
 
 interface UnitsStepperProps {
@@ -75,6 +78,22 @@ export function UnitsStepper({
           />
         </TouchableOpacity>
       </View>
+      {/* Colored dot indicators */}
+      <View style={styles.dotsContainer}>
+        {Array.from({ length: max }, (_, index) => {
+          const dotNumber = index + 1;
+          const isActive = dotNumber <= value;
+          return (
+            <View
+              key={dotNumber}
+              style={[
+                styles.dot,
+                isActive ? styles.dotActive : styles.dotInactive,
+              ]}
+            />
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -94,8 +113,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-    width: 48,
-    height: 48,
+    width: touchTargetSpec.comfortable, // 48px
+    height: touchTargetSpec.comfortable, // 48px
     borderRadius: 8,
     borderWidth: 1,
     borderColor: borderColors.default,
@@ -107,7 +126,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   valueContainer: {
-    minWidth: 60,
+    minWidth: 80, // Increased from 60px for better balance
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing(4),
@@ -116,5 +135,22 @@ const styles = StyleSheet.create({
     fontSize: headingStyles.sectionTitle.fontSize,
     fontWeight: fontWeight.semibold,
     color: textColors.primary,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing(2), // 8px gap between dots
+    marginTop: spacing(4), // 16px from stepper
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: radius.sm, // 4px for circular dots
+  },
+  dotActive: {
+    backgroundColor: primaryColors.primary, // Red for selected units
+  },
+  dotInactive: {
+    backgroundColor: borderColors.default, // Gray for remaining
   },
 });
