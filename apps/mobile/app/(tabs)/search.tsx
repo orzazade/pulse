@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from 'convex/react';
 import { api } from '@convex/_generated/api';
@@ -24,6 +25,8 @@ import {
   headingStyles,
   bodyStyles,
   spacing,
+  iconSpec,
+  touchTargetSpec,
 } from '@/theme/tokens';
 
 // Filter options
@@ -147,6 +150,12 @@ export default function SearchScreen() {
 
   const renderEmptyList = () => (
     <View style={styles.emptyContainer}>
+      <Ionicons
+        name="search-outline"
+        size={iconSpec.xl}
+        color={textColors.tertiary}
+        style={styles.emptyIcon}
+      />
       <Text style={styles.emptyText}>No requests found matching your criteria</Text>
       <Text style={styles.emptySubtext}>Try adjusting your filters</Text>
     </View>
@@ -269,13 +278,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: spacing(15),
   },
+  emptyIcon: {
+    marginBottom: spacing(4),
+  },
   emptyText: {
     ...bodyStyles.body,
     color: textColors.primary,
     marginBottom: spacing(2),
+    textAlign: 'center',
   },
   emptySubtext: {
     ...bodyStyles.bodySmall,
     color: textColors.secondary,
+    textAlign: 'center',
   },
 });

@@ -20,26 +20,26 @@ export function StatsRow({ donations, livesHelped, daysSince }: StatsRowProps) {
     <View style={styles.container}>
       {/* Donations - Red number */}
       <View style={styles.statItem}>
-        <Text style={[styles.statNumber, styles.primaryNumber]}>{donations}</Text>
-        <Text style={styles.statLabel}>Donations</Text>
+        <Text style={styles.statNumber}>{donations}</Text>
+        <Text style={styles.statLabel}>DONATIONS</Text>
       </View>
 
       {/* Divider */}
       <View style={styles.divider} />
 
-      {/* Lives Helped */}
+      {/* Lives Helped - Red number */}
       <View style={styles.statItem}>
         <Text style={styles.statNumber}>{livesHelped}</Text>
-        <Text style={styles.statLabel}>Lives Helped</Text>
+        <Text style={styles.statLabel}>LIVES HELPED</Text>
       </View>
 
       {/* Divider */}
       <View style={styles.divider} />
 
-      {/* Days Since */}
+      {/* Days Since - Red number */}
       <View style={styles.statItem}>
         <Text style={styles.statNumber}>{daysSince}</Text>
-        <Text style={styles.statLabel}>Days Since</Text>
+        <Text style={styles.statLabel}>DAYS SINCE</Text>
       </View>
     </View>
   );
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     paddingHorizontal: spacing(5),
     paddingVertical: spacing(4),
   },
@@ -58,21 +58,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: fontWeight.bold,
-    color: textColors.primary,
-    marginBottom: spacing(1),
-  },
-  primaryNumber: {
     color: primaryColors.primary,
+    marginBottom: spacing(1),
   },
   statLabel: {
     ...bodyStyles.caption,
     color: textColors.secondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
   },
   divider: {
     width: 1,
-    height: 40,
+    height: 48,
     backgroundColor: borderColors.default,
   },
 });
