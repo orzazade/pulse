@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     backgroundColor: backgroundColors.card,
     borderRadius: radius.lg,
     padding: spacing(4),
-    ...shadows.light,
+    ...shadows.medium, // Medium shadow for more presence
   },
   textContainer: {
     flex: 1,
@@ -55,16 +55,16 @@ const styles = StyleSheet.create({
     color: textColors.secondary,
   },
   bloodTypeBadge: {
-    width: bloodTypeBadgeSpec.standard.size,
-    height: bloodTypeBadgeSpec.standard.size,
-    borderRadius: bloodTypeBadgeSpec.standard.borderRadius,
-    backgroundColor: bloodTypeBadgeSpec.standard.backgroundColor,
+    width: bloodTypeBadgeSpec.large.size, // 50px for more prominence
+    height: bloodTypeBadgeSpec.large.size,
+    borderRadius: bloodTypeBadgeSpec.large.borderRadius,
+    backgroundColor: bloodTypeBadgeSpec.large.backgroundColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
   bloodTypeText: {
-    fontSize: bloodTypeBadgeSpec.standard.fontSize,
-    fontWeight: bloodTypeBadgeSpec.standard.fontWeight,
-    color: bloodTypeBadgeSpec.standard.textColor,
+    fontSize: bloodTypeBadgeSpec.large.fontSize,
+    fontWeight: bloodTypeBadgeSpec.large.fontWeight,
+    color: bloodTypeBadgeSpec.large.textColor,
   },
 });

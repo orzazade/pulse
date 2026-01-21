@@ -8,6 +8,7 @@ import {
   shadows,
   radius,
   spacing,
+  touchTargetSpec,
 } from '@/theme/tokens';
 
 interface QuickActionButtonProps {
@@ -38,7 +39,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing(4),
     alignItems: 'center',
-    ...shadows.light,
+    minHeight: touchTargetSpec.large, // 52px minimum touch target
+    ...shadows.light, // Keep light shadow for subtle depth
   },
   iconCircle: {
     width: 52,

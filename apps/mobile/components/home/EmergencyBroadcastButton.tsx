@@ -8,6 +8,7 @@ import {
   radius,
   spacing,
   specialStyles,
+  touchTargetSpec,
 } from '@/theme/tokens';
 
 interface EmergencyBroadcastButtonProps {
@@ -38,9 +39,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: primaryColors.primary,
     borderRadius: radius.lg,
-    paddingVertical: spacing(4),
+    height: touchTargetSpec.large, // 52px for consistent height
     paddingHorizontal: spacing(6),
-    ...shadows.large,
+    ...shadows.large, // Large shadow for maximum prominence
   },
   buttonDisabled: {
     backgroundColor: '#9CA3AF',
