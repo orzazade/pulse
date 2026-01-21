@@ -7,6 +7,7 @@ import {
   Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { shadows, spacing, semanticColors, touchTargetSpec } from "@/theme/tokens";
 
 interface CenterCardProps {
   center: {
@@ -93,15 +94,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    // iOS shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // Android shadow
-    elevation: 2,
+    padding: spacing(4),
+    marginBottom: spacing(3),
+    ...shadows.medium,
   },
   iconBadge: {
     width: 50,
@@ -137,10 +132,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   callButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#16a34a", // Green for call
+    width: touchTargetSpec.comfortable,
+    height: touchTargetSpec.comfortable,
+    borderRadius: touchTargetSpec.comfortable / 2,
+    backgroundColor: semanticColors.success, // Green for call
     justifyContent: "center",
     alignItems: "center",
   },

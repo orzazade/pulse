@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Id } from "@convex/_generated/dataModel";
+import { shadows, spacing, semanticColors } from "@/theme/tokens";
 
 interface DonorCardProps {
   donor: {
@@ -62,15 +63,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    // iOS shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // Android shadow
-    elevation: 2,
+    padding: spacing(4),
+    marginBottom: spacing(3),
+    ...shadows.medium,
   },
   bloodTypeBadge: {
     width: 50,

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { semanticColors, shadows, radius, spacing } from "@/theme/tokens";
 
 // 56-day cycle constant for progress calculation
 const DONATION_CYCLE_DAYS = 56;
@@ -66,7 +67,7 @@ export function EligibilityCard({ eligibilityData }: EligibilityCardProps) {
           <Ionicons
             name={isEligible ? "checkmark-circle" : "time"}
             size={24}
-            color={isEligible ? "#16a34a" : "#ea580c"}
+            color={isEligible ? semanticColors.success : semanticColors.warning}
           />
         </View>
         <View style={styles.headerText}>
@@ -128,14 +129,10 @@ export function EligibilityCard({ eligibilityData }: EligibilityCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: radius.lg,
+    padding: spacing(4),
     marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    ...shadows.light,
   },
   containerEligible: {
     backgroundColor: "#f0fdf4",
@@ -178,10 +175,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   statusEligible: {
-    color: "#16a34a",
+    color: semanticColors.success,
   },
   statusNotEligible: {
-    color: "#ea580c",
+    color: semanticColors.warning,
   },
   details: {
     marginTop: 12,
