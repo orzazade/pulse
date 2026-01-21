@@ -25,6 +25,10 @@ import {
   spacing,
   radius,
   shadows,
+  animationSpec,
+  iconSpec,
+  touchTargetSpec,
+  spacingValues,
   buttonSpec,
   inputSpec,
   bloodTypeBadgeSpec,
@@ -48,6 +52,9 @@ export interface Theme {
   spacing: typeof spacing;
   radius: typeof radius;
   shadows: typeof shadows;
+  animation: typeof animationSpec;
+  icons: typeof iconSpec;
+  touchTargets: typeof touchTargetSpec;
   components: {
     button: typeof buttonSpec;
     input: typeof inputSpec;
@@ -74,6 +81,9 @@ export const theme: Theme = {
   spacing,
   radius,
   shadows,
+  animation: animationSpec,
+  icons: iconSpec,
+  touchTargets: touchTargetSpec,
   components: {
     button: buttonSpec,
     input: inputSpec,
@@ -113,6 +123,14 @@ export {
 
 // Layout exports
 export { spacing, radius, shadows };
+
+// Animation and interaction exports
+export {
+  animationSpec,
+  iconSpec,
+  touchTargetSpec,
+  spacingValues,
+};
 
 // Component specification exports
 export {
