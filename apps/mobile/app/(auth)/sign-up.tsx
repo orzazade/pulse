@@ -25,6 +25,9 @@ import {
   headingStyles,
   bodyStyles,
   fontWeight,
+  touchTargetSpec,
+  spacingValues,
+  shadows,
 } from "@/theme/tokens";
 import { SocialLoginSection } from "@/components/auth/SocialLoginSection";
 import { TermsCheckbox } from "@/components/auth/TermsCheckbox";
@@ -298,17 +301,18 @@ const styles = StyleSheet.create({
     color: textColors.primary,
   },
   button: {
-    height: buttonSpec.primary.height,
+    height: buttonSpec.primary.height, // 52px
     backgroundColor: buttonSpec.primary.backgroundColor,
     borderRadius: buttonSpec.primary.borderRadius,
     alignItems: "center",
     justifyContent: "center",
+    ...shadows.medium, // Add shadow for depth
   },
   buttonMargin: {
     marginTop: spacing(6), // 24px
   },
   buttonDisabled: {
-    backgroundColor: "#FCA5A5", // primaryDisabled
+    opacity: 0.6,
   },
   buttonText: {
     color: buttonSpec.primary.textColor,
@@ -326,6 +330,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginTop: spacing(6), // 24px
+    minHeight: touchTargetSpec.minimum, // 44px touch target
+    alignItems: "center",
   },
   linkText: {
     fontSize: 15,
@@ -335,6 +341,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: primaryColors.primary,
     fontWeight: fontWeight.medium,
+    paddingVertical: spacing(2), // Extra padding for touch target
+    paddingHorizontal: spacing(1),
   },
   linkSingle: {
     color: primaryColors.primary,
@@ -342,5 +350,6 @@ const styles = StyleSheet.create({
     marginTop: spacing(6), // 24px
     fontSize: 15,
     fontWeight: fontWeight.medium,
+    paddingVertical: spacing(2), // Touch target padding
   },
 });

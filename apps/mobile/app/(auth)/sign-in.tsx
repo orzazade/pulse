@@ -24,6 +24,9 @@ import {
   headingStyles,
   bodyStyles,
   fontWeight,
+  touchTargetSpec,
+  spacingValues,
+  shadows,
 } from "@/theme/tokens";
 import { SocialLoginSection } from "@/components/auth/SocialLoginSection";
 
@@ -182,6 +185,8 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     marginBottom: spacing(6), // 24px
     marginTop: -spacing(2), // -8px to bring closer to password field
+    paddingVertical: spacing(2), // Padding for 44px touch target
+    paddingHorizontal: spacing(1), // Horizontal padding for easier touch
   },
   forgotPassword: {
     fontSize: 14,
@@ -189,14 +194,15 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.medium,
   },
   button: {
-    height: buttonSpec.primary.height,
+    height: buttonSpec.primary.height, // 52px
     backgroundColor: buttonSpec.primary.backgroundColor,
     borderRadius: buttonSpec.primary.borderRadius,
     alignItems: "center",
     justifyContent: "center",
+    ...shadows.medium, // Add shadow for depth
   },
   buttonDisabled: {
-    backgroundColor: "#FCA5A5", // primaryDisabled
+    opacity: 0.6,
   },
   buttonText: {
     color: buttonSpec.primary.textColor,
@@ -214,6 +220,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginTop: spacing(6), // 24px
+    minHeight: touchTargetSpec.minimum, // 44px touch target
+    alignItems: "center",
   },
   linkText: {
     fontSize: 15,
@@ -223,5 +231,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: primaryColors.primary,
     fontWeight: fontWeight.medium,
+    paddingVertical: spacing(2), // Extra padding for touch target
+    paddingHorizontal: spacing(1),
   },
 });
