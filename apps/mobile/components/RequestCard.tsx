@@ -2,6 +2,17 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Id } from "@convex/_generated/dataModel";
+import {
+  primaryColors,
+  backgroundColors,
+  textColors,
+  semanticColors,
+  headingStyles,
+  bodyStyles,
+  shadows,
+  radius,
+  spacing,
+} from "@/theme/tokens";
 
 type RequestStatus = "open" | "accepted" | "cancelled" | "completed";
 
@@ -60,15 +71,15 @@ function getStatusLabel(status: RequestStatus): string {
 function getStatusColor(status: RequestStatus): string {
   switch (status) {
     case "open":
-      return "#3b82f6"; // blue
+      return semanticColors.info; // blue
     case "accepted":
-      return "#22c55e"; // green
+      return semanticColors.success; // green
     case "cancelled":
-      return "#6b7280"; // gray
+      return textColors.tertiary; // gray
     case "completed":
-      return "#8b5cf6"; // purple
+      return "#8b5cf6"; // purple (no token for this yet)
     default:
-      return "#6b7280";
+      return textColors.tertiary;
   }
 }
 
@@ -141,7 +152,7 @@ export function RequestCard({ request, variant, onPress }: RequestCardProps) {
       </View>
 
       {/* Chevron */}
-      <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
+      <Ionicons name="chevron-forward" size={24} color={textColors.tertiary} />
     </TouchableOpacity>
   );
 }
@@ -150,17 +161,11 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    // iOS shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // Android shadow
-    elevation: 2,
+    backgroundColor: backgroundColors.card,
+    borderRadius: radius.lg,
+    padding: spacing(4), // 16px
+    marginBottom: spacing(3), // 12px
+    ...shadows.medium, // Consistent shadow with design tokens
     overflow: "hidden",
   },
   cardUrgent: {
@@ -172,70 +177,69 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 4,
-    backgroundColor: "#dc2626",
+    backgroundColor: primaryColors.primary, // Use primary red
   },
   bloodTypeBadge: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#dc2626",
+    backgroundColor: primaryColors.primary, // Use primary red
     justifyContent: "center",
     alignItems: "center",
   },
   bloodTypeText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
+    color: textColors.onPrimary, // White text
   },
   content: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: spacing(4), // 16px
   },
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 2,
+    marginBottom: spacing(0.5), // 2px
   },
   title: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
+    ...headingStyles.cardTitle, // 16px semibold
+    color: textColors.primary,
     flex: 1,
   },
   urgentDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#dc2626",
-    marginLeft: 8,
+    backgroundColor: primaryColors.primary, // Use primary red
+    marginLeft: spacing(2), // 8px
   },
   location: {
-    fontSize: 14,
-    color: "#6b7280",
-    marginBottom: 2,
+    ...bodyStyles.bodySmall, // 14px
+    color: textColors.secondary,
+    marginBottom: spacing(0.5), // 2px
   },
   meta: {
-    fontSize: 12,
-    color: "#9ca3af",
+    ...bodyStyles.caption, // 12px
+    color: textColors.tertiary,
   },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: spacing(2), // 8px
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
+    paddingHorizontal: spacing(2), // 8px
+    paddingVertical: spacing(0.75), // 3px
+    borderRadius: radius.sm, // 4px
   },
   statusText: {
-    fontSize: 12,
+    ...bodyStyles.caption, // 12px
     fontWeight: "600",
   },
   donorFoundText: {
     fontSize: 13,
-    color: "#22c55e",
+    color: semanticColors.success, // Green
     fontWeight: "500",
-    marginLeft: 8,
+    marginLeft: spacing(2), // 8px
   },
 });
