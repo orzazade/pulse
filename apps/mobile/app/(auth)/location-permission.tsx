@@ -18,6 +18,8 @@ import {
   spacing,
   radius,
   buttonSpec,
+  touchTargetSpec,
+  shadows,
 } from "@/theme/tokens";
 
 export default function LocationPermissionScreen() {
@@ -185,13 +187,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing(10),
   },
   illustration: {
-    width: 160,
-    height: 160,
+    width: 72, // 64-80px range per design spec
+    height: 72,
     borderRadius: radius.full,
     backgroundColor: colors.pinkCircle,
   },
   title: {
-    ...typography.pageTitle,
+    fontSize: 28, // 28px bold title as per design
+    fontWeight: "700",
     color: colors.text.primary,
     textAlign: "center",
     marginBottom: spacing(10),
@@ -200,9 +203,9 @@ const styles = StyleSheet.create({
     gap: spacing(8),
   },
   benefitText: {
-    ...typography.body,
+    fontSize: 16, // 16px body text
+    lineHeight: 24, // 24px line height
     color: colors.text.primary,
-    lineHeight: 24,
   },
   spacer: {
     flex: 1,
@@ -214,11 +217,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: buttonSpec.primary.backgroundColor,
-    height: buttonSpec.primary.height,
+    height: touchTargetSpec.large, // 52px for consistency
     borderRadius: buttonSpec.primary.borderRadius,
+    ...shadows.medium, // Add shadow for depth
   },
   buttonDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   enableButtonText: {
     color: buttonSpec.primary.textColor,
@@ -228,8 +232,8 @@ const styles = StyleSheet.create({
   skipButton: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: spacing(4),
-    minHeight: 48,
+    paddingVertical: spacing(3), // 12px vertical padding
+    minHeight: touchTargetSpec.minimum, // 44px minimum touch target
   },
   skipButtonText: {
     color: colors.secondary,

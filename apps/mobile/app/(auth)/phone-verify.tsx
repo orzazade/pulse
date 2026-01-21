@@ -11,6 +11,8 @@ import {
   radius,
   buttonSpec,
   inputSpec,
+  touchTargetSpec,
+  shadows,
 } from "@/theme/tokens";
 
 export default function PhoneVerify() {
@@ -146,19 +148,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   decoration: {
-    width: 80,
-    height: 80,
+    width: 72, // 64-80px range, using 72 for visual balance
+    height: 72,
     borderRadius: radius.full,
     backgroundColor: colors.pinkCircle,
     marginBottom: spacing(8),
   },
   title: {
-    ...typography.pageTitle,
+    fontSize: 28, // 28px bold title as per design
+    fontWeight: "700",
     color: colors.primary,
     marginBottom: spacing(3),
   },
   subtitle: {
-    ...typography.body,
+    fontSize: 16, // 16px subtitle
+    lineHeight: 24, // 24px line height
     color: colors.secondary,
     marginBottom: spacing(8),
   },
@@ -168,7 +172,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.default,
     borderRadius: radius.lg,
-    height: inputSpec.height,
+    height: touchTargetSpec.large, // 52px for consistency
     backgroundColor: colors.background,
     marginBottom: spacing(6),
   },
@@ -188,7 +192,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     width: 1,
-    height: 28,
+    height: 24, // 24px as per design spec
     backgroundColor: colors.default,
   },
   input: {
@@ -215,10 +219,11 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: buttonSpec.primary.backgroundColor,
-    height: buttonSpec.primary.height,
+    height: touchTargetSpec.large, // 52px for consistency
     borderRadius: buttonSpec.primary.borderRadius,
     alignItems: "center",
     justifyContent: "center",
+    ...shadows.medium, // Add shadow for depth
   },
   buttonDisabled: {
     opacity: 0.6,
