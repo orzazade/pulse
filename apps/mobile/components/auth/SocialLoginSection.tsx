@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { colors, spacing, radius, borderColors, textColors } from "@/theme/tokens";
+import { colors, spacing, radius, borderColors, textColors, touchTargetSpec } from "@/theme/tokens";
 
 interface SocialLoginSectionProps {
   /** "signin" or "signup" to display appropriate text */
@@ -27,10 +27,10 @@ export function SocialLoginSection({ variant }: SocialLoginSectionProps) {
       {/* Placeholder social login buttons */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.socialButton} disabled>
-          {/* Empty placeholder for future social icon */}
+          <Text style={styles.iconPlaceholder}>G</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton} disabled>
-          {/* Empty placeholder for future social icon */}
+          <Text style={styles.iconPlaceholder}>A</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -59,16 +59,21 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: spacing(4), // 16px between buttons
+    gap: spacing(3), // 12px between buttons
   },
   socialButton: {
     flex: 1,
-    height: 56,
+    height: touchTargetSpec.large, // 52px
     borderWidth: 1,
     borderColor: borderColors.default,
     borderRadius: radius.lg, // 12px - matches design
     backgroundColor: colors.background,
     alignItems: "center",
     justifyContent: "center",
+  },
+  iconPlaceholder: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: textColors.secondary,
   },
 });
