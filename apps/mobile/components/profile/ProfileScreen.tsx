@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: spacing(5),
     paddingBottom: spacing(8),
+    gap: spacing(5),
   },
   sectionWrapper: {
     paddingHorizontal: spacing(0),
@@ -140,6 +141,6 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: borderColors.default,
-    marginVertical: spacing(2),
+    marginVertical: spacing(0),
   },
 });

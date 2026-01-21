@@ -11,6 +11,7 @@ import {
   spacing,
   radius,
   shadows,
+  touchTargetSpec,
 } from "@/theme/tokens";
 
 interface ProfileHeaderProps {
@@ -109,7 +110,11 @@ const styles = StyleSheet.create({
     color: textColors.primary,
   },
   settingsButton: {
-    padding: spacing(2),
+    width: touchTargetSpec.minimum,
+    height: touchTargetSpec.minimum,
+    justifyContent: "center",
+    alignItems: "center",
+    ...shadows.light,
   },
   card: {
     backgroundColor: backgroundColors.card,
@@ -128,14 +133,20 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
+    ...shadows.medium,
   },
   avatarFallback: {
     width: 80,
     height: 80,
     borderRadius: 40,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     backgroundColor: "#E5E7EB",
     justifyContent: "center",
     alignItems: "center",
+    ...shadows.medium,
   },
   avatarText: {
     fontSize: 28,
@@ -146,15 +157,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontSize: 18,
-    fontWeight: fontWeight.semibold,
+    ...headingStyles.sectionTitle,
     color: textColors.primary,
     marginBottom: spacing(1),
   },
   userPhone: {
     ...bodyStyles.bodySmall,
     color: textColors.secondary,
-    marginBottom: spacing(1),
+    marginBottom: spacing(0.5),
   },
   memberSince: {
     ...bodyStyles.caption,
