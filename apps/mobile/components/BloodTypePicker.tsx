@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { bloodTypeChipSpec } from "@/theme/tokens";
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
@@ -81,12 +82,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    width: 70,
-    height: 40,
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 8,
+    width: bloodTypeChipSpec.width,
+    height: bloodTypeChipSpec.height,
+    backgroundColor: bloodTypeChipSpec.inactive.backgroundColor,
+    borderWidth: bloodTypeChipSpec.inactive.borderWidth,
+    borderColor: bloodTypeChipSpec.inactive.borderColor,
+    borderRadius: bloodTypeChipSpec.borderRadius,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -94,15 +95,16 @@ const styles = StyleSheet.create({
     width: 86,
   },
   selectedChip: {
-    backgroundColor: "#dc2626",
-    borderColor: "#dc2626",
+    backgroundColor: bloodTypeChipSpec.active.backgroundColor,
+    borderColor: bloodTypeChipSpec.active.borderColor,
+    borderWidth: bloodTypeChipSpec.active.borderWidth,
   },
   chipText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#111827",
+    fontSize: bloodTypeChipSpec.fontSize,
+    fontWeight: bloodTypeChipSpec.fontWeight,
+    color: bloodTypeChipSpec.inactive.textColor,
   },
   selectedChipText: {
-    color: "white",
+    color: bloodTypeChipSpec.active.textColor,
   },
 });

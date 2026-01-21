@@ -1,4 +1,5 @@
 import { View, Text, Switch, StyleSheet, ActivityIndicator } from "react-native";
+import { semanticColors } from "@/theme/tokens";
 
 interface AvailabilityToggleProps {
   isAvailable: boolean;
@@ -29,8 +30,8 @@ export function AvailabilityToggle({
             <Switch
               value={isAvailable}
               onValueChange={onToggle}
-              trackColor={{ false: "#d1d5db", true: "#fca5a5" }}
-              thumbColor={isAvailable ? "#dc2626" : "#9ca3af"}
+              trackColor={{ false: "#d1d5db", true: "#86efac" }}
+              thumbColor={isAvailable ? semanticColors.success : "#9ca3af"}
               ios_backgroundColor="#d1d5db"
             />
           )}

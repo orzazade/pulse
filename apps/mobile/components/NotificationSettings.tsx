@@ -8,6 +8,7 @@ import {
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useState } from "react";
+import { borderColors, spacing, semanticColors } from "@/theme/tokens";
 
 interface SettingItemProps {
   label: string;
@@ -37,8 +38,8 @@ function SettingItem({
           <Switch
             value={value}
             onValueChange={onToggle}
-            trackColor={{ false: "#d1d5db", true: "#fca5a5" }}
-            thumbColor={value ? "#dc2626" : "#9ca3af"}
+            trackColor={{ false: "#d1d5db", true: "#86efac" }}
+            thumbColor={value ? semanticColors.success : "#9ca3af"}
             ios_backgroundColor="#d1d5db"
           />
         )}
@@ -137,9 +138,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
+    paddingVertical: spacing(4),
     borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
+    borderBottomColor: borderColors.default,
   },
   settingTextContainer: {
     flex: 1,

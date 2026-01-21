@@ -8,6 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { inputSpec, primaryColors } from "@/theme/tokens";
 
 interface LocationFilterProps {
   city: string;
@@ -123,7 +124,7 @@ export function LocationFilter({
         onPress={handleUseMyLocation}
         activeOpacity={0.7}
       >
-        <Ionicons name="location-outline" size={18} color="#dc2626" />
+        <Ionicons name="location-outline" size={18} color={primaryColors.primary} />
         <Text style={styles.useLocationText}>Use My Location</Text>
       </TouchableOpacity>
     </View>
@@ -147,15 +148,16 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f9fafb",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 8,
+    backgroundColor: inputSpec.backgroundColor,
+    borderWidth: inputSpec.borderWidth,
+    borderColor: inputSpec.borderColor,
+    borderRadius: inputSpec.borderRadius,
+    height: inputSpec.height,
   },
   input: {
     flex: 1,
-    padding: 12,
-    fontSize: 16,
+    paddingHorizontal: inputSpec.paddingHorizontal,
+    fontSize: inputSpec.fontSize,
     color: "#111827",
   },
   clearButton: {
@@ -200,6 +202,6 @@ const styles = StyleSheet.create({
   useLocationText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#dc2626",
+    color: primaryColors.primary,
   },
 });
