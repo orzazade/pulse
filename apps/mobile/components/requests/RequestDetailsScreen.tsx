@@ -19,6 +19,7 @@ import {
   spacing,
   radius,
   shadows,
+  touchTargetSpec,
 } from "@/theme/tokens";
 import { UrgencyBanner } from "./UrgencyBanner";
 import { RequesterCard } from "./RequesterCard";
@@ -259,8 +260,8 @@ const styles = StyleSheet.create({
     color: textColors.primary,
   },
   closeButton: {
-    width: 40,
-    height: 40,
+    width: touchTargetSpec.minimum, // 44px
+    height: touchTargetSpec.minimum, // 44px
     justifyContent: "center",
     alignItems: "center",
   },
@@ -289,14 +290,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing(5), // 20px
   },
   bloodBadge: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: primaryColors.primary,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: spacing(2), // 8px
-    ...shadows.medium,
+    ...shadows.large, // Updated from medium to large
   },
   bloodBadgeText: {
     fontSize: 28,
@@ -309,7 +310,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   cardContainer: {
-    marginBottom: spacing(3), // 12px
+    marginBottom: spacing(4), // 16px - Updated from 12px
   },
   notesCard: {
     backgroundColor: backgroundColors.card,
@@ -363,6 +364,7 @@ const styles = StyleSheet.create({
     backgroundColor: primaryColors.primary,
     justifyContent: "center",
     alignItems: "center",
+    ...shadows.medium, // Added shadow for prominence
   },
   acceptButtonText: {
     fontSize: 16,

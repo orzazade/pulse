@@ -10,6 +10,7 @@ import {
   headingStyles,
   bodyStyles,
   fontWeight,
+  touchTargetSpec,
 } from '@/theme/tokens';
 
 // Blood type badge background colors based on blood type
@@ -71,9 +72,9 @@ export function SearchRequestCard({ request, onPress }: SearchRequestCardProps) 
   const isUrgent = request.urgency === 'urgent';
 
   // Generate title with urgency prefix to match design: "Urgent: A+ Needed"
-  const title = request.title || (isUrgent
+  const title = isUrgent
     ? `Urgent: ${request.bloodType} Needed`
-    : `${request.bloodType} Needed`);
+    : `${request.bloodType} Needed`;
 
   // Format location/subtitle
   const subtitle = request.location || request.city || 'Location not specified';
@@ -91,6 +92,7 @@ export function SearchRequestCard({ request, onPress }: SearchRequestCardProps) 
       style={styles.card}
       onPress={onPress}
       activeOpacity={0.7}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
     >
       {/* Blood type badge */}
       <View style={[styles.badge, { backgroundColor: badgeColors.backgroundColor }]}>
@@ -138,15 +140,15 @@ const styles = StyleSheet.create({
     ...shadows.medium,
   },
   badge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing(3),
   },
   badgeText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: fontWeight.bold,
   },
   content: {
@@ -155,6 +157,7 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing(2),
     marginBottom: spacing(1),
   },
   title: {
@@ -167,12 +170,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing(2),
     paddingVertical: spacing(0.5),
     borderRadius: radius.sm,
-    marginLeft: spacing(2),
   },
   urgentText: {
     fontSize: 10,
     fontWeight: fontWeight.bold,
     color: textColors.onPrimary,
+    letterSpacing: 0.5,
   },
   subtitle: {
     ...bodyStyles.bodySmall,
