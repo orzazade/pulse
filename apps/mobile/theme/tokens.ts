@@ -298,6 +298,96 @@ export const shadows = {
     shadowRadius: 0,
     elevation: 0,
   },
+  /** Focus ring shadow for accessibility */
+  focus: {
+    shadowColor: primaryColors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 0, // Focus ring is visual-only, no elevation
+  },
+} as const;
+
+// =============================================================================
+// ANIMATION & INTERACTION SPECIFICATIONS
+// =============================================================================
+
+/**
+ * Animation Timing Specifications
+ * For consistent micro-interactions across the app
+ */
+export const animationSpec = {
+  /** Quick feedback (button press, toggle) - 150ms */
+  quick: {
+    duration: 150,
+    easing: 'ease-out',
+  },
+  /** Standard transition (modal, screen) - 300ms */
+  standard: {
+    duration: 300,
+    easing: 'ease-in-out',
+  },
+  /** Spring animation config for tab bar, bouncy elements */
+  spring: {
+    damping: 20,
+    stiffness: 200,
+    mass: 0.5,
+  },
+  /** Fade in/out for loading states */
+  fade: {
+    duration: 200,
+    easing: 'ease-in-out',
+  },
+} as const;
+
+/**
+ * Icon Size Scale
+ * Based on 4px grid, ensures visual balance
+ */
+export const iconSpec = {
+  /** Extra small - 16px (inline text icons) */
+  xs: 16,
+  /** Small - 20px (button icons, list items) */
+  sm: 20,
+  /** Medium - 24px (tab bar, card icons) - default */
+  md: 24,
+  /** Large - 32px (empty states, feature icons) */
+  lg: 32,
+  /** Extra large - 48px (hero illustrations, empty states) */
+  xl: 48,
+} as const;
+
+/**
+ * Touch Target Specifications
+ * Minimum sizes per Apple/Google HIG (44pt minimum)
+ */
+export const touchTargetSpec = {
+  /** Minimum touch target - 44px (absolute minimum per HIG) */
+  minimum: 44,
+  /** Comfortable touch target - 48px (preferred for primary actions) */
+  comfortable: 48,
+  /** Large touch target - 52px (for primary buttons) */
+  large: 52,
+} as const;
+
+/**
+ * Named spacing values for common use cases
+ */
+export const spacingValues = {
+  /** Screen horizontal padding - 16px (spacing(4)) */
+  screenHorizontal: 16,
+  /** Screen horizontal padding large - 20px (spacing(5)) */
+  screenHorizontalLarge: 20,
+  /** Card padding - 16px */
+  cardPadding: 16,
+  /** Section gap - 24px */
+  sectionGap: 24,
+  /** Item gap - 12px */
+  itemGap: 12,
+  /** Tight gap - 8px */
+  tightGap: 8,
+  /** Micro gap - 4px */
+  microGap: 4,
 } as const;
 
 // =============================================================================
