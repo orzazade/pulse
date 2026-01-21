@@ -3,11 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   primaryColors,
+  backgroundColors,
   textColors,
   headingStyles,
   bodyStyles,
   fontWeight,
   spacing,
+  radius,
+  shadows,
+  touchTargetSpec,
 } from "@/theme/tokens";
 
 interface Donation {
@@ -33,7 +37,7 @@ export function DonationHistorySection({
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.sectionTitle}>Donation History</Text>
-        <TouchableOpacity onPress={onViewAllPress}>
+        <TouchableOpacity onPress={onViewAllPress} style={styles.viewAllButton}>
           <Text style={styles.viewAllLink}>View All</Text>
         </TouchableOpacity>
       </View>
@@ -82,6 +86,12 @@ const styles = StyleSheet.create({
     ...headingStyles.cardTitle,
     color: textColors.primary,
   },
+  viewAllButton: {
+    minHeight: touchTargetSpec.minimum,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: spacing(2),
+  },
   viewAllLink: {
     fontSize: 14,
     fontWeight: fontWeight.medium,
@@ -93,11 +103,15 @@ const styles = StyleSheet.create({
   donationItem: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: backgroundColors.card,
+    borderRadius: radius.lg,
+    padding: spacing(4),
+    ...shadows.light,
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: primaryColors.primaryLight,
     justifyContent: "center",
     alignItems: "center",

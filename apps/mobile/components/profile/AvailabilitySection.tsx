@@ -2,10 +2,13 @@ import React from "react";
 import { View, Text, Switch, StyleSheet, ActivityIndicator } from "react-native";
 import {
   primaryColors,
+  backgroundColors,
   textColors,
   fontWeight,
   bodyStyles,
   spacing,
+  radius,
+  shadows,
 } from "@/theme/tokens";
 
 interface AvailabilitySectionProps {
@@ -47,8 +50,10 @@ export function AvailabilitySection({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing(5),
-    paddingVertical: spacing(4),
+    backgroundColor: backgroundColors.card,
+    borderRadius: radius.lg,
+    padding: spacing(4),
+    ...shadows.light,
   },
   headerRow: {
     flexDirection: "row",
@@ -56,12 +61,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 15,
+    ...bodyStyles.body,
     fontWeight: fontWeight.semibold,
     color: textColors.primary,
   },
   subtitle: {
-    ...bodyStyles.bodySmall,
+    ...bodyStyles.caption,
     color: textColors.secondary,
     marginTop: spacing(1),
   },

@@ -70,16 +70,16 @@ const styles = StyleSheet.create({
     ...shadows.light,
   },
   statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     marginRight: spacing(3),
   },
   dotEligible: {
     backgroundColor: semanticColors.success,
   },
   dotNotEligible: {
-    backgroundColor: primaryColors.primary,
+    backgroundColor: semanticColors.warning,
   },
   textContent: {
     flex: 1,
