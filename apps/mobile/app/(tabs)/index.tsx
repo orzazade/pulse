@@ -24,6 +24,7 @@ import {
   shadows,
   radius,
   spacing,
+  iconSpec,
 } from "@/theme/tokens";
 
 // Home components
@@ -97,7 +98,7 @@ export default function HomeScreen() {
     if (homeFeedRequests.length === 0) {
       return (
         <View style={styles.emptyFeed}>
-          <Ionicons name="heart-outline" size={48} color={textColors.tertiary} />
+          <Ionicons name="heart-outline" size={iconSpec.xl} color={textColors.tertiary} />
           <Text style={styles.emptyFeedText}>
             No requests matching your blood type
           </Text>
@@ -158,7 +159,6 @@ export default function HomeScreen() {
             icon={<Ionicons name="search" size={24} color={primaryColors.primary} />}
             onPress={() => router.push("/search")}
           />
-          <View style={styles.quickActionSpacer} />
           <QuickActionButton
             label="Post Request"
             icon={<Ionicons name="add-circle" size={24} color={primaryColors.primary} />}
@@ -202,35 +202,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: spacing(4),
+    paddingHorizontal: spacing(5), // 20px consistent padding
     paddingBottom: spacing(20), // Space for emergency button
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: spacing(4),
-    marginBottom: spacing(6),
+    marginTop: spacing(4), // 16px top spacing
+    marginBottom: spacing(5), // 20px bottom spacing for visual rhythm
   },
   title: {
     ...headingStyles.pageTitle,
     color: textColors.primary,
   },
   notificationDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: primaryColors.primary,
+    borderWidth: 2,
+    borderColor: backgroundColors.background, // White border for contrast
   },
   welcomeSection: {
-    marginBottom: spacing(6),
+    marginBottom: spacing(5), // 20px section spacing
   },
   quickActionsSection: {
     flexDirection: "row",
-    marginBottom: spacing(6),
-  },
-  quickActionSpacer: {
-    width: spacing(3),
+    gap: spacing(3), // 12px gap between buttons
+    marginBottom: spacing(5), // 20px section spacing
   },
   requestsSection: {
     flex: 1,
@@ -276,8 +276,8 @@ const styles = StyleSheet.create({
   },
   emergencyButtonContainer: {
     position: "absolute",
-    left: spacing(4),
-    right: spacing(4),
+    left: spacing(5), // 20px matching content padding
+    right: spacing(5), // 20px matching content padding
     bottom: 0,
     backgroundColor: backgroundColors.background,
     paddingTop: spacing(2),
