@@ -429,6 +429,11 @@ export const searchNearbyDonors = query({
     maxDistance: v.optional(v.number()), // meters, default 50000 (50km)
   },
   handler: async (ctx, args) => {
+    // Validate coordinate ranges
+    if (args.latitude < -90 || args.latitude > 90 || args.longitude < -180 || args.longitude > 180) {
+      return [];
+    }
+
     // Get current user to exclude from results
     const identity = await ctx.auth.getUserIdentity();
     const currentUserClerkId = identity?.subject;
