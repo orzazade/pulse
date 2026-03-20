@@ -176,7 +176,8 @@ export const broadcastEmergency = mutation({
 
 /**
  * Cancel a request
- * Only the seeker who created it can cancel, and only if still open
+ * - Seekers can cancel their own open or accepted requests
+ * - Donors can withdraw from accepted requests (reverts to open)
  */
 export const cancelRequest = mutation({
   args: { requestId: v.id("requests") },
@@ -194,14 +195,26 @@ export const cancelRequest = mutation({
     const request = await ctx.db.get(args.requestId);
     if (!request) throw new Error("Request not found");
 
-    // Verify ownership
-    if (request.seekerId !== user._id) {
+    const isSeeker = request.seekerId === user._id;
+    const isDonor = request.acceptedDonorId === user._id;
+
+    // Donor withdrawing from an accepted request
+    if (isDonor && request.status === "accepted") {
+      await ctx.db.patch(args.requestId, {
+        status: "open",
+        acceptedDonorId: undefined,
+        acceptedAt: undefined,
+      });
+      return { success: true };
+    }
+
+    // Seeker cancelling their own request
+    if (!isSeeker) {
       throw new Error("You can only cancel your own requests");
     }
 
-    // Only allow cancellation of open requests
-    if (request.status !== "open") {
-      throw new Error("Can only cancel open requests");
+    if (request.status !== "open" && request.status !== "accepted") {
+      throw new Error("Can only cancel open or accepted requests");
     }
 
     await ctx.db.patch(args.requestId, {
