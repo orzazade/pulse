@@ -6,6 +6,7 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -66,9 +67,17 @@ export default function HomeScreen() {
         urgency: "urgent",
         notes: "Emergency broadcast request",
       });
-      console.warn("Emergency broadcast sent");
+      Alert.alert(
+        "Emergency Broadcast Sent",
+        "Matching donors nearby have been notified."
+      );
     } catch (error) {
-      console.error("Failed to send emergency broadcast:", error);
+      Alert.alert(
+        "Broadcast Failed",
+        error instanceof Error
+          ? error.message
+          : "Failed to send emergency broadcast. Please try again."
+      );
     }
   };
 
