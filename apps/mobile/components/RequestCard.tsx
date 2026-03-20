@@ -9,7 +9,7 @@ interface RequestCardProps {
   request: {
     _id: Id<"requests">;
     bloodType: string;
-    urgency: "normal" | "urgent";
+    urgency: string;
     city?: string;
     notes?: string;
     status: RequestStatus;
@@ -73,13 +73,15 @@ function getStatusColor(status: RequestStatus): string {
 }
 
 export function RequestCard({ request, variant, onPress }: RequestCardProps) {
-  const isUrgent = request.urgency === "urgent";
+  const isUrgent = request.urgency === "urgent" || request.urgency === "critical";
   const timeAgo = getTimeAgo(request.createdAt);
 
-  // Generate title to match design: "Urgent: B- Needed" or "O+ Needed"
-  const title = isUrgent
-    ? `Urgent: ${request.bloodType} Needed`
-    : `${request.bloodType} Needed`;
+  // Generate title to match design: "Critical: B- Needed", "Urgent: B- Needed", or "O+ Needed"
+  const title = request.urgency === "critical"
+    ? `Critical: ${request.bloodType} Needed`
+    : isUrgent
+      ? `Urgent: ${request.bloodType} Needed`
+      : `${request.bloodType} Needed`;
 
   // Get location display text
   const locationText = request.city || request.seeker?.city || null;
