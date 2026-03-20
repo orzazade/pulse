@@ -289,7 +289,7 @@ export const sendPushNotification = internalAction({
     body: v.string(),
     data: v.optional(v.any()),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const message = {
       to: args.pushToken,
       sound: "default",
@@ -298,20 +298,35 @@ export const sendPushNotification = internalAction({
       data: args.data ?? {},
     };
 
-    const response = await fetch("https://exp.host/--/api/v2/push/send", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Accept-encoding": "gzip, deflate",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(message),
-    });
+    try {
+      const response = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Accept-encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      });
 
-    const result = await response.json();
-    if (result.data?.status === "error") {
-      console.error("Push notification error:", result.data.message);
+      if (!response.ok) {
+        console.error(
+          `Push notification HTTP error: ${response.status} ${response.statusText}`
+        );
+        return { error: true, status: response.status };
+      }
+
+      const result = await response.json();
+      if (result.data?.status === "error") {
+        console.error("Push notification error:", result.data.message);
+      }
+      return result;
+    } catch (error) {
+      console.error(
+        "Push notification network error:",
+        error instanceof Error ? error.message : error
+      );
+      return { error: true, message: "Network error sending push notification" };
     }
-    return result;
   },
 });
