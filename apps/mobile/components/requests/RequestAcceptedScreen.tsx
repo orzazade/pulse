@@ -50,12 +50,32 @@ export function RequestAcceptedScreen({
 }: RequestAcceptedScreenProps) {
   const cancelAcceptance = useMutation(api.requests.cancelRequest);
 
-  const handleCall = () => {
-    Linking.openURL(`tel:${requesterPhone}`);
+  const handleCall = async () => {
+    const url = `tel:${requesterPhone}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Cannot Make Call", "Phone calls are not supported on this device.");
+      }
+    } catch {
+      Alert.alert("Error", "Failed to open phone app.");
+    }
   };
 
-  const handleMessage = () => {
-    Linking.openURL(`sms:${requesterPhone}`);
+  const handleMessage = async () => {
+    const url = `sms:${requesterPhone}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Cannot Send Message", "SMS is not supported on this device.");
+      }
+    } catch {
+      Alert.alert("Error", "Failed to open messaging app.");
+    }
   };
 
   const handleGetDirections = () => {
