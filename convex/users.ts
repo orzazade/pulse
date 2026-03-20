@@ -22,6 +22,14 @@ export const getOrCreateUser = mutation({
 
     if (existing) return existing._id;
 
+    // Validate input lengths
+    if (args.email && args.email.length > 254) {
+      throw new Error("Email must be 254 characters or less");
+    }
+    if (args.fullName && args.fullName.length > 100) {
+      throw new Error("Full name must be 100 characters or less");
+    }
+
     // Validate blood type if provided
     if (args.bloodType && !VALID_BLOOD_TYPES.includes(args.bloodType as typeof VALID_BLOOD_TYPES[number])) {
       throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
