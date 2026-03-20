@@ -4,6 +4,7 @@ import {
   Switch,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -61,8 +62,11 @@ export function NotificationSettings() {
     try {
       await updatePreferences({ [field]: value });
     } catch (error) {
-      // Error will be shown in UI through preferences state
       console.error("Failed to update notification preference:", error);
+      Alert.alert(
+        "Update Failed",
+        "Could not save your notification preference. Please try again."
+      );
     } finally {
       setUpdatingField(null);
     }
