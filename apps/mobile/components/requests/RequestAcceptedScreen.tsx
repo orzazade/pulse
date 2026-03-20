@@ -78,19 +78,24 @@ export function RequestAcceptedScreen({
     }
   };
 
-  const handleGetDirections = () => {
+  const handleGetDirections = async () => {
     const encodedAddress = encodeURIComponent(`${location}, ${address}`);
     const url = Platform.select({
       ios: `maps:?q=${encodedAddress}`,
       android: `geo:0,0?q=${encodedAddress}`,
     });
-    if (url) {
-      Linking.openURL(url).catch(() => {
-        // Fallback to Google Maps
-        Linking.openURL(
+    if (!url) return;
+    try {
+      await Linking.openURL(url);
+    } catch {
+      // Fallback to Google Maps
+      try {
+        await Linking.openURL(
           `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`
         );
-      });
+      } catch {
+        Alert.alert("Error", "Could not open maps. Please search for the address manually.");
+      }
     }
   };
 
