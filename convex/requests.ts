@@ -648,6 +648,7 @@ export const getRequestDetail = query({
     if (seeker) {
       seekerInfo = {
         _id: seeker._id,
+        fullName: seeker.fullName,
         bloodType: seeker.bloodType,
         city: seeker.city,
         // Phone only visible to accepted donor
@@ -663,6 +664,7 @@ export const getRequestDetail = query({
       if (donor) {
         donorInfo = {
           _id: donor._id,
+          fullName: donor.fullName,
           bloodType: donor.bloodType,
           city: donor.city,
           // Phone only visible to seeker
