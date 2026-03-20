@@ -15,13 +15,26 @@ import React, { useEffect, useState, useRef } from "react";
 
 const tokenCache = {
   async getToken(key: string) {
-    return SecureStore.getItemAsync(key);
+    try {
+      return await SecureStore.getItemAsync(key);
+    } catch {
+      console.error("SecureStore getToken failed for key:", key);
+      return null;
+    }
   },
   async saveToken(key: string, value: string) {
-    return SecureStore.setItemAsync(key, value);
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch {
+      console.error("SecureStore saveToken failed for key:", key);
+    }
   },
   async clearToken(key: string) {
-    return SecureStore.deleteItemAsync(key);
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch {
+      console.error("SecureStore clearToken failed for key:", key);
+    }
   },
 };
 
