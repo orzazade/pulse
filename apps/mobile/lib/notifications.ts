@@ -28,22 +28,21 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
     return null;
   }
 
-  // Check existing permissions
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-
-  // Request permission if not already granted
-  if (existingStatus !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-
-  if (finalStatus !== "granted") {
-    console.warn("Push notification permission denied");
-    return null;
-  }
-
   try {
+    // Check existing permissions
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    // Request permission if not already granted
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== "granted") {
+      console.warn("Push notification permission denied");
+      return null;
+    }
     // Get projectId from EAS config or use slug-based fallback for Expo Go
     const projectId =
       Constants.expoConfig?.extra?.eas?.projectId ??
