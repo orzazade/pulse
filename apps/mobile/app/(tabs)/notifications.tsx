@@ -1,4 +1,4 @@
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -49,6 +49,7 @@ export default function NotificationsScreen() {
       await markAllAsRead();
     } catch (error) {
       console.error("Failed to mark all as read:", error);
+      Alert.alert("Error", "Failed to mark notifications as read. Please try again.");
     }
   };
 
