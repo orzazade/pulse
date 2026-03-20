@@ -25,8 +25,13 @@ export default function Index() {
   // Check onboarding status on mount
   useEffect(() => {
     const checkOnboarding = async () => {
-      const seen = await hasSeenOnboarding();
-      setHasCompletedOnboarding(seen);
+      try {
+        const seen = await hasSeenOnboarding();
+        setHasCompletedOnboarding(seen);
+      } catch {
+        // AsyncStorage failure — assume onboarding completed to avoid blocking signed-in users
+        setHasCompletedOnboarding(true);
+      }
       setOnboardingChecked(true);
     };
     checkOnboarding();
