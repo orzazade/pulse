@@ -553,8 +553,17 @@ export const updatePushToken = mutation({
 
     if (!user) throw new Error("User not found");
 
+    // Validate push token format (Expo push tokens)
+    const token = args.pushToken.trim();
+    if (token.length === 0 || token.length > 200) {
+      throw new Error("Invalid push token");
+    }
+    if (!token.startsWith("ExponentPushToken[") && !token.startsWith("ExpoPushToken[")) {
+      throw new Error("Invalid push token format");
+    }
+
     await ctx.db.patch(user._id, {
-      pushToken: args.pushToken,
+      pushToken: token,
     });
 
     return { success: true };
