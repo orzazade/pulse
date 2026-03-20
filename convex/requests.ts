@@ -53,6 +53,17 @@ export const createRequest = mutation({
       throw new Error("Units must be between 1 and 10");
     }
 
+    // Validate string lengths to prevent abuse
+    if (args.notes && args.notes.length > 500) {
+      throw new Error("Notes must be 500 characters or less");
+    }
+    if (args.hospital && args.hospital.length > 200) {
+      throw new Error("Hospital name must be 200 characters or less");
+    }
+    if (args.city && args.city.length > 100) {
+      throw new Error("City name must be 100 characters or less");
+    }
+
     const requestId = await ctx.db.insert("requests", {
       seekerId: user._id,
       bloodType: args.bloodType,
@@ -109,6 +120,14 @@ export const broadcastEmergency = mutation({
     const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
     if (!VALID_BLOOD_TYPES.includes(args.bloodType)) {
       throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    }
+
+    // Validate string lengths to prevent abuse
+    if (args.notes && args.notes.length > 500) {
+      throw new Error("Notes must be 500 characters or less");
+    }
+    if (args.city && args.city.length > 100) {
+      throw new Error("City name must be 100 characters or less");
     }
 
     // Rate limiting: Check for critical/urgent requests in the last hour
