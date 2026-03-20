@@ -103,7 +103,7 @@ export default function SignUp() {
         }
         router.replace("/");
       } else {
-        console.log("Verification status:", result.status);
+        console.warn("Verification status:", result.status);
         setError("Verification incomplete. Please try again.");
       }
     } catch (err: unknown) {

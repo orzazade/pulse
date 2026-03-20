@@ -19,9 +19,7 @@ import {
 } from 'react-native';
 
 import {
-  colors,
   spacing,
-  fontWeight,
   filterChipSpec,
 } from '../../theme';
 

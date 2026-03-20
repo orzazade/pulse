@@ -20,7 +20,6 @@ import {
   illustrationColors,
   semanticColors,
   spacing,
-  radius,
   headingStyles,
   bodyStyles,
   buttonSpec,

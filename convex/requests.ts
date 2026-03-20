@@ -2,7 +2,6 @@ import { mutation, query, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { getCompatibleDonorTypes } from "./lib/bloodType";
-import { Id } from "./_generated/dataModel";
 
 /**
  * Request System
@@ -268,7 +267,7 @@ export const acceptRequest = mutation({
  */
 export const declineRequest = mutation({
   args: { requestId: v.id("requests") },
-  handler: async (ctx, args) => {
+  handler: async (ctx, _args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 

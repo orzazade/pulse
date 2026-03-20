@@ -18,7 +18,6 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   spacing,
   textColors,
-  primaryColors,
   backgroundColors,
   borderColors,
   buttonSpec,

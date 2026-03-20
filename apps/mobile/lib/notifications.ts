@@ -24,7 +24,7 @@ Notifications.setNotificationHandler({
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
   // Push notifications only work on physical devices
   if (!Device.isDevice) {
-    console.log("Push notifications require a physical device");
+    console.warn("Push notifications require a physical device");
     return null;
   }
 
@@ -39,7 +39,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   }
 
   if (finalStatus !== "granted") {
-    console.log("Push notification permission denied");
+    console.warn("Push notification permission denied");
     return null;
   }
 
@@ -69,7 +69,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   } catch (error) {
     // In development (Expo Go) without EAS projectId, push tokens won't work
     // This is expected - push notifications require a production build with EAS
-    console.log(
+    console.warn(
       "Push token registration skipped (requires EAS build for production):",
       error instanceof Error ? error.message : error
     );

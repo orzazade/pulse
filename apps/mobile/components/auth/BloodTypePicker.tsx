@@ -13,8 +13,7 @@ import {
   spacing,
   radius,
   textColors,
-  borderColors,
-  primaryColors,
+
   bloodTypeChipSpec,
   inputSpec,
 } from "@/theme/tokens";

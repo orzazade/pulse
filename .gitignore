@@ -50,3 +50,4 @@ ios/
 
 # Convex
 .convex-generated/
+.crius/

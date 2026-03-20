@@ -50,7 +50,7 @@ interface TabItemProps {
 
 function TabItem({
   route,
-  index,
+  index: _index,
   isFocused,
   tabBarLabel,
   iconName,

@@ -51,7 +51,7 @@ export default function SearchScreen() {
   const [activeFilter, setActiveFilter] = useState('All Requests');
 
   // Location state for "Near Me" filter
-  const [userLocation, setUserLocation] = useState<{
+  const [_userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
@@ -120,7 +120,7 @@ export default function SearchScreen() {
     // For now, we just show all requests since distance isn't in the data
 
     return filtered;
-  }, [requests, searchQuery, activeFilter, userLocation]);
+  }, [requests, searchQuery]);
 
   // Transform requests to SearchRequest format
   const displayRequests: SearchRequest[] = useMemo(() => {
@@ -142,7 +142,7 @@ export default function SearchScreen() {
 
   const handleRequestPress = (request: SearchRequest) => {
     // Navigate to request details (placeholder for now)
-    console.log('Request pressed:', request._id);
+    console.warn('Request pressed:', request._id);
   };
 
   const renderEmptyList = () => (

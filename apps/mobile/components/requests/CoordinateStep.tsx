@@ -22,7 +22,7 @@ interface CoordinateStepProps {
 
 export function CoordinateStep({
   name,
-  phone,
+  phone: _phone,
   onCall,
   onMessage,
 }: CoordinateStepProps) {

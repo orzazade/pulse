@@ -18,9 +18,6 @@ import {
 } from 'react-native';
 
 import {
-  colors,
-  radius,
-  spacing,
   shadows,
   requestCardSpec,
 } from '../../theme';

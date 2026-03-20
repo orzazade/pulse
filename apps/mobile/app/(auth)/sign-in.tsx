@@ -17,7 +17,7 @@ import {
   spacing,
   radius,
   textColors,
-  borderColors,
+
   primaryColors,
   inputSpec,
   buttonSpec,
@@ -54,7 +54,7 @@ export default function SignIn() {
         router.replace("/");
       } else {
         // Handle other statuses if needed (e.g., needs_first_factor)
-        console.log("Sign in status:", result.status);
+        console.warn("Sign in status:", result.status);
         setError("Sign in incomplete. Please try again.");
       }
     } catch (err: unknown) {

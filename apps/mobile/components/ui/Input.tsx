@@ -23,7 +23,6 @@ import {
 
 import {
   colors,
-  radius,
   spacing,
   fontWeight,
   inputSpec,

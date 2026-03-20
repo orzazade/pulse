@@ -76,7 +76,7 @@ export default function ProfileTabScreen() {
     setIsTogglingAvailability(true);
     try {
       await toggleAvailability();
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Failed to update availability. Please try again.");
     } finally {
       setIsTogglingAvailability(false);
@@ -95,7 +95,7 @@ export default function ProfileTabScreen() {
     setIsSigningOut(true);
     try {
       await signOut();
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Failed to sign out. Please try again.");
       setIsSigningOut(false);
     }
@@ -119,7 +119,7 @@ export default function ProfileTabScreen() {
       });
       setIsEditModalVisible(false);
       Alert.alert("Success", "Profile updated successfully.");
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Failed to update profile. Please try again.");
     } finally {
       setIsSaving(false);
@@ -140,7 +140,7 @@ export default function ProfileTabScreen() {
       });
       setIsAddDonationModalVisible(false);
       Alert.alert("Success", "Donation logged successfully.");
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Failed to log donation. Please try again.");
     } finally {
       setIsAddingDonation(false);

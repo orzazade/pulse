@@ -1,6 +1,5 @@
 import { GeospatialIndex } from "@convex-dev/geospatial";
-import { components, internal } from "./_generated/api";
-import { Id } from "./_generated/dataModel";
+import { components } from "./_generated/api";
 import { internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 

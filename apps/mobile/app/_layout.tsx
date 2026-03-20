@@ -11,7 +11,7 @@ import { ModeProvider } from "../contexts/ModeContext";
 import { useBiometricAuth } from "../hooks/useBiometricAuth";
 import { getBiometricType } from "../lib/biometric";
 import { registerForPushNotificationsAsync } from "../lib/notifications";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 const tokenCache = {
   async getToken(key: string) {
@@ -123,7 +123,7 @@ function PushNotificationRegistrar() {
         if (token) {
           await updatePushToken({ pushToken: token });
           hasRegistered.current = true;
-          console.log("Push token registered successfully");
+          console.warn("Push token registered successfully");
         }
       } catch (error) {
         // Log but don't crash - push notifications are not critical

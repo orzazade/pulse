@@ -21,8 +21,7 @@ import {
   textColors,
   headingStyles,
   bodyStyles,
-  shadows,
-  radius,
+
   spacing,
 } from "@/theme/tokens";
 
@@ -51,13 +50,13 @@ export default function HomeScreen() {
   const isLoading = currentUser === undefined;
 
   const handleRequestPress = (requestId: Id<"requests">) => {
-    console.log("Request pressed:", requestId);
     // Future: navigate to request detail
+    void requestId;
   };
 
   const handleEmergencyBroadcast = async () => {
     if (!currentUser?.bloodType) {
-      console.log("No blood type set");
+      console.warn("No blood type set");
       return;
     }
 
@@ -67,7 +66,7 @@ export default function HomeScreen() {
         urgency: "urgent",
         notes: "Emergency broadcast request",
       });
-      console.log("Emergency broadcast sent");
+      console.warn("Emergency broadcast sent");
     } catch (error) {
       console.error("Failed to send emergency broadcast:", error);
     }
