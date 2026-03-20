@@ -176,6 +176,22 @@ export const updateLocation = mutation({
 
     if (!user) throw new Error("User not found");
 
+    // Validate coordinate ranges
+    if (args.latitude < -90 || args.latitude > 90) {
+      throw new Error("Latitude must be between -90 and 90");
+    }
+    if (args.longitude < -180 || args.longitude > 180) {
+      throw new Error("Longitude must be between -180 and 180");
+    }
+
+    // Validate string lengths
+    if (args.city && args.city.length > 100) {
+      throw new Error("City name must be 100 characters or less");
+    }
+    if (args.region && args.region.length > 100) {
+      throw new Error("Region name must be 100 characters or less");
+    }
+
     await ctx.db.patch(user._id, {
       city: args.city,
       region: args.region,
@@ -236,6 +252,17 @@ export const updateProfile = mutation({
       .unique();
 
     if (!user) throw new Error("User not found");
+
+    // Validate string lengths
+    if (args.city && args.city.length > 100) {
+      throw new Error("City name must be 100 characters or less");
+    }
+    if (args.region && args.region.length > 100) {
+      throw new Error("Region name must be 100 characters or less");
+    }
+    if (args.preferredDonationCenter && args.preferredDonationCenter.length > 200) {
+      throw new Error("Donation center name must be 200 characters or less");
+    }
 
     // Build update object with only provided fields
     const updates: {
