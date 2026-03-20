@@ -37,7 +37,10 @@ function LockScreen({ onUnlock, onSignOut }: { onUnlock: () => void; onSignOut: 
   const [biometricType, setBiometricType] = useState<"fingerprint" | "facial" | "iris" | null>(null);
 
   useEffect(() => {
-    getBiometricType().then(setBiometricType);
+    getBiometricType().then(setBiometricType).catch(() => {
+      // Fallback to generic label if biometric detection fails
+      setBiometricType(null);
+    });
   }, []);
 
   const biometricLabel = biometricType === "facial" ? "Face ID" : biometricType === "fingerprint" ? "Touch ID" : "Biometric";
