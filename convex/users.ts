@@ -86,8 +86,17 @@ export const updatePhone = mutation({
 
     if (!user) throw new Error("User not found");
 
+    // Validate phone: must be 5-20 chars, only digits, spaces, dashes, parens, plus
+    const phone = args.phone.trim();
+    if (phone.length < 5 || phone.length > 20) {
+      throw new Error("Phone number must be between 5 and 20 characters");
+    }
+    if (!/^[+\d\s()-]+$/.test(phone)) {
+      throw new Error("Phone number contains invalid characters");
+    }
+
     await ctx.db.patch(user._id, {
-      phone: args.phone,
+      phone,
       phoneVerified: false, // Will be verified later if needed
     });
   },
