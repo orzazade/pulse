@@ -75,6 +75,7 @@ export function RequestDetailModal({
   onClose,
 }: RequestDetailModalProps) {
   const [showAcceptedScreen, setShowAcceptedScreen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [acceptedRequestData, setAcceptedRequestData] = useState<{
     requesterName: string;
     requesterPhone: string;
@@ -100,7 +101,8 @@ export function RequestDetailModal({
   };
 
   const handleAccept = async () => {
-    if (!requestId || !detail) return;
+    if (!requestId || !detail || isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await acceptRequest({ requestId });
       // Show the Request Accepted screen with seeker info
@@ -118,11 +120,13 @@ export function RequestDetailModal({
         error instanceof Error ? error.message : "Failed to accept request",
         [{ text: "OK" }]
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleCancel = async () => {
-    if (!requestId) return;
+    if (!requestId || isSubmitting) return;
     Alert.alert(
       "Cancel Request",
       "Are you sure you want to cancel this request?",
@@ -328,11 +332,16 @@ export function RequestDetailModal({
                       <Text style={styles.declineButtonText}>Decline</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={styles.acceptButton}
+                      style={[styles.acceptButton, isSubmitting && styles.buttonDisabled]}
                       onPress={handleAccept}
                       activeOpacity={0.8}
+                      disabled={isSubmitting}
                     >
-                      <Text style={styles.acceptButtonText}>Accept Request</Text>
+                      {isSubmitting ? (
+                        <ActivityIndicator size="small" color={textColors.onPrimary} />
+                      ) : (
+                        <Text style={styles.acceptButtonText}>Accept Request</Text>
+                      )}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -340,9 +349,10 @@ export function RequestDetailModal({
                 {/* Seeker viewing their own request */}
                 {detail.isSeeker && (
                   <TouchableOpacity
-                    style={styles.cancelButton}
+                    style={[styles.cancelButton, isSubmitting && styles.buttonDisabled]}
                     onPress={handleCancel}
                     activeOpacity={0.7}
+                    disabled={isSubmitting}
                   >
                     <Text style={styles.cancelButtonText}>Cancel Request</Text>
                   </TouchableOpacity>
@@ -543,6 +553,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: textColors.primary,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   emptyContainer: {
     flex: 1,
