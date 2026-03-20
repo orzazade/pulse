@@ -12,12 +12,21 @@ export async function isBiometricAvailable(): Promise<boolean> {
 }
 
 export async function isBiometricEnabled(): Promise<boolean> {
-  const value = await SecureStore.getItemAsync(BIOMETRIC_ENABLED_KEY);
-  return value === "true";
+  try {
+    const value = await SecureStore.getItemAsync(BIOMETRIC_ENABLED_KEY);
+    return value === "true";
+  } catch {
+    // SecureStore failure — assume biometric not enabled to avoid locking user out
+    return false;
+  }
 }
 
 export async function setBiometricEnabled(enabled: boolean): Promise<void> {
-  await SecureStore.setItemAsync(BIOMETRIC_ENABLED_KEY, enabled ? "true" : "false");
+  try {
+    await SecureStore.setItemAsync(BIOMETRIC_ENABLED_KEY, enabled ? "true" : "false");
+  } catch {
+    console.error("Failed to save biometric preference to SecureStore");
+  }
 }
 
 export async function authenticateWithBiometric(): Promise<boolean> {
