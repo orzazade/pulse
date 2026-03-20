@@ -66,11 +66,19 @@ export function AddDonationModal({
       return;
     }
 
-    await onAdd({
-      donationDate: donationDate.getTime(),
-      donationCenter: donationCenter.trim() || undefined,
-      notes: notes.trim() || undefined,
-    });
+    try {
+      await onAdd({
+        donationDate: donationDate.getTime(),
+        donationCenter: donationCenter.trim() || undefined,
+        notes: notes.trim() || undefined,
+      });
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Failed to save donation. Please try again.",
+        [{ text: "OK" }]
+      );
+    }
   };
 
   const formatDate = (date: Date): string => {
