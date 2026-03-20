@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   Text,
@@ -55,12 +56,15 @@ export default function HomeScreen() {
     void requestId;
   };
 
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+
   const handleEmergencyBroadcast = async () => {
-    if (!currentUser?.bloodType) {
-      console.warn("No blood type set");
+    if (!currentUser?.bloodType || isBroadcasting) {
+      if (!currentUser?.bloodType) console.warn("No blood type set");
       return;
     }
 
+    setIsBroadcasting(true);
     try {
       await createRequest({
         bloodType: currentUser.bloodType,
@@ -78,6 +82,8 @@ export default function HomeScreen() {
           ? error.message
           : "Failed to send emergency broadcast. Please try again."
       );
+    } finally {
+      setIsBroadcasting(false);
     }
   };
 
@@ -190,7 +196,7 @@ export default function HomeScreen() {
       <View style={[styles.emergencyButtonContainer, { paddingBottom: insets.bottom + spacing(2) }]}>
         <EmergencyBroadcastButton
           onPress={handleEmergencyBroadcast}
-          disabled={!currentUser?.bloodType}
+          disabled={!currentUser?.bloodType || isBroadcasting}
         />
       </View>
     </View>
