@@ -148,8 +148,18 @@ export function RequestDetailModal({
     );
   };
 
-  const handleCall = (phone: string) => {
-    Linking.openURL(`tel:${phone}`);
+  const handleCall = async (phone: string) => {
+    const url = `tel:${phone}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Cannot Make Call", "Phone calls are not supported on this device.");
+      }
+    } catch {
+      Alert.alert("Error", "Failed to open phone app.");
+    }
   };
 
   // If showing accepted screen, render that instead
