@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Linking,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useMutation } from "convex/react";
@@ -40,11 +41,18 @@ export default function BloodTypeSelection() {
     }
   };
 
-  const handleDontKnow = () => {
-    // Link to information about blood type testing
-    Linking.openURL(
-      "https://www.redcrossblood.org/donate-blood/blood-types.html"
-    );
+  const handleDontKnow = async () => {
+    const url = "https://www.redcrossblood.org/donate-blood/blood-types.html";
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Cannot Open Link", "Unable to open the browser on this device.");
+      }
+    } catch {
+      Alert.alert("Cannot Open Link", "Unable to open the browser on this device.");
+    }
   };
 
   return (
