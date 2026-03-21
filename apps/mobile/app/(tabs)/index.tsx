@@ -79,6 +79,7 @@ export default function HomeScreen() {
             try {
               await broadcastEmergency({
                 bloodType: currentUser.bloodType!,
+                city: currentUser.city || undefined,
                 notes: "Emergency broadcast request",
               });
               Alert.alert(
