@@ -193,6 +193,7 @@ export default function SignUp() {
           onChangeText={setFullName}
           autoCapitalize="words"
           autoComplete="name"
+          maxLength={100}
         />
 
         {/* Blood Type Picker */}
@@ -211,6 +212,7 @@ export default function SignUp() {
           autoCapitalize="none"
           keyboardType="email-address"
           autoComplete="email"
+          maxLength={254}
         />
 
         {/* Password Input */}
@@ -222,6 +224,7 @@ export default function SignUp() {
           onChangeText={setPassword}
           secureTextEntry
           autoComplete="new-password"
+          maxLength={128}
         />
 
         {/* Terms Checkbox */}
