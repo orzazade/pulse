@@ -1,9 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { getCompatibleDonorTypes, BLOOD_TYPES } from "./lib/bloodType";
-import { geospatial } from "./geospatial";
 
 // Strip internal fields before returning user data to the client
 // clerkId is an internal auth identifier; pushToken could be used to send unsolicited notifications
@@ -461,110 +459,6 @@ export const searchDonors = query({
       city: user.city,
       region: user.region,
       isAvailable: user.isAvailable !== false, // Normalize to boolean
-    }));
-  },
-});
-
-/**
- * Search for donors near a geographic location using geospatial index
- * Returns donors within maxDistance meters of the given coordinates
- */
-export const searchNearbyDonors = query({
-  args: {
-    latitude: v.number(),
-    longitude: v.number(),
-    bloodType: v.optional(v.string()),
-    maxDistance: v.optional(v.number()), // meters, default 50000 (50km)
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
-
-    // Validate coordinates are finite and in range (NaN/Infinity bypass range checks)
-    if (!Number.isFinite(args.latitude) || !Number.isFinite(args.longitude) ||
-        args.latitude < -90 || args.latitude > 90 || args.longitude < -180 || args.longitude > 180) {
-      return [];
-    }
-
-    // Validate maxDistance: must be positive and finite, cap at 200km
-    const maxDistance = args.maxDistance ?? 50000;
-    if (!Number.isFinite(maxDistance) || maxDistance <= 0) {
-      return [];
-    }
-    const clampedDistance = Math.min(maxDistance, 200000); // Cap at 200km
-
-    // Get current user to exclude from results
-    const currentUserClerkId = identity.subject;
-
-    // Get compatible donor blood types if blood type filter provided
-    const compatibleTypes = args.bloodType
-      ? getCompatibleDonorTypes(args.bloodType)
-      : null;
-
-    // If invalid blood type provided, return empty results
-    if (args.bloodType && compatibleTypes?.length === 0) {
-      return [];
-    }
-
-    // Query geospatial index for nearby users
-    const nearbyResults = await geospatial.nearest(ctx, {
-      point: { latitude: args.latitude, longitude: args.longitude },
-      limit: 50,
-      maxDistance: clampedDistance,
-      filter: (q) => q.eq("type", "user").eq("isAvailable", true),
-    });
-
-    // Get user IDs from results
-    const userIds = nearbyResults.map((result) => result.key as Id<"users">);
-
-    // Fetch full user documents
-    const usersWithDistance = await Promise.all(
-      userIds.map(async (userId, index) => {
-        const user = await ctx.db.get(userId);
-        if (!user) return null;
-        // Attach distance from geospatial result
-        const nearbyResult = nearbyResults[index];
-        return {
-          _id: user._id as Id<"users">,
-          clerkId: (user as { clerkId?: string }).clerkId,
-          bloodType: (user as { bloodType?: string }).bloodType,
-          city: (user as { city?: string }).city,
-          region: (user as { region?: string }).region,
-          isAvailable: (user as { isAvailable?: boolean }).isAvailable,
-          distance: nearbyResult?.distance ?? 0,
-        };
-      })
-    );
-
-    // Filter results
-    const donors = usersWithDistance.filter(
-      (user): user is NonNullable<typeof user> => {
-        if (!user) return false;
-
-        // Exclude current user
-        if (currentUserClerkId && user.clerkId === currentUserClerkId) {
-          return false;
-        }
-
-        // Filter by blood type compatibility if specified
-        if (compatibleTypes && user.bloodType) {
-          if (!compatibleTypes.includes(user.bloodType)) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-    );
-
-    // Return only necessary fields with distance
-    return donors.map((user) => ({
-      _id: user._id,
-      bloodType: user.bloodType,
-      city: user.city,
-      region: user.region,
-      isAvailable: user.isAvailable !== false,
-      distance: user.distance,
     }));
   },
 });
