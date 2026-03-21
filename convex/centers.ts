@@ -80,6 +80,10 @@ export const searchNearbyCenters = query({
     maxDistance: v.optional(v.number()), // Maximum distance in meters
   },
   handler: async (ctx, args) => {
+    if (args.latitude < -90 || args.latitude > 90 || args.longitude < -180 || args.longitude > 180) {
+      throw new Error("Invalid coordinates: latitude must be -90..90, longitude -180..180");
+    }
+
     // Query the geospatial index for nearby centers
     const nearbyResults = await geospatial.nearest(ctx, {
       point: { latitude: args.latitude, longitude: args.longitude },
