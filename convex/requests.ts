@@ -407,6 +407,35 @@ export const completeRequest = mutation({
       status: "completed",
     });
 
+    // Notify the donor that the request was completed (thank you)
+    if (request.acceptedDonorId) {
+      const donor = await ctx.db.get(request.acceptedDonorId);
+      if (donor) {
+        await ctx.db.insert("notifications", {
+          userId: request.acceptedDonorId,
+          type: "request_accepted",
+          title: "Thank You for Donating!",
+          body: `The ${request.bloodType} blood request has been marked as completed. Your donation made a difference.`,
+          read: false,
+          data: { requestId: args.requestId },
+          createdAt: Date.now(),
+        });
+
+        if (donor.pushToken) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.sendPushNotification,
+            {
+              pushToken: donor.pushToken,
+              title: "Thank You for Donating!",
+              body: `The ${request.bloodType} blood request has been marked as completed. Your donation made a difference.`,
+              data: { type: "request_completed", requestId: args.requestId },
+            }
+          );
+        }
+      }
+    }
+
     return { success: true };
   },
 });
