@@ -53,14 +53,18 @@ export const createRequest = mutation({
       throw new Error("Units must be between 1 and 10");
     }
 
-    // Validate string lengths to prevent abuse
-    if (args.notes && args.notes.length > 500) {
+    // Sanitize and validate string inputs
+    const hospital = args.hospital?.trim() || undefined;
+    const city = args.city?.trim() || undefined;
+    const notes = args.notes?.trim() || undefined;
+
+    if (notes && notes.length > 500) {
       throw new Error("Notes must be 500 characters or less");
     }
-    if (args.hospital && args.hospital.length > 200) {
+    if (hospital && hospital.length > 200) {
       throw new Error("Hospital name must be 200 characters or less");
     }
-    if (args.city && args.city.length > 100) {
+    if (city && city.length > 100) {
       throw new Error("City name must be 100 characters or less");
     }
 
@@ -69,9 +73,9 @@ export const createRequest = mutation({
       bloodType: args.bloodType,
       units,
       urgency: args.urgency,
-      hospital: args.hospital,
-      city: args.city,
-      notes: args.notes,
+      hospital,
+      city,
+      notes,
       status: "open",
       createdAt: Date.now(),
     });
@@ -81,7 +85,7 @@ export const createRequest = mutation({
       requestId,
       bloodType: args.bloodType,
       urgency: args.urgency,
-      city: args.city,
+      city,
       seekerId: user._id,
     });
 
@@ -122,11 +126,14 @@ export const broadcastEmergency = mutation({
       throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
     }
 
-    // Validate string lengths to prevent abuse
-    if (args.notes && args.notes.length > 500) {
+    // Sanitize and validate string inputs
+    const city = args.city?.trim() || undefined;
+    const notes = args.notes?.trim() || undefined;
+
+    if (notes && notes.length > 500) {
       throw new Error("Notes must be 500 characters or less");
     }
-    if (args.city && args.city.length > 100) {
+    if (city && city.length > 100) {
       throw new Error("City name must be 100 characters or less");
     }
 
@@ -155,8 +162,8 @@ export const broadcastEmergency = mutation({
       bloodType: args.bloodType,
       units: 1, // Default to 1 unit for emergency
       urgency: "critical",
-      city: args.city,
-      notes: args.notes,
+      city,
+      notes,
       status: "open",
       createdAt: Date.now(),
     });
@@ -166,7 +173,7 @@ export const broadcastEmergency = mutation({
       requestId,
       bloodType: args.bloodType,
       urgency: "critical",
-      city: args.city,
+      city,
       seekerId: user._id,
     });
 
