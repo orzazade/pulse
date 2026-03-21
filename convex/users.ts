@@ -2,10 +2,8 @@ import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
-import { getCompatibleDonorTypes } from "./lib/bloodType";
+import { getCompatibleDonorTypes, BLOOD_TYPES } from "./lib/bloodType";
 import { geospatial } from "./geospatial";
-
-const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
 // Strip internal fields before returning user data to the client
 // clerkId is an internal auth identifier; pushToken could be used to send unsolicited notifications
@@ -44,8 +42,8 @@ export const getOrCreateUser = mutation({
     }
 
     // Validate blood type if provided
-    if (args.bloodType && !VALID_BLOOD_TYPES.includes(args.bloodType as typeof VALID_BLOOD_TYPES[number])) {
-      throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    if (args.bloodType && !BLOOD_TYPES.includes(args.bloodType as typeof BLOOD_TYPES[number])) {
+      throw new Error(`Invalid blood type. Must be one of: ${BLOOD_TYPES.join(", ")}`);
     }
 
     // Build user object with optional fields
@@ -133,8 +131,8 @@ export const updateBloodType = mutation({
     if (!identity) throw new Error("Not authenticated");
 
     // Validate blood type
-    if (!VALID_BLOOD_TYPES.includes(args.bloodType as typeof VALID_BLOOD_TYPES[number])) {
-      throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    if (!BLOOD_TYPES.includes(args.bloodType as typeof BLOOD_TYPES[number])) {
+      throw new Error(`Invalid blood type. Must be one of: ${BLOOD_TYPES.join(", ")}`);
     }
 
     const user = await ctx.db

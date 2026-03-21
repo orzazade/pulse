@@ -1,7 +1,7 @@
 import { mutation, query, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { getCompatibleDonorTypes } from "./lib/bloodType";
+import { getCompatibleDonorTypes, BLOOD_TYPES } from "./lib/bloodType";
 import { DONATION_CYCLE_DAYS, DONATION_CYCLE_MS } from "./lib/constants";
 
 // Urgency priority for sorting: critical first, standard last
@@ -68,9 +68,8 @@ export const createRequest = mutation({
     }
 
     // Validate blood type
-    const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-    if (!VALID_BLOOD_TYPES.includes(args.bloodType)) {
-      throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    if (!BLOOD_TYPES.includes(args.bloodType as typeof BLOOD_TYPES[number])) {
+      throw new Error(`Invalid blood type. Must be one of: ${BLOOD_TYPES.join(", ")}`);
     }
 
     // Validate units (1-10, must be whole number, defaults to 1)
@@ -147,9 +146,8 @@ export const broadcastEmergency = mutation({
     }
 
     // Validate blood type
-    const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-    if (!VALID_BLOOD_TYPES.includes(args.bloodType)) {
-      throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    if (!BLOOD_TYPES.includes(args.bloodType as typeof BLOOD_TYPES[number])) {
+      throw new Error(`Invalid blood type. Must be one of: ${BLOOD_TYPES.join(", ")}`);
     }
 
     // Sanitize and validate string inputs
