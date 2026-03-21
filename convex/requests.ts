@@ -41,6 +41,17 @@ export const createRequest = mutation({
       throw new Error("Only seekers can create blood requests");
     }
 
+    // Rate limit: max 5 open requests per user
+    const openRequests = await ctx.db
+      .query("requests")
+      .withIndex("by_seeker", (q) => q.eq("seekerId", user._id))
+      .filter((q) => q.eq(q.field("status"), "open"))
+      .collect();
+
+    if (openRequests.length >= 5) {
+      throw new Error("You can have at most 5 open requests. Please cancel or wait for existing ones to be fulfilled.");
+    }
+
     // Validate blood type
     const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
     if (!VALID_BLOOD_TYPES.includes(args.bloodType)) {
