@@ -137,6 +137,7 @@ export function RequestDetailModal({
           text: "Yes, Cancel",
           style: "destructive",
           onPress: async () => {
+            setIsSubmitting(true);
             try {
               await cancelRequest({ requestId });
               handleClose();
@@ -146,6 +147,8 @@ export function RequestDetailModal({
                 error instanceof Error ? error.message : "Failed to cancel request",
                 [{ text: "OK" }]
               );
+            } finally {
+              setIsSubmitting(false);
             }
           },
         },
