@@ -6,10 +6,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-
-// 56-day donation cycle (8 weeks between donations)
-const DONATION_CYCLE_DAYS = 56;
-const _DONATION_CYCLE_MS = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+import { DONATION_CYCLE_DAYS } from "./lib/constants";
 
 /**
  * Notification System

@@ -1,8 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-
-// 56-day donation cycle (8 weeks between donations)
-const DONATION_CYCLE_DAYS = 56;
+import { DONATION_CYCLE_DAYS, DONATION_CYCLE_MS } from "./lib/constants";
 
 /**
  * Add a new donation record
@@ -58,7 +56,7 @@ export const addDonation = mutation({
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .take(500);
 
-    const cycleMsMin = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+    const cycleMsMin = DONATION_CYCLE_MS;
     const tooClose = existingDonations.find(
       (d) => Math.abs(args.donationDate - d.donationDate) < cycleMsMin
     );
@@ -297,7 +295,7 @@ export const getEligibilityStatus = query({
     // Calculate next eligible date
     const nextEligibleDate = isEligible
       ? null
-      : lastDonation.donationDate + DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+      : lastDonation.donationDate + DONATION_CYCLE_MS;
 
     return {
       isEligible,

@@ -2,9 +2,7 @@ import { mutation, query, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { getCompatibleDonorTypes } from "./lib/bloodType";
-
-// 56-day donation cycle (8 weeks between donations)
-const DONATION_CYCLE_DAYS = 56;
+import { DONATION_CYCLE_DAYS, DONATION_CYCLE_MS } from "./lib/constants";
 
 // Urgency priority for sorting: critical first, standard last
 const URGENCY_PRIORITY: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
@@ -419,7 +417,7 @@ export const acceptRequest = mutation({
       .filter((q) => q.eq(q.field("status"), "completed"))
       .take(100);
 
-    const cycleMsMin = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+    const cycleMsMin = DONATION_CYCLE_MS;
     const now = Date.now();
     const tooRecentCompletion = recentlyCompletedAsDonor.find(
       (r) => r.acceptedAt && now - r.acceptedAt < cycleMsMin
@@ -544,7 +542,7 @@ export const completeRequest = mutation({
     // cycle is enforced even if the donor doesn't manually log it.
     if (request.acceptedDonorId) {
       const now = Date.now();
-      const cycleMsMin = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+      const cycleMsMin = DONATION_CYCLE_MS;
 
       // Only record if no donation exists within the last 56 days
       // (donor may have already logged it manually via addDonation)
