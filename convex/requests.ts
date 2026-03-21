@@ -3,6 +3,9 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { getCompatibleDonorTypes } from "./lib/bloodType";
 
+// 56-day donation cycle (8 weeks between donations)
+const DONATION_CYCLE_DAYS = 56;
+
 /**
  * Request System
  *
@@ -349,6 +352,25 @@ export const acceptRequest = mutation({
     // Cannot accept own request
     if (request.seekerId === user._id) {
       throw new Error("You cannot accept your own request");
+    }
+
+    // Verify donor is eligible (56-day donation cycle)
+    const lastDonation = await ctx.db
+      .query("donations")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .order("desc")
+      .first();
+
+    if (lastDonation) {
+      const daysSince = Math.floor(
+        (Date.now() - lastDonation.donationDate) / (1000 * 60 * 60 * 24)
+      );
+      if (daysSince < DONATION_CYCLE_DAYS) {
+        const daysLeft = DONATION_CYCLE_DAYS - daysSince;
+        throw new Error(
+          `You are not yet eligible to donate. ${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining until your next eligible donation.`
+        );
+      }
     }
 
     await ctx.db.patch(args.requestId, {
