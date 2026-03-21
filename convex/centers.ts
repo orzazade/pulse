@@ -86,13 +86,13 @@ export const searchNearbyCenters = query({
 
     if (!Number.isFinite(args.latitude) || !Number.isFinite(args.longitude) ||
         args.latitude < -90 || args.latitude > 90 || args.longitude < -180 || args.longitude > 180) {
-      throw new Error("Invalid coordinates: latitude must be -90..90, longitude -180..180");
+      return [];
     }
 
     // Validate maxDistance: must be positive and finite, cap at 200km
     const maxDistance = args.maxDistance ?? 50000;
     if (!Number.isFinite(maxDistance) || maxDistance <= 0) {
-      throw new Error("maxDistance must be a positive number");
+      return [];
     }
     const clampedDistance = Math.min(maxDistance, 200000); // Cap at 200km
 
