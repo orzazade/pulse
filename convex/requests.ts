@@ -665,11 +665,13 @@ export const getIncomingRequests = query({
       return [];
     }
 
-    // Get all open requests
+    // Get open requests, capped at 500 to prevent unbounded data transfer
+    // (result is sliced to 50 after filtering; 500 provides ample margin)
     const openRequests = await ctx.db
       .query("requests")
       .withIndex("by_status", (q) => q.eq("status", "open"))
-      .collect();
+      .order("desc")
+      .take(500);
 
     // Filter by compatibility, city, and exclude self
     const filteredRequests = openRequests.filter((request) => {
@@ -824,11 +826,13 @@ export const listOpenRequests = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
 
-    // Get all open requests
+    // Get open requests, capped at 500 to prevent unbounded data transfer
+    // (result is sliced to 100 after sorting; 500 provides ample margin for filtering)
     let requests = await ctx.db
       .query("requests")
       .withIndex("by_status", (q) => q.eq("status", "open"))
-      .collect();
+      .order("desc")
+      .take(500);
 
     // Filter by blood type if specified
     if (args.bloodType) {
