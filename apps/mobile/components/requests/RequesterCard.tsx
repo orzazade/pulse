@@ -7,26 +7,11 @@ import {
   spacing,
   radius,
 } from "@/theme/tokens";
+import { getTimeAgo } from "@/lib/timeFormat";
 
 interface RequesterCardProps {
   name: string;
   postedAt: number;
-}
-
-/**
- * Format timestamp to relative time (e.g., "25 minutes ago")
- */
-function formatTimeAgo(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  return "Just now";
 }
 
 /**
@@ -47,7 +32,7 @@ export function RequesterCard({ name, postedAt }: RequesterCardProps) {
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.name}>Requested by {name}</Text>
-        <Text style={styles.postedTime}>Posted {formatTimeAgo(postedAt)}</Text>
+        <Text style={styles.postedTime}>Posted {getTimeAgo(postedAt)}</Text>
       </View>
     </View>
   );
