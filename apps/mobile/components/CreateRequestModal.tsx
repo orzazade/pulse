@@ -29,7 +29,7 @@ export function CreateRequestModal({
   onSuccess,
 }: CreateRequestModalProps) {
   const [bloodType, setBloodType] = useState<string | null>(null);
-  const [urgency, setUrgency] = useState<"normal" | "urgent">("normal");
+  const [urgency, setUrgency] = useState<"standard" | "urgent">("standard");
   const [city, setCity] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +38,7 @@ export function CreateRequestModal({
 
   const resetForm = () => {
     setBloodType(null);
-    setUrgency("normal");
+    setUrgency("standard");
     setCity("");
     setNotes("");
   };
@@ -143,16 +143,16 @@ export function CreateRequestModal({
               <TouchableOpacity
                 style={[
                   styles.urgencyButton,
-                  urgency === "normal" && styles.urgencyButtonSelected,
+                  urgency === "standard" && styles.urgencyButtonSelected,
                 ]}
-                onPress={() => setUrgency("normal")}
+                onPress={() => setUrgency("standard")}
                 disabled={isSubmitting}
                 activeOpacity={0.7}
               >
                 <Text
                   style={[
                     styles.urgencyButtonText,
-                    urgency === "normal" && styles.urgencyButtonTextSelected,
+                    urgency === "standard" && styles.urgencyButtonTextSelected,
                   ]}
                 >
                   Normal
