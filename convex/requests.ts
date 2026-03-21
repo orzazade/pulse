@@ -212,6 +212,34 @@ export const cancelRequest = mutation({
         acceptedDonorId: undefined,
         acceptedAt: undefined,
       });
+
+      // Notify the seeker that the donor withdrew
+      const seeker = await ctx.db.get(request.seekerId);
+      if (seeker) {
+        await ctx.db.insert("notifications", {
+          userId: request.seekerId,
+          type: "request_match",
+          title: "Donor Withdrew",
+          body: `The donor for your ${request.bloodType} blood request has withdrawn. Your request is open again for other donors.`,
+          read: false,
+          data: { requestId: args.requestId },
+          createdAt: Date.now(),
+        });
+
+        if (seeker.pushToken) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.sendPushNotification,
+            {
+              pushToken: seeker.pushToken,
+              title: "Donor Withdrew",
+              body: `The donor for your ${request.bloodType} blood request has withdrawn. Your request is open again for other donors.`,
+              data: { type: "donor_withdrew", requestId: args.requestId },
+            }
+          );
+        }
+      }
+
       return { success: true };
     }
 
