@@ -39,17 +39,16 @@ export const getNotifications = query({
 
     if (!user) return [];
 
+    // Fetch most recent 50 notifications (capped to prevent unbounded data transfer)
     const notifications = await ctx.db
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
+      .order("desc")
+      .take(50);
 
     // Sort by createdAt descending (most recent first)
-    const sortedNotifications = notifications
-      .sort((a, b) => b.createdAt - a.createdAt)
-      .slice(0, 50);
-
-    return sortedNotifications;
+    // (order("desc") sorts by _creationTime, but we sort by our createdAt field for consistency)
+    return notifications.sort((a, b) => b.createdAt - a.createdAt);
   },
 });
 
