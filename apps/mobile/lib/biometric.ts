@@ -26,14 +26,6 @@ export async function isBiometricEnabled(): Promise<boolean> {
   }
 }
 
-export async function setBiometricEnabled(enabled: boolean): Promise<void> {
-  try {
-    await SecureStore.setItemAsync(BIOMETRIC_ENABLED_KEY, enabled ? "true" : "false");
-  } catch {
-    console.error("Failed to save biometric preference to SecureStore");
-  }
-}
-
 export async function authenticateWithBiometric(): Promise<boolean> {
   const result = await LocalAuthentication.authenticateAsync({
     promptMessage: "Authenticate to access Pulse",
