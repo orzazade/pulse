@@ -6,6 +6,7 @@ import {
   FlatList,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from 'convex/react';
@@ -87,9 +88,17 @@ export default function SearchScreen() {
             lat: location.coords.latitude,
             lng: location.coords.longitude,
           });
+        } else {
+          Alert.alert(
+            'Location Permission Denied',
+            'Enable location in your device settings to use the "Near Me" filter.'
+          );
         }
       } catch {
-        // Location not available, continue without distance
+        Alert.alert(
+          'Location Unavailable',
+          'Unable to get your location. Please try again.'
+        );
       }
     }
     setActiveFilter(filter);
