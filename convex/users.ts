@@ -22,11 +22,14 @@ export const getOrCreateUser = mutation({
 
     if (existing) return existing._id;
 
-    // Validate input lengths
-    if (args.email && args.email.length > 254) {
+    // Sanitize and validate input
+    const email = args.email?.trim() || undefined;
+    const fullName = args.fullName?.trim() || undefined;
+
+    if (email && email.length > 254) {
       throw new Error("Email must be 254 characters or less");
     }
-    if (args.fullName && args.fullName.length > 100) {
+    if (fullName && fullName.length > 100) {
       throw new Error("Full name must be 100 characters or less");
     }
 
@@ -48,8 +51,8 @@ export const getOrCreateUser = mutation({
       createdAt: Date.now(),
     };
 
-    if (args.email) userData.email = args.email;
-    if (args.fullName) userData.fullName = args.fullName;
+    if (email) userData.email = email;
+    if (fullName) userData.fullName = fullName;
     if (args.bloodType) {
       userData.bloodType = args.bloodType;
       // Set mode to "donor" when blood type is provided during registration
