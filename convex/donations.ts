@@ -150,12 +150,10 @@ export const getDonationStats = query({
       };
     }
 
-    // Get most recent donation via indexed desc query (avoids scanning all donations)
-    const lastDonation = (await ctx.db
-      .query("donations")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .order("desc")
-      .first())!;
+    // Find most recent donation from the already-fetched list (avoids redundant DB query)
+    const lastDonation = donations.reduce((latest, d) =>
+      d.donationDate > latest.donationDate ? d : latest
+    );
 
     const now = Date.now();
     const daysSinceLastDonation = Math.floor(
