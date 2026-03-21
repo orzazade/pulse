@@ -6,6 +6,19 @@ import { getCompatibleDonorTypes } from "./lib/bloodType";
 // 56-day donation cycle (8 weeks between donations)
 const DONATION_CYCLE_DAYS = 56;
 
+// Urgency priority for sorting: critical first, standard last
+const URGENCY_PRIORITY: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
+
+/** Sort requests by urgency (critical first), then by createdAt (newest first) */
+function sortByUrgencyThenDate<T extends { urgency: string; createdAt: number }>(requests: T[]): T[] {
+  return requests.sort((a, b) => {
+    const aPriority = URGENCY_PRIORITY[a.urgency] ?? 2;
+    const bPriority = URGENCY_PRIORITY[b.urgency] ?? 2;
+    if (aPriority !== bPriority) return aPriority - bPriority;
+    return b.createdAt - a.createdAt;
+  });
+}
+
 /**
  * Request System
  *
@@ -701,14 +714,7 @@ export const getIncomingRequests = query({
       return true;
     });
 
-    // Sort: critical > urgent > normal > standard, then by createdAt (newest first within same urgency)
-    const urgencyPriority: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
-    const sortedRequests = filteredRequests.sort((a, b) => {
-      const aPriority = urgencyPriority[a.urgency] ?? 2;
-      const bPriority = urgencyPriority[b.urgency] ?? 2;
-      if (aPriority !== bPriority) return aPriority - bPriority;
-      return b.createdAt - a.createdAt;
-    });
+    const sortedRequests = sortByUrgencyThenDate(filteredRequests);
 
     // Limit results to prevent excessive data transfer as request volume grows.
     // Sorted by urgency first, so the most critical requests are always included.
@@ -786,14 +792,7 @@ export const getHomeFeedRequests = query({
       return compatibleDonors.includes(user.bloodType!);
     });
 
-    // Sort: critical > urgent > normal > standard, then by createdAt (newest first)
-    const urgencyPriority: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
-    const sortedRequests = filteredRequests.sort((a, b) => {
-      const aPriority = urgencyPriority[a.urgency] ?? 2;
-      const bPriority = urgencyPriority[b.urgency] ?? 2;
-      if (aPriority !== bPriority) return aPriority - bPriority;
-      return b.createdAt - a.createdAt;
-    });
+    const sortedRequests = sortByUrgencyThenDate(filteredRequests);
 
     // Limit to 10 most recent
     const limitedRequests = sortedRequests.slice(0, 10);
@@ -851,14 +850,7 @@ export const listOpenRequests = query({
       requests = requests.filter((r) => r.urgency === args.urgency);
     }
 
-    // Sort: critical > urgent > normal > standard, then by createdAt (newest first)
-    const urgencyPriority: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
-    const sortedRequests = requests.sort((a, b) => {
-      const aPriority = urgencyPriority[a.urgency] ?? 2;
-      const bPriority = urgencyPriority[b.urgency] ?? 2;
-      if (aPriority !== bPriority) return aPriority - bPriority;
-      return b.createdAt - a.createdAt;
-    });
+    const sortedRequests = sortByUrgencyThenDate(requests);
 
     // Limit results to prevent excessive data transfer as request volume grows.
     // Sorted by urgency first, so the most critical requests are always included.
