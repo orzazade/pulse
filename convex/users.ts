@@ -404,8 +404,13 @@ export const searchDonors = query({
           return false;
         }
 
-        // Filter by mode: must be "donor" or "both" (not "seeker")
-        if (user.mode === "seeker") {
+        // Filter by mode: must be "donor" or "both"
+        if (user.mode !== "donor" && user.mode !== "both") {
+          return false;
+        }
+
+        // Must have blood type set to be a valid donor
+        if (!user.bloodType) {
           return false;
         }
 
@@ -415,10 +420,8 @@ export const searchDonors = query({
         }
 
         // Filter by blood type compatibility if specified
-        if (compatibleTypes && user.bloodType) {
-          if (!compatibleTypes.includes(user.bloodType)) {
-            return false;
-          }
+        if (compatibleTypes && !compatibleTypes.includes(user.bloodType)) {
+          return false;
         }
 
         // Filter by city if specified
