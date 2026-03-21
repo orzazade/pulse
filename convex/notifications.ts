@@ -128,14 +128,12 @@ export const markAllAsRead = mutation({
 
     // Get unread notifications for this user, capped at 200 to stay within
     // Convex per-mutation write limits for users with large backlogs
-    const unreadNotifications = await ctx.db
+    const batch = await ctx.db
       .query("notifications")
       .withIndex("by_user_read", (q) =>
         q.eq("userId", user._id).eq("read", false)
       )
-      .collect();
-
-    const batch = unreadNotifications.slice(0, 200);
+      .take(200);
 
     // Mark each as read
     await Promise.all(
