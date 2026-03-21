@@ -201,17 +201,19 @@ export const updateLocation = mutation({
       throw new Error("Longitude must be between -180 and 180");
     }
 
-    // Validate string lengths
-    if (args.city && args.city.length > 100) {
+    // Validate and sanitize string inputs
+    const city = args.city?.trim() || undefined;
+    const region = args.region?.trim() || undefined;
+    if (city && city.length > 100) {
       throw new Error("City name must be 100 characters or less");
     }
-    if (args.region && args.region.length > 100) {
+    if (region && region.length > 100) {
       throw new Error("Region name must be 100 characters or less");
     }
 
     await ctx.db.patch(user._id, {
-      city: args.city,
-      region: args.region,
+      city,
+      region,
       latitude: args.latitude,
       longitude: args.longitude,
       locationGranted: true,
@@ -224,8 +226,8 @@ export const updateLocation = mutation({
 
     return {
       ...user,
-      city: args.city,
-      region: args.region,
+      city,
+      region,
       latitude: args.latitude,
       longitude: args.longitude,
       locationGranted: true,
@@ -270,14 +272,20 @@ export const updateProfile = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Validate string lengths
-    if (args.city && args.city.length > 100) {
+    // Validate and sanitize string inputs
+    const city = args.city !== undefined ? (args.city.trim() || undefined) : undefined;
+    const region = args.region !== undefined ? (args.region.trim() || undefined) : undefined;
+    const preferredDonationCenter = args.preferredDonationCenter !== undefined
+      ? (args.preferredDonationCenter.trim() || undefined)
+      : undefined;
+
+    if (city && city.length > 100) {
       throw new Error("City name must be 100 characters or less");
     }
-    if (args.region && args.region.length > 100) {
+    if (region && region.length > 100) {
       throw new Error("Region name must be 100 characters or less");
     }
-    if (args.preferredDonationCenter && args.preferredDonationCenter.length > 200) {
+    if (preferredDonationCenter && preferredDonationCenter.length > 200) {
       throw new Error("Donation center name must be 200 characters or less");
     }
 
@@ -288,10 +296,10 @@ export const updateProfile = mutation({
       preferredDonationCenter?: string;
     } = {};
 
-    if (args.city !== undefined) updates.city = args.city;
-    if (args.region !== undefined) updates.region = args.region;
+    if (args.city !== undefined) updates.city = city;
+    if (args.region !== undefined) updates.region = region;
     if (args.preferredDonationCenter !== undefined)
-      updates.preferredDonationCenter = args.preferredDonationCenter;
+      updates.preferredDonationCenter = preferredDonationCenter;
 
     await ctx.db.patch(user._id, updates);
 
