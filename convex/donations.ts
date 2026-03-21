@@ -51,6 +51,21 @@ export const addDonation = mutation({
       throw new Error("Notes must be 500 characters or less");
     }
 
+    // Enforce 56-day donation cycle — no two donations within 56 days of each other
+    const existingDonations = await ctx.db
+      .query("donations")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    const cycleMsMin = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+    const tooClose = existingDonations.find(
+      (d) => Math.abs(args.donationDate - d.donationDate) < cycleMsMin
+    );
+    if (tooClose) {
+      const daysBetween = Math.floor(Math.abs(args.donationDate - tooClose.donationDate) / (1000 * 60 * 60 * 24));
+      throw new Error(`Donations must be at least ${DONATION_CYCLE_DAYS} days apart. An existing donation is ${daysBetween} days from this date.`);
+    }
+
     // Insert donation
     const donationId = await ctx.db.insert("donations", {
       userId: user._id,
