@@ -36,8 +36,8 @@ export const createRequest = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Validate user mode - must be seeker or both
-    if (user.mode === "donor") {
+    // Validate user mode - must be seeker or both (not donor-only or unset)
+    if (user.mode !== "seeker" && user.mode !== "both") {
       throw new Error("Only seekers can create blood requests");
     }
 
@@ -115,8 +115,8 @@ export const broadcastEmergency = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Validate user mode - must be seeker or both
-    if (user.mode === "donor") {
+    // Validate user mode - must be seeker or both (not donor-only or unset)
+    if (user.mode !== "seeker" && user.mode !== "both") {
       throw new Error("Only seekers can broadcast emergency requests");
     }
 
@@ -306,8 +306,8 @@ export const acceptRequest = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Verify donor mode
-    if (user.mode === "seeker") {
+    // Verify donor mode - must be donor or both (not seeker-only or unset)
+    if (user.mode !== "donor" && user.mode !== "both") {
       throw new Error("Only donors can accept blood requests");
     }
 
