@@ -587,10 +587,11 @@ export const getUserStats = query({
     if (!user) return { helpedCount: 0 };
 
     // Count accepted/completed requests where user is the donor
+    // Capped at 500 to prevent unbounded data transfer for prolific donors
     const acceptedRequests = await ctx.db
       .query("requests")
       .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
-      .collect();
+      .take(500);
 
     const helpedCount = acceptedRequests.filter(
       (r) => r.status === "accepted" || r.status === "completed"
