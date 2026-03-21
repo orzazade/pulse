@@ -3,6 +3,26 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { getCompatibleDonorTypes, BLOOD_TYPES } from "./lib/bloodType";
 import { DONATION_CYCLE_DAYS, DONATION_CYCLE_MS } from "./lib/constants";
+import type { QueryCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+
+/** Enrich requests with public seeker info (city only — no phone for privacy) */
+async function enrichWithSeekerInfo<T extends { seekerId: Id<"users"> }>(
+  ctx: QueryCtx,
+  requests: T[],
+) {
+  return Promise.all(
+    requests.map(async (request) => {
+      const seeker = await ctx.db.get(request.seekerId);
+      return {
+        ...request,
+        seeker: seeker
+          ? { _id: seeker._id, city: seeker.city }
+          : null,
+      };
+    })
+  );
+}
 
 // Urgency priority for sorting: critical first, standard last
 const URGENCY_PRIORITY: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
@@ -674,24 +694,7 @@ export const getIncomingRequests = query({
     // Sorted by urgency first, so the most critical requests are always included.
     const limitedRequests = sortedRequests.slice(0, 50);
 
-    // Fetch seeker info for each request
-    const requestsWithSeeker = await Promise.all(
-      limitedRequests.map(async (request) => {
-        const seeker = await ctx.db.get(request.seekerId);
-        return {
-          ...request,
-          seeker: seeker
-            ? {
-                _id: seeker._id,
-                city: seeker.city,
-                // Note: phone NOT included - privacy until accepted
-              }
-            : null,
-        };
-      })
-    );
-
-    return requestsWithSeeker;
+    return enrichWithSeekerInfo(ctx, limitedRequests);
   },
 });
 
@@ -751,24 +754,7 @@ export const getHomeFeedRequests = query({
     // Limit to 10 most recent
     const limitedRequests = sortedRequests.slice(0, 10);
 
-    // Fetch seeker info (city only, NOT phone for privacy)
-    const requestsWithSeeker = await Promise.all(
-      limitedRequests.map(async (request) => {
-        const seeker = await ctx.db.get(request.seekerId);
-        return {
-          ...request,
-          seeker: seeker
-            ? {
-                _id: seeker._id,
-                city: seeker.city,
-                // Note: phone NOT included - privacy until accepted
-              }
-            : null,
-        };
-      })
-    );
-
-    return requestsWithSeeker;
+    return enrichWithSeekerInfo(ctx, limitedRequests);
   },
 });
 
@@ -810,23 +796,7 @@ export const listOpenRequests = query({
     // Sorted by urgency first, so the most critical requests are always included.
     const limitedRequests = sortedRequests.slice(0, 100);
 
-    // Fetch seeker info for each request
-    const requestsWithSeeker = await Promise.all(
-      limitedRequests.map(async (request) => {
-        const seeker = await ctx.db.get(request.seekerId);
-        return {
-          ...request,
-          seeker: seeker
-            ? {
-                _id: seeker._id,
-                city: seeker.city,
-              }
-            : null,
-        };
-      })
-    );
-
-    return requestsWithSeeker;
+    return enrichWithSeekerInfo(ctx, limitedRequests);
   },
 });
 
