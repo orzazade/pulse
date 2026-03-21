@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { getCompatibleDonorTypes, BLOOD_TYPES } from "./lib/bloodType";
+import { BLOOD_TYPES } from "./lib/bloodType";
 
 // Strip internal fields before returning user data to the client
 // clerkId is an internal auth identifier; pushToken could be used to send unsolicited notifications
@@ -381,85 +381,6 @@ export const toggleAvailability = mutation({
     });
 
     return sanitizeUser({ ...user, isAvailable: newAvailability });
-  },
-});
-
-export const searchDonors = query({
-  args: {
-    bloodType: v.optional(v.string()),
-    city: v.optional(v.string()),
-    region: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
-
-    // Get current user to exclude from results
-    const currentUserClerkId = identity.subject;
-
-    // Get compatible donor blood types if blood type filter provided
-    const compatibleTypes = args.bloodType
-      ? getCompatibleDonorTypes(args.bloodType)
-      : null;
-
-    // If invalid blood type provided, return empty results
-    if (args.bloodType && compatibleTypes?.length === 0) {
-      return [];
-    }
-
-    // Query users, capped at 1000 to prevent loading entire users table
-    // (result is sliced to 50 after filtering; 1000 provides ample margin)
-    const allUsers = await ctx.db.query("users").take(1000);
-
-    const donors = allUsers
-      .filter((user) => {
-        // Exclude current user
-        if (currentUserClerkId && user.clerkId === currentUserClerkId) {
-          return false;
-        }
-
-        // Filter by mode: must be "donor" or "both"
-        if (user.mode !== "donor" && user.mode !== "both") {
-          return false;
-        }
-
-        // Must have blood type set to be a valid donor
-        if (!user.bloodType) {
-          return false;
-        }
-
-        // Filter by availability: true or undefined (defaults to available)
-        if (user.isAvailable === false) {
-          return false;
-        }
-
-        // Filter by blood type compatibility if specified
-        if (compatibleTypes && !compatibleTypes.includes(user.bloodType)) {
-          return false;
-        }
-
-        // Filter by city if specified
-        if (args.city && user.city !== args.city) {
-          return false;
-        }
-
-        // Filter by region if specified
-        if (args.region && user.region !== args.region) {
-          return false;
-        }
-
-        return true;
-      })
-      .slice(0, 50); // Limit to 50 results
-
-    // Return only necessary fields
-    return donors.map((user) => ({
-      _id: user._id,
-      bloodType: user.bloodType,
-      city: user.city,
-      region: user.region,
-      isAvailable: user.isAvailable !== false, // Normalize to boolean
-    }));
   },
 });
 
