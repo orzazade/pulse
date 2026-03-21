@@ -277,9 +277,17 @@ export const cancelRequest = mutation({
       throw new Error("Can only cancel open or accepted requests");
     }
 
-    await ctx.db.patch(args.requestId, {
+    // Clear donor association when cancelling an accepted request (privacy: don't
+    // retain the link between donor and a cancelled record). Notification below
+    // uses the pre-patch `request` snapshot so the donorId is still available.
+    const cancelPatch: { status: "cancelled"; acceptedDonorId?: undefined; acceptedAt?: undefined } = {
       status: "cancelled",
-    });
+    };
+    if (request.status === "accepted" && request.acceptedDonorId) {
+      cancelPatch.acceptedDonorId = undefined;
+      cancelPatch.acceptedAt = undefined;
+    }
+    await ctx.db.patch(args.requestId, cancelPatch);
 
     // Notify the accepted donor that the request was cancelled
     if (request.status === "accepted" && request.acceptedDonorId) {
