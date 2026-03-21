@@ -14,6 +14,7 @@ interface UnitsStepperProps {
   onChange: (value: number) => void;
   min?: number;
   max?: number;
+  disabled?: boolean;
 }
 
 /**
@@ -27,9 +28,10 @@ export function UnitsStepper({
   onChange,
   min = 1,
   max = 10,
+  disabled = false,
 }: UnitsStepperProps) {
-  const canDecrement = value > min;
-  const canIncrement = value < max;
+  const canDecrement = value > min && !disabled;
+  const canIncrement = value < max && !disabled;
 
   const handleDecrement = () => {
     if (canDecrement) {

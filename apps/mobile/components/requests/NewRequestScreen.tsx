@@ -126,6 +126,7 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
           onChange={setUnits}
           min={1}
           max={10}
+          disabled={isSubmitting}
         />
 
         {/* Urgency Section */}
