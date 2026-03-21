@@ -251,7 +251,7 @@ export const cancelRequest = mutation({
           createdAt: Date.now(),
         });
 
-        if (seeker.pushToken) {
+        if (seeker.pushToken && seeker.notifyRequestAccepted !== false) {
           await ctx.scheduler.runAfter(
             0,
             internal.notifications.sendPushNotification,
@@ -295,7 +295,7 @@ export const cancelRequest = mutation({
           createdAt: Date.now(),
         });
 
-        if (donor.pushToken) {
+        if (donor.pushToken && donor.notifyRequestAccepted !== false) {
           await ctx.scheduler.runAfter(
             0,
             internal.notifications.sendPushNotification,
@@ -506,7 +506,7 @@ export const completeRequest = mutation({
           createdAt: Date.now(),
         });
 
-        if (donor.pushToken) {
+        if (donor.pushToken && donor.notifyRequestAccepted !== false) {
           await ctx.scheduler.runAfter(
             0,
             internal.notifications.sendPushNotification,
