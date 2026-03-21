@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Linking,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -35,9 +36,18 @@ const formatDistance = (meters: number): string => {
 /**
  * Handle phone call action
  */
-const handleCall = (phone: string) => {
+const handleCall = async (phone: string) => {
   const phoneUrl = `tel:${phone.replace(/\s/g, "")}`;
-  Linking.openURL(phoneUrl);
+  try {
+    const supported = await Linking.canOpenURL(phoneUrl);
+    if (supported) {
+      await Linking.openURL(phoneUrl);
+    } else {
+      Alert.alert("Cannot Make Call", "Phone calls are not supported on this device.");
+    }
+  } catch {
+    Alert.alert("Error", "Failed to open phone app.");
+  }
 };
 
 export function CenterCard({ center, distance, onPress }: CenterCardProps) {
