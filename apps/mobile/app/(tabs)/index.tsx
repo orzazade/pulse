@@ -43,7 +43,7 @@ export default function HomeScreen() {
   const homeFeedRequests = useQuery(api.requests.getHomeFeedRequests);
 
   // Mutations
-  const createRequest = useMutation(api.requests.createRequest);
+  const broadcastEmergency = useMutation(api.requests.broadcastEmergency);
 
   // Derived state
   const firstName = currentUser?.fullName?.split(" ")[0] || "User";
@@ -66,9 +66,8 @@ export default function HomeScreen() {
 
     setIsBroadcasting(true);
     try {
-      await createRequest({
+      await broadcastEmergency({
         bloodType: currentUser.bloodType,
-        urgency: "urgent",
         notes: "Emergency broadcast request",
       });
       Alert.alert(
