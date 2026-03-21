@@ -132,17 +132,15 @@ export const getDonationHistory = query({
 
     if (!user) return { donations: [], totalCount: 0 };
 
+    // Cap at 50 to prevent unbounded data transfer (UI shows 5)
     const donations = await ctx.db
       .query("donations")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .order("desc")
-      .collect();
-
-    // Cap results to prevent unbounded data transfer (UI shows 5, cap at 50)
-    const limitedDonations = donations.slice(0, 50);
+      .take(50);
 
     return {
-      donations: limitedDonations,
+      donations,
       totalCount: donations.length,
     };
   },
