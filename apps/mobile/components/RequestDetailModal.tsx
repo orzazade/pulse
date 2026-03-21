@@ -90,6 +90,7 @@ export function RequestDetailModal({
   );
   const acceptRequest = useMutation(api.requests.acceptRequest);
   const cancelRequest = useMutation(api.requests.cancelRequest);
+  const completeRequest = useMutation(api.requests.completeRequest);
 
   const isLoading = requestId && detail === undefined;
 
@@ -145,6 +146,69 @@ export function RequestDetailModal({
                 error instanceof Error ? error.message : "Failed to cancel request",
                 [{ text: "OK" }]
               );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleComplete = async () => {
+    if (!requestId || isSubmitting) return;
+    Alert.alert(
+      "Mark as Complete",
+      "Confirm the donation was received? The donor will be thanked and their eligibility timer will reset.",
+      [
+        { text: "Not Yet", style: "cancel" },
+        {
+          text: "Yes, Complete",
+          onPress: async () => {
+            setIsSubmitting(true);
+            try {
+              await completeRequest({ requestId });
+              Alert.alert(
+                "Request Completed",
+                "Thank you! The donor has been notified.",
+                [{ text: "OK", onPress: handleClose }]
+              );
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error instanceof Error ? error.message : "Failed to complete request",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsSubmitting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleWithdraw = async () => {
+    if (!requestId || isSubmitting) return;
+    Alert.alert(
+      "Withdraw from Request",
+      "Are you sure you want to withdraw? The request will be reopened for other donors.",
+      [
+        { text: "No, Stay", style: "cancel" },
+        {
+          text: "Yes, Withdraw",
+          style: "destructive",
+          onPress: async () => {
+            setIsSubmitting(true);
+            try {
+              await cancelRequest({ requestId });
+              handleClose();
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error instanceof Error ? error.message : "Failed to withdraw",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsSubmitting(false);
             }
           },
         },
@@ -355,6 +419,48 @@ export function RequestDetailModal({
                     disabled={isSubmitting}
                   >
                     <Text style={styles.cancelButtonText}>Cancel Request</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
+            {detail.status === "accepted" && (
+              <View style={styles.actionContainer}>
+                {/* Seeker: mark as complete or cancel */}
+                {detail.isSeeker && (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={[styles.declineButton, isSubmitting && styles.buttonDisabled]}
+                      onPress={handleCancel}
+                      activeOpacity={0.7}
+                      disabled={isSubmitting}
+                    >
+                      <Text style={styles.declineButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.acceptButton, isSubmitting && styles.buttonDisabled]}
+                      onPress={handleComplete}
+                      activeOpacity={0.8}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <ActivityIndicator size="small" color={textColors.onPrimary} />
+                      ) : (
+                        <Text style={styles.acceptButtonText}>Mark as Complete</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Donor: withdraw */}
+                {detail.isDonor && (
+                  <TouchableOpacity
+                    style={[styles.cancelButton, isSubmitting && styles.buttonDisabled]}
+                    onPress={handleWithdraw}
+                    activeOpacity={0.7}
+                    disabled={isSubmitting}
+                  >
+                    <Text style={styles.cancelButtonText}>Withdraw</Text>
                   </TouchableOpacity>
                 )}
               </View>
