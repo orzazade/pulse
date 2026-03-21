@@ -538,7 +538,8 @@ export const completeRequest = mutation({
 
     // Auto-record donation for the accepted donor so the 56-day eligibility
     // cycle is enforced even if the donor doesn't manually log it.
-    if (request.acceptedDonorId) {
+    const acceptedDonorId = request.acceptedDonorId;
+    if (acceptedDonorId) {
       const now = Date.now();
       const cycleMsMin = DONATION_CYCLE_MS;
 
@@ -546,7 +547,7 @@ export const completeRequest = mutation({
       // (donor may have already logged it manually via addDonation)
       const recentDonation = await ctx.db
         .query("donations")
-        .withIndex("by_user", (q) => q.eq("userId", request.acceptedDonorId!))
+        .withIndex("by_user", (q) => q.eq("userId", acceptedDonorId))
         .order("desc")
         .first();
 
@@ -555,21 +556,19 @@ export const completeRequest = mutation({
 
       if (!alreadyRecorded) {
         await ctx.db.insert("donations", {
-          userId: request.acceptedDonorId,
+          userId: acceptedDonorId,
           donationDate: now,
           donationCenter: request.hospital,
           notes: `Auto-recorded from completed request (${request.bloodType})`,
           createdAt: now,
         });
       }
-    }
 
-    // Notify the donor that the request was completed (thank you)
-    if (request.acceptedDonorId) {
-      const donor = await ctx.db.get(request.acceptedDonorId);
+      // Notify the donor that the request was completed (thank you)
+      const donor = await ctx.db.get(acceptedDonorId);
       if (donor) {
         await ctx.db.insert("notifications", {
-          userId: request.acceptedDonorId,
+          userId: acceptedDonorId,
           type: "request_completed",
           title: "Thank You for Donating!",
           body: `The ${request.bloodType} blood request has been marked as completed. Your donation made a difference.`,
