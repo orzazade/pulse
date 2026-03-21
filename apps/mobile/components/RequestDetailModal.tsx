@@ -30,43 +30,12 @@ import { RequesterCard } from "./requests/RequesterCard";
 import { LocationCard } from "./requests/LocationCard";
 import { TimelineInfoCard } from "./requests/TimelineInfoCard";
 import { RequestAcceptedScreen } from "./requests/RequestAcceptedScreen";
+import { mapUrgency, formatNeededBy } from "@/lib/urgency";
 
 interface RequestDetailModalProps {
   visible: boolean;
   requestId: Id<"requests"> | null;
   onClose: () => void;
-}
-
-/**
- * Map urgency string to UrgencyBanner urgency level
- */
-function mapUrgency(urgency: string): "critical" | "urgent" | "standard" {
-  if (urgency === "critical") return "critical";
-  if (urgency === "urgent") return "urgent";
-  return "standard";
-}
-
-/**
- * Format date for "Needed by" display
- */
-function formatNeededBy(urgency: string): string {
-  const now = new Date();
-
-  if (urgency === "critical") {
-    // Same day
-    const hours = now.getHours();
-    const period = hours >= 12 ? "PM" : "AM";
-    const displayHour = hours % 12 || 12;
-    return `Today, ${displayHour}:00 ${period}`;
-  }
-
-  if (urgency === "urgent") {
-    // 1-2 days
-    return `Tomorrow`;
-  }
-
-  // Standard - within a week
-  return `Within 7 days`;
 }
 
 export function RequestDetailModal({
