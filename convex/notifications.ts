@@ -67,12 +67,13 @@ export const getUnreadCount = query({
 
     if (!user) return 0;
 
+    // Cap at 500 — badge only needs a count, not the full list
     const unreadNotifications = await ctx.db
       .query("notifications")
       .withIndex("by_user_read", (q) =>
         q.eq("userId", user._id).eq("read", false)
       )
-      .collect();
+      .take(500);
 
     return unreadNotifications.length;
   },
@@ -198,11 +199,11 @@ export const checkEligibilityReminders = internalMutation({
   handler: async (ctx) => {
     const now = Date.now();
 
-    // Get all users who might need eligibility reminders
+    // Get users who might need eligibility reminders, capped at 2000
     // - mode is donor or both
     // - have a push token
     // - notifyEligibility is not explicitly false (defaults to true)
-    const allUsers = await ctx.db.query("users").collect();
+    const allUsers = await ctx.db.query("users").take(2000);
 
     const eligibleUsers = allUsers.filter(
       (user) =>
