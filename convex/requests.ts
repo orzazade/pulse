@@ -395,11 +395,13 @@ export const acceptRequest = mutation({
 
     // Check 2: recently completed requests (tamper-proof — donors can't delete these)
     // Prevents bypass via deleting auto-recorded donation records
+    // Capped at 100 to prevent unbounded data loading for prolific long-term donors
+    // (100 completed requests ≈ 15+ years of donations at the 56-day cycle rate)
     const recentlyCompletedAsDonor = await ctx.db
       .query("requests")
       .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
       .filter((q) => q.eq(q.field("status"), "completed"))
-      .collect();
+      .take(100);
 
     const cycleMsMin = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
     const now = Date.now();
