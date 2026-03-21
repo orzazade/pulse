@@ -72,21 +72,6 @@ export const indexUser = internalMutation({
 });
 
 /**
- * Remove a user from the geospatial index
- * Called when a user is deleted or should no longer be indexed
- */
-export const removeUserFromIndex = internalMutation({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
-    try {
-      await geospatial.remove(ctx, args.userId);
-    } catch {
-      // Entry might not exist, that's fine
-    }
-  },
-});
-
-/**
  * Sync all users to the geospatial index (one-time migration)
  * Indexes all users who have location and are donors/both
  */
