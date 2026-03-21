@@ -453,11 +453,36 @@ export const acceptRequest = mutation({
  */
 export const declineRequest = mutation({
   args: { requestId: v.id("requests") },
-  handler: async (ctx, _args) => {
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    // Placeholder - just verify auth for now
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+
+    // Verify donor mode
+    if (user.mode !== "donor" && user.mode !== "both") {
+      throw new Error("Only donors can decline requests");
+    }
+
+    const request = await ctx.db.get(args.requestId);
+    if (!request) throw new Error("Request not found");
+
+    // Can only decline open requests
+    if (request.status !== "open") {
+      throw new Error("Can only decline open requests");
+    }
+
+    // Cannot decline own request
+    if (request.seekerId === user._id) {
+      throw new Error("You cannot decline your own request");
+    }
+
+    // Placeholder - validated but not tracking yet
     // Future: track declined donors in a separate table
     return { success: true, message: "Request declined (not tracking yet)" };
   },
