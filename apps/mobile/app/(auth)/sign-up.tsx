@@ -92,14 +92,20 @@ export default function SignUp() {
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         // Create user in Convex database with fullName and bloodType
+        // Wrapped separately so a Convex failure doesn't block navigation
+        // after successful verification — index.tsx retries on next load
         const userId = result.createdUserId;
         if (userId) {
-          await getOrCreateUser({
-            clerkId: userId,
-            email,
-            fullName: fullName || undefined,
-            bloodType: bloodType || undefined,
-          });
+          try {
+            await getOrCreateUser({
+              clerkId: userId,
+              email,
+              fullName: fullName || undefined,
+              bloodType: bloodType || undefined,
+            });
+          } catch (convexErr) {
+            console.error("Failed to create Convex user during sign-up:", convexErr);
+          }
         }
         router.replace("/");
       } else {
