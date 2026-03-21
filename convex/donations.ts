@@ -106,6 +106,13 @@ export const deleteDonation = mutation({
       throw new Error("Not authorized to delete this donation");
     }
 
+    // Prevent deletion of auto-recorded donations from completed requests.
+    // These are system-generated to enforce the 56-day eligibility cycle and
+    // deleting them would desync the UI eligibility status from the backend check.
+    if (donation.notes?.startsWith("Auto-recorded from completed request")) {
+      throw new Error("System-recorded donations from completed requests cannot be deleted");
+    }
+
     await ctx.db.delete(args.donationId);
   },
 });
