@@ -59,13 +59,14 @@ export const listCenters = query({
     city: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Cap at 200 to prevent unbounded data transfer
     if (args.city) {
       return ctx.db
         .query("donationCenters")
         .withIndex("by_city", (q) => q.eq("city", args.city!))
-        .collect();
+        .take(200);
     }
-    return ctx.db.query("donationCenters").collect();
+    return ctx.db.query("donationCenters").take(200);
   },
 });
 
