@@ -7,6 +7,13 @@ import { geospatial } from "./geospatial";
 
 const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
+// Strip internal fields before returning user data to the client
+// clerkId is an internal auth identifier; pushToken could be used to send unsolicited notifications
+function sanitizeUser<T extends Record<string, unknown>>(user: T): Omit<T, "clerkId" | "pushToken"> {
+  const { clerkId: _, pushToken: __, ...safe } = user;
+  return safe as Omit<T, "clerkId" | "pushToken">;
+}
+
 export const getOrCreateUser = mutation({
   args: {
     email: v.optional(v.string()),
@@ -80,10 +87,13 @@ export const getCurrentUser = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
-    return await ctx.db
+    const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
+
+    if (!user) return null;
+    return sanitizeUser(user);
   },
 });
 
@@ -149,7 +159,7 @@ export const updateBloodType = mutation({
       userId: user._id,
     });
 
-    return { ...user, ...updates };
+    return sanitizeUser({ ...user, ...updates });
   },
 });
 
@@ -177,7 +187,7 @@ export const updateMode = mutation({
       userId: user._id,
     });
 
-    return { ...user, mode: args.mode };
+    return sanitizeUser({ ...user, mode: args.mode });
   },
 });
 
@@ -260,7 +270,7 @@ export const skipLocation = mutation({
       locationGranted: false,
     });
 
-    return { ...user, locationGranted: false };
+    return sanitizeUser({ ...user, locationGranted: false });
   },
 });
 
@@ -312,7 +322,7 @@ export const updateProfile = mutation({
 
     await ctx.db.patch(user._id, updates);
 
-    return { ...user, ...updates };
+    return sanitizeUser({ ...user, ...updates });
   },
 });
 
@@ -357,7 +367,7 @@ export const toggleAvailability = mutation({
       userId: user._id,
     });
 
-    return { ...user, isAvailable: newAvailability };
+    return sanitizeUser({ ...user, isAvailable: newAvailability });
   },
 });
 
