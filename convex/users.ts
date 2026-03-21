@@ -196,7 +196,10 @@ export const updateLocation = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Validate coordinate ranges
+    // Validate coordinates are finite numbers (NaN/Infinity bypass range checks)
+    if (!Number.isFinite(args.latitude) || !Number.isFinite(args.longitude)) {
+      throw new Error("Coordinates must be valid numbers");
+    }
     if (args.latitude < -90 || args.latitude > 90) {
       throw new Error("Latitude must be between -90 and 90");
     }
@@ -440,8 +443,9 @@ export const searchNearbyDonors = query({
     maxDistance: v.optional(v.number()), // meters, default 50000 (50km)
   },
   handler: async (ctx, args) => {
-    // Validate coordinate ranges
-    if (args.latitude < -90 || args.latitude > 90 || args.longitude < -180 || args.longitude > 180) {
+    // Validate coordinates are finite and in range (NaN/Infinity bypass range checks)
+    if (!Number.isFinite(args.latitude) || !Number.isFinite(args.longitude) ||
+        args.latitude < -90 || args.latitude > 90 || args.longitude < -180 || args.longitude > 180) {
       return [];
     }
 

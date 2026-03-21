@@ -25,8 +25,11 @@ export const addDonation = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Validate donationDate is not in the future
+    // Validate donationDate is a finite number (NaN bypasses range checks)
     const now = Date.now();
+    if (!Number.isFinite(args.donationDate)) {
+      throw new Error("Donation date must be a valid number");
+    }
     if (args.donationDate > now) {
       throw new Error("Donation date cannot be in the future");
     }
