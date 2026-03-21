@@ -40,6 +40,8 @@ export default function NotificationsScreen() {
       notification.data?.requestId
     ) {
       router.push("/requests");
+    } else if (notification.type === "eligibility_reminder") {
+      router.push("/profile");
     }
   };
 
