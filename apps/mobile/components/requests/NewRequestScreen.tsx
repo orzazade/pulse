@@ -54,7 +54,7 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validation
-  const isValid = bloodType !== null;
+  const isValid = bloodType !== null && hospital.trim().length > 0;
 
   const handleSubmit = async () => {
     if (!isValid || isSubmitting) return;
@@ -140,6 +140,7 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
             value={hospital}
             onChangeText={setHospital}
             autoCapitalize="words"
+            maxLength={200}
           />
         </View>
       </ScrollView>
