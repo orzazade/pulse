@@ -37,11 +37,14 @@ export const addDonation = mutation({
       throw new Error("Donation date cannot be more than 10 years ago");
     }
 
-    // Validate string lengths
-    if (args.donationCenter && args.donationCenter.length > 200) {
+    // Sanitize and validate string inputs
+    const donationCenter = args.donationCenter?.trim() || undefined;
+    const notes = args.notes?.trim() || undefined;
+
+    if (donationCenter && donationCenter.length > 200) {
       throw new Error("Donation center name must be 200 characters or less");
     }
-    if (args.notes && args.notes.length > 500) {
+    if (notes && notes.length > 500) {
       throw new Error("Notes must be 500 characters or less");
     }
 
@@ -49,8 +52,8 @@ export const addDonation = mutation({
     const donationId = await ctx.db.insert("donations", {
       userId: user._id,
       donationDate: args.donationDate,
-      donationCenter: args.donationCenter,
-      notes: args.notes,
+      donationCenter,
+      notes,
       createdAt: now,
     });
 
