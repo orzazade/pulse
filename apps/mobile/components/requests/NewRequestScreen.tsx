@@ -142,6 +142,7 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
             onChangeText={setHospital}
             autoCapitalize="words"
             maxLength={200}
+            editable={!isSubmitting}
           />
         </View>
       </ScrollView>
