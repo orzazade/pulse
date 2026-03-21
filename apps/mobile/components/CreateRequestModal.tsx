@@ -190,6 +190,7 @@ export function CreateRequestModal({
               placeholder="Enter city where blood is needed"
               placeholderTextColor="#9ca3af"
               editable={!isSubmitting}
+              maxLength={100}
             />
           </View>
 
@@ -199,13 +200,14 @@ export function CreateRequestModal({
             <TextInput
               style={[styles.input, styles.textArea]}
               value={notes}
-              onChangeText={(text) => setNotes(text.slice(0, 500))}
+              onChangeText={setNotes}
               placeholder="Additional details..."
               placeholderTextColor="#9ca3af"
               editable={!isSubmitting}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
+              maxLength={500}
             />
             <Text style={styles.charCount}>{notes.length}/500</Text>
           </View>
