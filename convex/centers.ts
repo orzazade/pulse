@@ -80,6 +80,9 @@ export const searchNearbyCenters = query({
     maxDistance: v.optional(v.number()), // Maximum distance in meters
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
     if (!Number.isFinite(args.latitude) || !Number.isFinite(args.longitude) ||
         args.latitude < -90 || args.latitude > 90 || args.longitude < -180 || args.longitude > 180) {
       throw new Error("Invalid coordinates: latitude must be -90..90, longitude -180..180");

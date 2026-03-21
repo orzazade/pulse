@@ -448,6 +448,9 @@ export const searchNearbyDonors = query({
     maxDistance: v.optional(v.number()), // meters, default 50000 (50km)
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
     // Validate coordinates are finite and in range (NaN/Infinity bypass range checks)
     if (!Number.isFinite(args.latitude) || !Number.isFinite(args.longitude) ||
         args.latitude < -90 || args.latitude > 90 || args.longitude < -180 || args.longitude > 180) {
@@ -462,8 +465,7 @@ export const searchNearbyDonors = query({
     const clampedDistance = Math.min(maxDistance, 200000); // Cap at 200km
 
     // Get current user to exclude from results
-    const identity = await ctx.auth.getUserIdentity();
-    const currentUserClerkId = identity?.subject;
+    const currentUserClerkId = identity.subject;
 
     // Get compatible donor blood types if blood type filter provided
     const compatibleTypes = args.bloodType
