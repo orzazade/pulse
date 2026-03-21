@@ -95,6 +95,8 @@ export default function SignIn() {
           autoCapitalize="none"
           keyboardType="email-address"
           autoComplete="email"
+          maxLength={254}
+          editable={!loading}
         />
 
         {/* Password Input */}
@@ -106,6 +108,8 @@ export default function SignIn() {
           onChangeText={setPassword}
           secureTextEntry
           autoComplete="password"
+          maxLength={128}
+          editable={!loading}
         />
 
         {/* Forgot Password Link - Right aligned */}
