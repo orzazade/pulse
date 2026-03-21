@@ -92,7 +92,8 @@ export const removeUserFromIndex = internalMutation({
  */
 export const syncAllUsers = internalMutation({
   handler: async (ctx) => {
-    const users = await ctx.db.query("users").collect();
+    // Cap at 5000 to prevent unbounded memory usage in large databases
+    const users = await ctx.db.query("users").take(5000);
     let indexedCount = 0;
 
     for (const user of users) {
@@ -172,7 +173,8 @@ export const indexCenter = internalMutation({
  */
 export const indexAllCenters = internalMutation({
   handler: async (ctx) => {
-    const centers = await ctx.db.query("donationCenters").collect();
+    // Cap at 500 to prevent unbounded memory usage
+    const centers = await ctx.db.query("donationCenters").take(500);
     let indexedCount = 0;
 
     for (const center of centers) {
