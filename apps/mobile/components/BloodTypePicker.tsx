@@ -1,7 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-
-const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
+import { BLOOD_TYPES } from "@convex/lib/bloodType";
 
 interface BloodTypePickerProps {
   selectedType: string | null;

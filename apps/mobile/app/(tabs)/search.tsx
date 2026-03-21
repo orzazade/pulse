@@ -26,6 +26,7 @@ import {
   bodyStyles,
   spacing,
 } from '@/theme/tokens';
+import { BLOOD_TYPES } from '@convex/lib/bloodType';
 
 // Filter options
 const FILTER_OPTIONS = [
@@ -41,8 +42,6 @@ const FILTER_OPTIONS = [
   'AB+',
   'AB-',
 ];
-
-const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
 export default function SearchScreen() {
   const insets = useSafeAreaInsets();

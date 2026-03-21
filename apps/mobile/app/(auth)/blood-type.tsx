@@ -12,9 +12,7 @@ import { useRouter } from "expo-router";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
-type BloodType = (typeof BLOOD_TYPES)[number];
+import { BLOOD_TYPES, BloodType } from "@convex/lib/bloodType";
 
 export default function BloodTypeSelection() {
   const router = useRouter();

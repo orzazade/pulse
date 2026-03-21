@@ -14,8 +14,7 @@ import {
 } from "react-native";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-
-const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
+import { BLOOD_TYPES } from "@convex/lib/bloodType";
 
 interface CreateRequestModalProps {
   visible: boolean;
