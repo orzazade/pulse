@@ -449,6 +449,13 @@ export const searchNearbyDonors = query({
       return [];
     }
 
+    // Validate maxDistance: must be positive and finite, cap at 200km
+    const maxDistance = args.maxDistance ?? 50000;
+    if (!Number.isFinite(maxDistance) || maxDistance <= 0) {
+      return [];
+    }
+    const clampedDistance = Math.min(maxDistance, 200000); // Cap at 200km
+
     // Get current user to exclude from results
     const identity = await ctx.auth.getUserIdentity();
     const currentUserClerkId = identity?.subject;
@@ -467,7 +474,7 @@ export const searchNearbyDonors = query({
     const nearbyResults = await geospatial.nearest(ctx, {
       point: { latitude: args.latitude, longitude: args.longitude },
       limit: 50,
-      maxDistance: args.maxDistance ?? 50000, // Default 50km
+      maxDistance: clampedDistance,
       filter: (q) => q.eq("type", "user").eq("isAvailable", true),
     });
 

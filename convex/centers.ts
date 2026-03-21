@@ -85,11 +85,18 @@ export const searchNearbyCenters = query({
       throw new Error("Invalid coordinates: latitude must be -90..90, longitude -180..180");
     }
 
+    // Validate maxDistance: must be positive and finite, cap at 200km
+    const maxDistance = args.maxDistance ?? 50000;
+    if (!Number.isFinite(maxDistance) || maxDistance <= 0) {
+      throw new Error("maxDistance must be a positive number");
+    }
+    const clampedDistance = Math.min(maxDistance, 200000); // Cap at 200km
+
     // Query the geospatial index for nearby centers
     const nearbyResults = await geospatial.nearest(ctx, {
       point: { latitude: args.latitude, longitude: args.longitude },
       limit: 20, // Return up to 20 nearest centers
-      maxDistance: args.maxDistance,
+      maxDistance: clampedDistance,
       filter: (q) => q.eq("type", "center"),
     });
 
