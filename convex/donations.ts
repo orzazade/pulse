@@ -146,31 +146,6 @@ export const getDonationHistory = query({
 });
 
 /**
- * Get the most recent donation
- */
-export const getLastDonation = query({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) return null;
-
-    const lastDonation = await ctx.db
-      .query("donations")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .order("desc")
-      .first();
-
-    return lastDonation;
-  },
-});
-
-/**
  * Get donation statistics
  */
 export const getDonationStats = query({
