@@ -373,6 +373,19 @@ export const acceptRequest = mutation({
       }
     }
 
+    // Prevent donor from accepting multiple requests simultaneously
+    const activeAccepted = await ctx.db
+      .query("requests")
+      .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
+      .filter((q) => q.eq(q.field("status"), "accepted"))
+      .first();
+
+    if (activeAccepted) {
+      throw new Error(
+        "You already have an active accepted request. Complete or withdraw from it before accepting another."
+      );
+    }
+
     await ctx.db.patch(args.requestId, {
       status: "accepted",
       acceptedDonorId: user._id,
