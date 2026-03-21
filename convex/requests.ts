@@ -464,6 +464,34 @@ export const completeRequest = mutation({
       status: "completed",
     });
 
+    // Auto-record donation for the accepted donor so the 56-day eligibility
+    // cycle is enforced even if the donor doesn't manually log it.
+    if (request.acceptedDonorId) {
+      const now = Date.now();
+      const cycleMsMin = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+
+      // Only record if no donation exists within the last 56 days
+      // (donor may have already logged it manually via addDonation)
+      const recentDonation = await ctx.db
+        .query("donations")
+        .withIndex("by_user", (q) => q.eq("userId", request.acceptedDonorId!))
+        .order("desc")
+        .first();
+
+      const alreadyRecorded =
+        recentDonation && now - recentDonation.donationDate < cycleMsMin;
+
+      if (!alreadyRecorded) {
+        await ctx.db.insert("donations", {
+          userId: request.acceptedDonorId,
+          donationDate: now,
+          donationCenter: request.hospital,
+          notes: `Auto-recorded from completed request (${request.bloodType})`,
+          createdAt: now,
+        });
+      }
+    }
+
     // Notify the donor that the request was completed (thank you)
     if (request.acceptedDonorId) {
       const donor = await ctx.db.get(request.acceptedDonorId);
