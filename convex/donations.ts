@@ -79,44 +79,6 @@ export const addDonation = mutation({
 });
 
 /**
- * Delete a donation record
- */
-export const deleteDonation = mutation({
-  args: {
-    donationId: v.id("donations"),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    // Get user
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
-
-    // Get donation and verify ownership
-    const donation = await ctx.db.get(args.donationId);
-    if (!donation) throw new Error("Donation not found");
-
-    if (donation.userId !== user._id) {
-      throw new Error("Not authorized to delete this donation");
-    }
-
-    // Prevent deletion of auto-recorded donations from completed requests.
-    // These are system-generated to enforce the 56-day eligibility cycle and
-    // deleting them would desync the UI eligibility status from the backend check.
-    if (donation.notes?.startsWith("Auto-recorded from completed request")) {
-      throw new Error("System-recorded donations from completed requests cannot be deleted");
-    }
-
-    await ctx.db.delete(args.donationId);
-  },
-});
-
-/**
  * Get user's donation history sorted by date descending
  */
 export const getDonationHistory = query({
