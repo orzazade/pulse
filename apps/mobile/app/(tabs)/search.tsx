@@ -56,6 +56,7 @@ export default function SearchScreen() {
     lat: number;
     lng: number;
   } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   // Determine query args based on filter
   // Note: "Urgent" filter is handled client-side to include both urgent AND critical
@@ -72,9 +73,11 @@ export default function SearchScreen() {
   const requests = useQuery(api.requests.listOpenRequests, queryArgs);
 
   // Handle "Near Me" filter selection
+  // Guarded with isLocating to prevent concurrent location requests from rapid taps
   const handleFilterPress = async (filter: string) => {
     if (filter === 'Near Me') {
-      // Request location permission and get location
+      if (isLocating) return;
+      setIsLocating(true);
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status === 'granted') {
@@ -96,6 +99,8 @@ export default function SearchScreen() {
           'Location Unavailable',
           'Unable to get your location. Please try again.'
         );
+      } finally {
+        setIsLocating(false);
       }
     }
     setActiveFilter(filter);
