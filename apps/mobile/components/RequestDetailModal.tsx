@@ -95,7 +95,9 @@ export function RequestDetailModal({
   const isLoading = requestId && detail === undefined;
 
   // Handle close - reset accepted screen state
+  // Block close during active mutations so the user sees the result feedback
   const handleClose = () => {
+    if (isSubmitting) return;
     setShowAcceptedScreen(false);
     setAcceptedRequestData(null);
     onClose();
