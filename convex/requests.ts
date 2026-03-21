@@ -857,9 +857,9 @@ export const getRequestDetail = query({
         fullName: seeker.fullName,
         bloodType: seeker.bloodType,
         city: seeker.city,
-        // Phone only visible to accepted donor
+        // Phone visible to donor after acceptance (including after completion for follow-up)
         phone:
-          request.status === "accepted" && isDonor ? seeker.phone : undefined,
+          (request.status === "accepted" || request.status === "completed") && isDonor ? seeker.phone : undefined,
       };
     }
 
@@ -873,9 +873,9 @@ export const getRequestDetail = query({
           fullName: donor.fullName,
           bloodType: donor.bloodType,
           city: donor.city,
-          // Phone only visible to seeker
+          // Phone visible to seeker after acceptance (including after completion for follow-up)
           phone:
-            request.status === "accepted" && isSeeker ? donor.phone : undefined,
+            (request.status === "accepted" || request.status === "completed") && isSeeker ? donor.phone : undefined,
         };
       }
     }
