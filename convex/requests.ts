@@ -581,8 +581,11 @@ export const getMyRequests = query({
       .withIndex("by_seeker", (q) => q.eq("seekerId", user._id))
       .collect();
 
-    // Sort by createdAt descending (most recent first)
-    const sortedRequests = requests.sort((a, b) => b.createdAt - a.createdAt);
+    // Sort by createdAt descending (most recent first), cap at 100 results
+    // to prevent unbounded data transfer for users with extensive history
+    const sortedRequests = requests
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, 100);
 
     // Fetch accepted donor info for accepted requests
     const requestsWithDonor = await Promise.all(
