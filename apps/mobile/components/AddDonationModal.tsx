@@ -155,6 +155,7 @@ export function AddDonationModal({
               placeholder="Enter donation center name"
               placeholderTextColor="#9ca3af"
               editable={!isSaving}
+              maxLength={200}
             />
           </View>
 
@@ -170,6 +171,7 @@ export function AddDonationModal({
               multiline
               numberOfLines={3}
               textAlignVertical="top"
+              maxLength={500}
             />
           </View>
         </ScrollView>
