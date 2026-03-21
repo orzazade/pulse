@@ -89,7 +89,8 @@ const AZERBAIJAN_CITIES = [
 export const listCities = query({
   args: {},
   handler: async (ctx) => {
-    const cities = await ctx.db.query("cities").collect();
+    // Cap at 200 to prevent unbounded data transfer (Azerbaijan has ~80 cities)
+    const cities = await ctx.db.query("cities").take(200);
 
     // If no cities in DB, return from constant (fallback)
     if (cities.length === 0) {
