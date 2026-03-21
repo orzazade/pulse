@@ -243,14 +243,14 @@ export const updateLocation = mutation({
       userId: user._id,
     });
 
-    return {
+    return sanitizeUser({
       ...user,
       city,
       region,
       latitude: args.latitude,
       longitude: args.longitude,
       locationGranted: true,
-    };
+    });
   },
 });
 
