@@ -854,33 +854,34 @@ export const getRequestDetail = query({
     const isSeeker = request.seekerId === user._id;
     const isDonor = request.acceptedDonorId === user._id;
 
-    // Build seeker info with conditional phone
+    // Build seeker info with conditional phone and name
+    // Privacy: fullName only visible to the seeker themselves or the accepted donor
+    const isAcceptedOrCompleted = request.status === "accepted" || request.status === "completed";
     let seekerInfo = null;
     if (seeker) {
       seekerInfo = {
         _id: seeker._id,
-        fullName: seeker.fullName,
+        fullName: isSeeker || (isAcceptedOrCompleted && isDonor) ? seeker.fullName : undefined,
         bloodType: seeker.bloodType,
         city: seeker.city,
         // Phone visible to donor after acceptance (including after completion for follow-up)
-        phone:
-          (request.status === "accepted" || request.status === "completed") && isDonor ? seeker.phone : undefined,
+        phone: isAcceptedOrCompleted && isDonor ? seeker.phone : undefined,
       };
     }
 
     // Fetch donor info if accepted
+    // Privacy: fullName only visible to the donor themselves or the seeker
     let donorInfo = null;
     if (request.acceptedDonorId) {
       const donor = await ctx.db.get(request.acceptedDonorId);
       if (donor) {
         donorInfo = {
           _id: donor._id,
-          fullName: donor.fullName,
+          fullName: isDonor || (isAcceptedOrCompleted && isSeeker) ? donor.fullName : undefined,
           bloodType: donor.bloodType,
           city: donor.city,
           // Phone visible to seeker after acceptance (including after completion for follow-up)
-          phone:
-            (request.status === "accepted" || request.status === "completed") && isSeeker ? donor.phone : undefined,
+          phone: isAcceptedOrCompleted && isSeeker ? donor.phone : undefined,
         };
       }
     }
