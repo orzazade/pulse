@@ -815,9 +815,13 @@ export const listOpenRequests = query({
       return b.createdAt - a.createdAt;
     });
 
+    // Limit results to prevent excessive data transfer as request volume grows.
+    // Sorted by urgency first, so the most critical requests are always included.
+    const limitedRequests = sortedRequests.slice(0, 100);
+
     // Fetch seeker info for each request
     const requestsWithSeeker = await Promise.all(
-      sortedRequests.map(async (request) => {
+      limitedRequests.map(async (request) => {
         const seeker = await ctx.db.get(request.seekerId);
         return {
           ...request,
