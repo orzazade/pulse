@@ -16,6 +16,7 @@ interface SettingItemProps {
   value: boolean;
   onToggle: (value: boolean) => void;
   isUpdating: boolean;
+  disabled: boolean;
 }
 
 function SettingItem({
@@ -24,6 +25,7 @@ function SettingItem({
   value,
   onToggle,
   isUpdating,
+  disabled,
 }: SettingItemProps) {
   return (
     <View style={styles.settingRow}>
@@ -38,6 +40,7 @@ function SettingItem({
           <Switch
             value={value}
             onValueChange={onToggle}
+            disabled={disabled}
             trackColor={{ false: "#d1d5db", true: "#fca5a5" }}
             thumbColor={value ? "#dc2626" : "#9ca3af"}
             ios_backgroundColor="#d1d5db"
@@ -94,6 +97,7 @@ export function NotificationSettings() {
         value={preferences.notifyRequestMatch}
         onToggle={(value) => handleToggle("notifyRequestMatch", value)}
         isUpdating={updatingField === "notifyRequestMatch"}
+        disabled={updatingField !== null}
       />
 
       <SettingItem
@@ -102,6 +106,7 @@ export function NotificationSettings() {
         value={preferences.notifyRequestAccepted}
         onToggle={(value) => handleToggle("notifyRequestAccepted", value)}
         isUpdating={updatingField === "notifyRequestAccepted"}
+        disabled={updatingField !== null}
       />
 
       <SettingItem
@@ -110,6 +115,7 @@ export function NotificationSettings() {
         value={preferences.notifyEligibility}
         onToggle={(value) => handleToggle("notifyEligibility", value)}
         isUpdating={updatingField === "notifyEligibility"}
+        disabled={updatingField !== null}
       />
     </View>
   );
