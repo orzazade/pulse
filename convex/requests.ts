@@ -664,6 +664,9 @@ export const listOpenRequests = query({
     urgency: v.optional(v.union(v.literal("normal"), v.literal("urgent"), v.literal("critical"), v.literal("standard"))),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
     // Get all open requests
     let requests = await ctx.db
       .query("requests")
