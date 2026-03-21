@@ -47,10 +47,10 @@ export const createRequest = mutation({
       throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
     }
 
-    // Validate units (1-10, defaults to 1)
+    // Validate units (1-10, must be whole number, defaults to 1)
     const units = args.units ?? 1;
-    if (units < 1 || units > 10) {
-      throw new Error("Units must be between 1 and 10");
+    if (!Number.isFinite(units) || !Number.isInteger(units) || units < 1 || units > 10) {
+      throw new Error("Units must be a whole number between 1 and 10");
     }
 
     // Sanitize and validate string inputs
