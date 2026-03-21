@@ -52,6 +52,10 @@ export function RequestAcceptedScreen({
   const [isCancelling, setIsCancelling] = useState(false);
 
   const handleCall = async () => {
+    if (!requesterPhone.trim()) {
+      Alert.alert("Phone Unavailable", "View the request details to see contact information.");
+      return;
+    }
     const url = `tel:${requesterPhone}`;
     try {
       const supported = await Linking.canOpenURL(url);
@@ -66,6 +70,10 @@ export function RequestAcceptedScreen({
   };
 
   const handleMessage = async () => {
+    if (!requesterPhone.trim()) {
+      Alert.alert("Phone Unavailable", "View the request details to see contact information.");
+      return;
+    }
     const url = `sms:${requesterPhone}`;
     try {
       const supported = await Linking.canOpenURL(url);
