@@ -601,13 +601,15 @@ export const getMyRequests = query({
 
     if (!user) return [];
 
+    // Fetch most recent requests, capped at 200 to prevent unbounded data transfer
+    // (result is sliced to 100 after sorting; 200 provides margin)
     const requests = await ctx.db
       .query("requests")
       .withIndex("by_seeker", (q) => q.eq("seekerId", user._id))
-      .collect();
+      .order("desc")
+      .take(200);
 
     // Sort by createdAt descending (most recent first), cap at 100 results
-    // to prevent unbounded data transfer for users with extensive history
     const sortedRequests = requests
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, 100);
