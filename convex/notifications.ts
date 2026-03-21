@@ -146,44 +146,6 @@ export const markAllAsRead = mutation({
 // ============ INTERNAL MUTATIONS ============
 
 /**
- * Create a notification (for use by other functions like cron jobs)
- * This is an internal mutation, not exposed to clients
- */
-export const createNotification = internalMutation({
-  args: {
-    userId: v.id("users"),
-    type: v.union(
-      v.literal("request_match"),
-      v.literal("request_accepted"),
-      v.literal("eligibility_reminder"),
-      v.literal("donor_withdrew"),
-      v.literal("request_cancelled"),
-      v.literal("request_completed")
-    ),
-    title: v.string(),
-    body: v.string(),
-    data: v.optional(
-      v.object({
-        requestId: v.optional(v.id("requests")),
-      })
-    ),
-  },
-  handler: async (ctx, args) => {
-    const notificationId = await ctx.db.insert("notifications", {
-      userId: args.userId,
-      type: args.type,
-      title: args.title,
-      body: args.body,
-      read: false,
-      data: args.data,
-      createdAt: Date.now(),
-    });
-
-    return notificationId;
-  },
-});
-
-/**
  * Check and send eligibility reminders to donors who just became eligible
  * Called by cron job daily at 9:00 AM UTC
  *
