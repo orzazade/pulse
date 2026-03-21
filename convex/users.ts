@@ -178,6 +178,23 @@ export const updateMode = mutation({
 
     if (!user) throw new Error("User not found");
 
+    // Block switching away from donor mode if user has an active accepted request.
+    // Without this, the request would be orphaned — the donor can no longer see or
+    // withdraw from it since their UI filters by mode.
+    if (args.mode === "seeker" && (user.mode === "donor" || user.mode === "both")) {
+      const activeAccepted = await ctx.db
+        .query("requests")
+        .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
+        .filter((q) => q.eq(q.field("status"), "accepted"))
+        .first();
+
+      if (activeAccepted) {
+        throw new Error(
+          "You have an active accepted request. Complete or withdraw from it before switching to seeker mode."
+        );
+      }
+    }
+
     await ctx.db.patch(user._id, {
       mode: args.mode,
     });
