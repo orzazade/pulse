@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -49,6 +49,7 @@ export function RequestAcceptedScreen({
   onClose,
 }: RequestAcceptedScreenProps) {
   const cancelAcceptance = useMutation(api.requests.cancelRequest);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const handleCall = async () => {
     const url = `tel:${requesterPhone}`;
@@ -104,6 +105,7 @@ export function RequestAcceptedScreen({
   };
 
   const handleCancelDonation = () => {
+    if (isCancelling) return;
     Alert.alert(
       "Cancel Donation",
       "Are you sure you want to cancel your commitment to donate? The requester will be notified.",
@@ -113,6 +115,7 @@ export function RequestAcceptedScreen({
           text: "Yes, Cancel",
           style: "destructive",
           onPress: async () => {
+            setIsCancelling(true);
             try {
               await cancelAcceptance({ requestId });
               onClose();
@@ -124,6 +127,8 @@ export function RequestAcceptedScreen({
                   : "Failed to cancel donation",
                 [{ text: "OK" }]
               );
+            } finally {
+              setIsCancelling(false);
             }
           },
         },
@@ -200,11 +205,14 @@ export function RequestAcceptedScreen({
 
         {/* Cancel Donation Link */}
         <TouchableOpacity
-          style={styles.cancelLink}
+          style={[styles.cancelLink, isCancelling && { opacity: 0.5 }]}
           onPress={handleCancelDonation}
           activeOpacity={0.7}
+          disabled={isCancelling}
         >
-          <Text style={styles.cancelLinkText}>Cancel Donation</Text>
+          <Text style={styles.cancelLinkText}>
+            {isCancelling ? "Cancelling..." : "Cancel Donation"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
