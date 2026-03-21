@@ -138,8 +138,11 @@ export const getDonationHistory = query({
       .order("desc")
       .collect();
 
+    // Cap results to prevent unbounded data transfer (UI shows 5, cap at 50)
+    const limitedDonations = donations.slice(0, 50);
+
     return {
-      donations,
+      donations: limitedDonations,
       totalCount: donations.length,
     };
   },
