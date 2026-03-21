@@ -52,25 +52,6 @@ const AZERBAIJAN_CENTERS = [
 ];
 
 /**
- * List all donation centers, optionally filtered by city
- */
-export const listCenters = query({
-  args: {
-    city: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    // Cap at 200 to prevent unbounded data transfer
-    if (args.city) {
-      return ctx.db
-        .query("donationCenters")
-        .withIndex("by_city", (q) => q.eq("city", args.city!))
-        .take(200);
-    }
-    return ctx.db.query("donationCenters").take(200);
-  },
-});
-
-/**
  * Search for donation centers near a given location
  * Uses geospatial index for efficient nearest-neighbor queries
  */
