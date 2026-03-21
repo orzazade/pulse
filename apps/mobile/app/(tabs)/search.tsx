@@ -58,16 +58,13 @@ export default function SearchScreen() {
   } | null>(null);
 
   // Determine query args based on filter
+  // Note: "Urgent" filter is handled client-side to include both urgent AND critical
   const queryArgs = useMemo(() => {
     // Blood type filter
     if (BLOOD_TYPES.includes(activeFilter)) {
       return { bloodType: activeFilter };
     }
-    // Urgent filter
-    if (activeFilter === 'Urgent') {
-      return { urgency: 'urgent' as const };
-    }
-    // All Requests or Near Me (no server-side filtering for Near Me)
+    // All Requests, Near Me, and Urgent use no server-side filtering
     return {};
   }, [activeFilter]);
 
@@ -113,6 +110,14 @@ export default function SearchScreen() {
 
     let filtered = requests;
 
+    // Apply "Urgent" filter client-side to include both urgent AND critical
+    if (activeFilter === 'Urgent') {
+      filtered = filtered.filter(
+        (request: RequestWithSeeker) =>
+          request.urgency === 'urgent' || request.urgency === 'critical'
+      );
+    }
+
     // Apply search query filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -129,7 +134,7 @@ export default function SearchScreen() {
     // For now, we just show all requests since distance isn't in the data
 
     return filtered;
-  }, [requests, searchQuery]);
+  }, [requests, searchQuery, activeFilter]);
 
   // Transform requests to SearchRequest format
   const displayRequests: SearchRequest[] = useMemo(() => {
