@@ -52,10 +52,11 @@ export const addDonation = mutation({
     }
 
     // Enforce 56-day donation cycle — no two donations within 56 days of each other
+    // Capped at 500 to prevent unbounded data transfer (no user will have 500+ donations)
     const existingDonations = await ctx.db
       .query("donations")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
+      .take(500);
 
     const cycleMsMin = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
     const tooClose = existingDonations.find(
