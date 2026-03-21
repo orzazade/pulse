@@ -421,9 +421,10 @@ export const acceptRequest = mutation({
       (r) => r.acceptedAt && now - r.acceptedAt < cycleMsMin
     );
 
-    if (tooRecentCompletion) {
+    const tooRecentAcceptedAt = tooRecentCompletion?.acceptedAt;
+    if (tooRecentCompletion && tooRecentAcceptedAt) {
       const daysSince = Math.floor(
-        (now - tooRecentCompletion.acceptedAt!) / (1000 * 60 * 60 * 24)
+        (now - tooRecentAcceptedAt) / (1000 * 60 * 60 * 24)
       );
       const daysLeft = DONATION_CYCLE_DAYS - daysSince;
       throw new Error(
