@@ -5,7 +5,8 @@
  * Badge support for notifications count.
  */
 
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 
@@ -23,8 +24,14 @@ const headerTitleStyle = {
 };
 
 export default function TabsLayout() {
-  // Get unread notification count for badge
+  // All hooks must be called before any early return (React rules of hooks)
+  const { isSignedIn, isLoaded } = useAuth();
   const unreadCount = useQuery(api.notifications.getUnreadCount);
+
+  // Auth guard: redirect to sign-in if session expires or user is not authenticated
+  if (isLoaded && !isSignedIn) {
+    return <Redirect href="/sign-in" />;
+  }
 
   return (
     <Tabs
