@@ -30,7 +30,6 @@ import {
   bloodTypeBadgeSpec,
   bloodTypeChipSpec,
   filterChipSpec,
-  requestCardSpec,
   tabBarSpec,
   paginationSpec,
 } from './tokens';
@@ -54,7 +53,6 @@ export interface Theme {
     bloodTypeBadge: typeof bloodTypeBadgeSpec;
     bloodTypeChip: typeof bloodTypeChipSpec;
     filterChip: typeof filterChipSpec;
-    requestCard: typeof requestCardSpec;
     tabBar: typeof tabBarSpec;
     pagination: typeof paginationSpec;
   };
@@ -80,7 +78,6 @@ export const theme: Theme = {
     bloodTypeBadge: bloodTypeBadgeSpec,
     bloodTypeChip: bloodTypeChipSpec,
     filterChip: filterChipSpec,
-    requestCard: requestCardSpec,
     tabBar: tabBarSpec,
     pagination: paginationSpec,
   },
@@ -121,7 +118,6 @@ export {
   bloodTypeBadgeSpec,
   bloodTypeChipSpec,
   filterChipSpec,
-  requestCardSpec,
   tabBarSpec,
   paginationSpec,
 };
