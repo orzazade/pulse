@@ -72,52 +72,6 @@ export const indexUser = internalMutation({
 });
 
 /**
- * Sync all users to the geospatial index (one-time migration)
- * Indexes all users who have location and are donors/both
- */
-export const syncAllUsers = internalMutation({
-  handler: async (ctx) => {
-    // Cap at 5000 to prevent unbounded memory usage in large databases
-    const users = await ctx.db.query("users").take(5000);
-    let indexedCount = 0;
-
-    for (const user of users) {
-      const hasLocation =
-        user.latitude !== undefined && user.longitude !== undefined;
-      const isDonor = user.mode === "donor" || user.mode === "both";
-
-      if (hasLocation && isDonor) {
-        // Remove any existing entry first
-        try {
-          await geospatial.remove(ctx, user._id);
-        } catch {
-          // Entry might not exist, that's fine
-        }
-
-        // Insert into geospatial index
-        await geospatial.insert(
-          ctx,
-          user._id,
-          {
-            latitude: user.latitude!,
-            longitude: user.longitude!,
-          },
-          {
-            type: "user",
-            bloodType: user.bloodType ?? "unknown",
-            isAvailable: user.isAvailable !== false,
-            city: "", // Not used for user filtering
-          }
-        );
-        indexedCount++;
-      }
-    }
-
-    return { indexedCount, totalUsers: users.length };
-  },
-});
-
-/**
  * Index a donation center in the geospatial index
  */
 export const indexCenter = internalMutation({
