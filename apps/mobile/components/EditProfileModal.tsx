@@ -111,6 +111,7 @@ export function EditProfileModal({
               onChangeText={setCity}
               placeholder="Enter your city"
               editable={!isSaving}
+              maxLength={100}
             />
           </View>
 
@@ -121,6 +122,7 @@ export function EditProfileModal({
               onChangeText={setRegion}
               placeholder="Enter your region"
               editable={!isSaving}
+              maxLength={100}
             />
           </View>
 
@@ -131,6 +133,7 @@ export function EditProfileModal({
               onChangeText={setPreferredDonationCenter}
               placeholder="Enter preferred donation center"
               editable={!isSaving}
+              maxLength={200}
             />
           </View>
         </ScrollView>
