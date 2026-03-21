@@ -14,6 +14,9 @@ import { Id } from "@convex/_generated/dataModel";
 type NotificationType =
   | "request_match"
   | "request_accepted"
+  | "request_completed"
+  | "request_cancelled"
+  | "donor_withdrew"
   | "eligibility_reminder"
   | "thank_you"
   | "general";
@@ -76,6 +79,11 @@ function getIconForType(type: NotificationType): keyof typeof Ionicons.glyphMap 
       return "megaphone"; // Urgent request - megaphone icon (matching PNG)
     case "request_accepted":
       return "checkmark-circle"; // Green checkmark
+    case "request_completed":
+      return "heart-circle"; // Completed donation
+    case "request_cancelled":
+    case "donor_withdrew":
+      return "close-circle"; // Cancelled/withdrawn
     case "eligibility_reminder":
       return "shield-checkmark"; // Blue shield with check (Profile Verified)
     case "thank_you":
@@ -93,7 +101,11 @@ function getIconColorForType(type: NotificationType): string {
     case "request_match":
       return "#DC2626"; // Red for urgent
     case "request_accepted":
+    case "request_completed":
       return "#10B981"; // Green for success
+    case "request_cancelled":
+    case "donor_withdrew":
+      return "#F59E0B"; // Amber for cancellation/withdrawal
     case "eligibility_reminder":
       return "#3B82F6"; // Blue for info
     case "thank_you":
@@ -111,7 +123,11 @@ function getIconBackgroundForType(type: NotificationType): string {
     case "request_match":
       return "#FEE2E2"; // Light red
     case "request_accepted":
+    case "request_completed":
       return "#D1FAE5"; // Light green
+    case "request_cancelled":
+    case "donor_withdrew":
+      return "#FEF3C7"; // Light amber
     case "eligibility_reminder":
       return "#DBEAFE"; // Light blue
     case "thank_you":
