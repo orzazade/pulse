@@ -366,6 +366,7 @@ export const acceptRequest = mutation({
     }
 
     // Verify donor is eligible (56-day donation cycle)
+    // Check 1: donations table (primary source)
     const lastDonation = await ctx.db
       .query("donations")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
@@ -382,6 +383,30 @@ export const acceptRequest = mutation({
           `You are not yet eligible to donate. ${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining until your next eligible donation.`
         );
       }
+    }
+
+    // Check 2: recently completed requests (tamper-proof — donors can't delete these)
+    // Prevents bypass via deleting auto-recorded donation records
+    const recentlyCompletedAsDonor = await ctx.db
+      .query("requests")
+      .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
+      .filter((q) => q.eq(q.field("status"), "completed"))
+      .collect();
+
+    const cycleMsMin = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const tooRecentCompletion = recentlyCompletedAsDonor.find(
+      (r) => r.acceptedAt && now - r.acceptedAt < cycleMsMin
+    );
+
+    if (tooRecentCompletion) {
+      const daysSince = Math.floor(
+        (now - tooRecentCompletion.acceptedAt!) / (1000 * 60 * 60 * 24)
+      );
+      const daysLeft = DONATION_CYCLE_DAYS - daysSince;
+      throw new Error(
+        `You are not yet eligible to donate. ${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining until your next eligible donation.`
+      );
     }
 
     // Prevent donor from accepting multiple requests simultaneously
