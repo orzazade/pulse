@@ -73,6 +73,7 @@ export default function ProfileTabScreen() {
   }));
 
   const handleAvailabilityToggle = async () => {
+    if (isTogglingAvailability) return;
     setIsTogglingAvailability(true);
     try {
       await toggleAvailability();
@@ -92,6 +93,7 @@ export default function ProfileTabScreen() {
   };
 
   const handleSignOut = async () => {
+    if (isSigningOut) return;
     setIsSigningOut(true);
     try {
       await signOut();
