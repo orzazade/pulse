@@ -411,8 +411,9 @@ export const searchDonors = query({
       return [];
     }
 
-    // Query all users and filter
-    const allUsers = await ctx.db.query("users").collect();
+    // Query users, capped at 1000 to prevent loading entire users table
+    // (result is sliced to 50 after filtering; 1000 provides ample margin)
+    const allUsers = await ctx.db.query("users").take(1000);
 
     const donors = allUsers
       .filter((user) => {
