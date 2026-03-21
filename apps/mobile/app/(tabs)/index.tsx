@@ -58,32 +58,47 @@ export default function HomeScreen() {
 
   const [isBroadcasting, setIsBroadcasting] = useState(false);
 
-  const handleEmergencyBroadcast = async () => {
+  const handleEmergencyBroadcast = () => {
     if (!currentUser?.bloodType || isBroadcasting) {
       if (!currentUser?.bloodType) console.warn("No blood type set");
       return;
     }
 
-    setIsBroadcasting(true);
-    try {
-      await broadcastEmergency({
-        bloodType: currentUser.bloodType,
-        notes: "Emergency broadcast request",
-      });
-      Alert.alert(
-        "Emergency Broadcast Sent",
-        "Matching donors nearby have been notified."
-      );
-    } catch (error) {
-      Alert.alert(
-        "Broadcast Failed",
-        error instanceof Error
-          ? error.message
-          : "Failed to send emergency broadcast. Please try again."
-      );
-    } finally {
-      setIsBroadcasting(false);
-    }
+    // Confirm before broadcasting — this sends push notifications to all compatible
+    // donors and should not be triggered accidentally.
+    Alert.alert(
+      "Send Emergency Broadcast?",
+      "This will notify all compatible donors nearby. Only use this for genuine emergencies.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Send Broadcast",
+          style: "destructive",
+          onPress: async () => {
+            setIsBroadcasting(true);
+            try {
+              await broadcastEmergency({
+                bloodType: currentUser.bloodType!,
+                notes: "Emergency broadcast request",
+              });
+              Alert.alert(
+                "Emergency Broadcast Sent",
+                "Matching donors nearby have been notified."
+              );
+            } catch (error) {
+              Alert.alert(
+                "Broadcast Failed",
+                error instanceof Error
+                  ? error.message
+                  : "Failed to send emergency broadcast. Please try again."
+              );
+            } finally {
+              setIsBroadcasting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const renderRequestItem = ({
