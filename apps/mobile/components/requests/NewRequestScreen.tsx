@@ -100,8 +100,9 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={styles.closeButton}
+          style={[styles.closeButton, isSubmitting && { opacity: 0.3 }]}
           onPress={onClose}
+          disabled={isSubmitting}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Ionicons name="close" size={24} color={textColors.primary} />
