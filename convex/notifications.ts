@@ -126,7 +126,8 @@ export const markAllAsRead = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Get all unread notifications for this user
+    // Get unread notifications for this user, capped at 200 to stay within
+    // Convex per-mutation write limits for users with large backlogs
     const unreadNotifications = await ctx.db
       .query("notifications")
       .withIndex("by_user_read", (q) =>
@@ -134,14 +135,16 @@ export const markAllAsRead = mutation({
       )
       .collect();
 
+    const batch = unreadNotifications.slice(0, 200);
+
     // Mark each as read
     await Promise.all(
-      unreadNotifications.map((notification) =>
+      batch.map((notification) =>
         ctx.db.patch(notification._id, { read: true })
       )
     );
 
-    return { success: true, count: unreadNotifications.length };
+    return { success: true, count: batch.length };
   },
 });
 
