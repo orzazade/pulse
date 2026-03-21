@@ -126,6 +126,9 @@ export const searchNearbyCenters = query({
  */
 export const seedCenters = mutation({
   handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
     // Check if centers already exist
     const existingCenters = await ctx.db.query("donationCenters").first();
     if (existingCenters) {
