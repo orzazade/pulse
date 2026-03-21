@@ -9,15 +9,18 @@ const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as 
 
 export const getOrCreateUser = mutation({
   args: {
-    clerkId: v.string(),
     email: v.optional(v.string()),
     fullName: v.optional(v.string()),
     bloodType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const clerkId = identity.subject;
     const existing = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
       .unique();
 
     if (existing) return existing._id;
@@ -47,7 +50,7 @@ export const getOrCreateUser = mutation({
       mode?: "donor" | "seeker" | "both";
       createdAt: number;
     } = {
-      clerkId: args.clerkId,
+      clerkId,
       createdAt: Date.now(),
     };
 

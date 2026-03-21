@@ -98,7 +98,6 @@ export default function SignUp() {
         if (userId) {
           try {
             await getOrCreateUser({
-              clerkId: userId,
               email,
               fullName: fullName || undefined,
               bloodType: bloodType || undefined,

@@ -45,7 +45,6 @@ export default function Index() {
         setCreateUserError(false);
         try {
           await getOrCreateUser({
-            clerkId: clerkUser.id,
             email: clerkUser.emailAddresses[0]?.emailAddress,
           });
         } catch (error) {
