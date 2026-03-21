@@ -37,7 +37,9 @@ export default function NotificationsScreen() {
     if (
       (notification.type === "request_match" ||
         notification.type === "request_accepted" ||
-        notification.type === "request_completed") &&
+        notification.type === "request_completed" ||
+        notification.type === "donor_withdrew" ||
+        notification.type === "request_cancelled") &&
       notification.data?.requestId
     ) {
       router.push("/requests");

@@ -243,7 +243,7 @@ export const cancelRequest = mutation({
       if (seeker) {
         await ctx.db.insert("notifications", {
           userId: request.seekerId,
-          type: "request_match",
+          type: "donor_withdrew",
           title: "Donor Withdrew",
           body: `The donor for your ${request.bloodType} blood request has withdrawn. Your request is open again for other donors.`,
           read: false,
@@ -295,7 +295,7 @@ export const cancelRequest = mutation({
       if (donor) {
         await ctx.db.insert("notifications", {
           userId: request.acceptedDonorId,
-          type: "request_match",
+          type: "request_cancelled",
           title: "Request Cancelled",
           body: `The ${request.bloodType} blood request you accepted has been cancelled by the seeker.`,
           read: false,
