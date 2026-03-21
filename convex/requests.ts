@@ -973,8 +973,9 @@ export const notifyMatchingDonors = internalMutation({
     const compatibleDonorTypes = getCompatibleDonorTypes(args.bloodType);
     if (compatibleDonorTypes.length === 0) return { notificationsSent: 0 };
 
-    // Get all potential donors
-    const allUsers = await ctx.db.query("users").collect();
+    // Get potential donors, capped at 2000 to prevent loading entire users table
+    // (result is sliced to 100 after filtering; 2000 provides ample margin)
+    const allUsers = await ctx.db.query("users").take(2000);
 
     // Filter to matching donors
     const matchingDonors = allUsers.filter((user) => {
