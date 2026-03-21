@@ -77,8 +77,9 @@ export default function ProfileTabScreen() {
     setIsTogglingAvailability(true);
     try {
       await toggleAvailability();
-    } catch {
-      Alert.alert("Error", "Failed to update availability. Please try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update availability. Please try again.";
+      Alert.alert("Error", message);
     } finally {
       setIsTogglingAvailability(false);
     }
@@ -97,8 +98,9 @@ export default function ProfileTabScreen() {
     setIsSigningOut(true);
     try {
       await signOut();
-    } catch {
-      Alert.alert("Error", "Failed to sign out. Please try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to sign out. Please try again.";
+      Alert.alert("Error", message);
       setIsSigningOut(false);
     }
   };
@@ -121,8 +123,9 @@ export default function ProfileTabScreen() {
       });
       setIsEditModalVisible(false);
       Alert.alert("Success", "Profile updated successfully.");
-    } catch {
-      Alert.alert("Error", "Failed to update profile. Please try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update profile. Please try again.";
+      Alert.alert("Error", message);
     } finally {
       setIsSaving(false);
     }
@@ -142,8 +145,9 @@ export default function ProfileTabScreen() {
       });
       setIsAddDonationModalVisible(false);
       Alert.alert("Success", "Donation logged successfully.");
-    } catch {
-      Alert.alert("Error", "Failed to log donation. Please try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to log donation. Please try again.";
+      Alert.alert("Error", message);
     } finally {
       setIsAddingDonation(false);
     }
