@@ -228,6 +228,35 @@ export const cancelRequest = mutation({
       status: "cancelled",
     });
 
+    // Notify the accepted donor that the request was cancelled
+    if (request.status === "accepted" && request.acceptedDonorId) {
+      const donor = await ctx.db.get(request.acceptedDonorId);
+      if (donor) {
+        await ctx.db.insert("notifications", {
+          userId: request.acceptedDonorId,
+          type: "request_match",
+          title: "Request Cancelled",
+          body: `The ${request.bloodType} blood request you accepted has been cancelled by the seeker.`,
+          read: false,
+          data: { requestId: args.requestId },
+          createdAt: Date.now(),
+        });
+
+        if (donor.pushToken) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.sendPushNotification,
+            {
+              pushToken: donor.pushToken,
+              title: "Request Cancelled",
+              body: `The ${request.bloodType} blood request you accepted has been cancelled by the seeker.`,
+              data: { type: "request_cancelled", requestId: args.requestId },
+            }
+          );
+        }
+      }
+    }
+
     return { success: true };
   },
 });
