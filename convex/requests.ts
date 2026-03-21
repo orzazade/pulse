@@ -756,11 +756,13 @@ export const getHomeFeedRequests = query({
       return [];
     }
 
-    // Get all open requests
+    // Get open requests, capped at 200 most recent to prevent unbounded data transfer
+    // (home feed only shows 10 results; 200 provides ample margin for blood type filtering)
     const openRequests = await ctx.db
       .query("requests")
       .withIndex("by_status", (q) => q.eq("status", "open"))
-      .collect();
+      .order("desc")
+      .take(200);
 
     // Filter based on user mode and blood type compatibility
     const filteredRequests = openRequests.filter((request) => {
