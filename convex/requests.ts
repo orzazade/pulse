@@ -171,6 +171,17 @@ export const broadcastEmergency = mutation({
       throw new Error("Please wait before sending another emergency broadcast");
     }
 
+    // Rate limit: max 5 open requests per user (consistent with createRequest)
+    const openRequests = await ctx.db
+      .query("requests")
+      .withIndex("by_seeker", (q) => q.eq("seekerId", user._id))
+      .filter((q) => q.eq(q.field("status"), "open"))
+      .collect();
+
+    if (openRequests.length >= 5) {
+      throw new Error("You can have at most 5 open requests. Please cancel or wait for existing ones to be fulfilled.");
+    }
+
     const requestId = await ctx.db.insert("requests", {
       seekerId: user._id,
       bloodType: args.bloodType,
