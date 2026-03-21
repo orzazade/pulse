@@ -158,7 +158,10 @@ export const createNotification = internalMutation({
     type: v.union(
       v.literal("request_match"),
       v.literal("request_accepted"),
-      v.literal("eligibility_reminder")
+      v.literal("eligibility_reminder"),
+      v.literal("donor_withdrew"),
+      v.literal("request_cancelled"),
+      v.literal("request_completed")
     ),
     title: v.string(),
     body: v.string(),
