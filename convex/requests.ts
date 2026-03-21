@@ -706,6 +706,11 @@ export const getHomeFeedRequests = query({
 
     if (!user) return [];
 
+    // Only donors or both mode users see the donor-oriented home feed
+    if (user.mode === "seeker") {
+      return [];
+    }
+
     // Must have blood type set to see compatible requests
     if (!user.bloodType) {
       return [];
