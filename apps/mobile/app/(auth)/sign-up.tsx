@@ -201,6 +201,7 @@ export default function SignUp() {
           autoCapitalize="words"
           autoComplete="name"
           maxLength={100}
+          editable={!loading}
         />
 
         {/* Blood Type Picker */}
@@ -220,6 +221,7 @@ export default function SignUp() {
           keyboardType="email-address"
           autoComplete="email"
           maxLength={254}
+          editable={!loading}
         />
 
         {/* Password Input */}
@@ -232,6 +234,7 @@ export default function SignUp() {
           secureTextEntry
           autoComplete="new-password"
           maxLength={128}
+          editable={!loading}
         />
 
         {/* Terms Checkbox */}
