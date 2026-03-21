@@ -72,42 +72,6 @@ export const indexUser = internalMutation({
 });
 
 /**
- * Index a donation center in the geospatial index
- */
-export const indexCenter = internalMutation({
-  args: { centerId: v.id("donationCenters") },
-  handler: async (ctx, args) => {
-    const center = await ctx.db.get(args.centerId);
-    if (!center) {
-      return;
-    }
-
-    // Remove any existing entry first (update scenario)
-    try {
-      await geospatial.remove(ctx, args.centerId);
-    } catch {
-      // Entry might not exist, that's fine
-    }
-
-    // Insert center into geospatial index
-    await geospatial.insert(
-      ctx,
-      args.centerId,
-      {
-        latitude: center.latitude,
-        longitude: center.longitude,
-      },
-      {
-        type: "center",
-        bloodType: "", // Not applicable for centers
-        isAvailable: true, // Centers are always available
-        city: center.city,
-      }
-    );
-  },
-});
-
-/**
  * Index all donation centers (call after seeding)
  */
 export const indexAllCenters = internalMutation({
