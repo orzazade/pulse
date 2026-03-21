@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   small: {
     height: 28,
-    paddingHorizontal: spacing[2], // 8px
+    paddingHorizontal: spacing(2), // 8px
   },
 
   // States

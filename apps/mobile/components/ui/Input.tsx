@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: fontWeight.medium,
     color: colors.text.primary,
-    marginBottom: spacing[2], // 8px
+    marginBottom: spacing(2), // 8px
   },
 
   container: {
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
 
   phoneInput: {
-    paddingLeft: spacing[2], // 8px
+    paddingLeft: spacing(2), // 8px
   },
 
   countryCodeContainer: {
@@ -174,13 +174,13 @@ const styles = StyleSheet.create({
     width: 1,
     height: 24,
     backgroundColor: colors.default,
-    marginLeft: spacing[3], // 12px
+    marginLeft: spacing(3), // 12px
   },
 
   errorText: {
     fontSize: 12,
     color: colors.error,
-    marginTop: spacing[1], // 4px
+    marginTop: spacing(1), // 4px
   },
 });
 
