@@ -69,6 +69,7 @@ export default function Onboarding() {
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -82,7 +83,13 @@ export default function Onboarding() {
   };
 
   const handleGetStarted = async () => {
-    await markOnboardingComplete();
+    if (isNavigating) return;
+    setIsNavigating(true);
+    try {
+      await markOnboardingComplete();
+    } catch {
+      // Best-effort — proceed to sign-up even if storage fails
+    }
     router.replace("/sign-up");
   };
 
