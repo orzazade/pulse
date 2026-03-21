@@ -36,7 +36,8 @@ export default function NotificationsScreen() {
     // Navigate based on type
     if (
       (notification.type === "request_match" ||
-        notification.type === "request_accepted") &&
+        notification.type === "request_accepted" ||
+        notification.type === "request_completed") &&
       notification.data?.requestId
     ) {
       router.push("/requests");

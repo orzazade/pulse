@@ -556,7 +556,7 @@ export const completeRequest = mutation({
       if (donor) {
         await ctx.db.insert("notifications", {
           userId: request.acceptedDonorId,
-          type: "request_accepted",
+          type: "request_completed",
           title: "Thank You for Donating!",
           body: `The ${request.bloodType} blood request has been marked as completed. Your donation made a difference.`,
           read: false,
