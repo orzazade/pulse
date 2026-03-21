@@ -198,10 +198,11 @@ export const getDonationStats = query({
       };
     }
 
+    // Cap at 500 to prevent unbounded data transfer (only need count + latest)
     const donations = await ctx.db
       .query("donations")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
+      .take(500);
 
     const totalDonations = donations.length;
 
@@ -213,10 +214,12 @@ export const getDonationStats = query({
       };
     }
 
-    // Find most recent donation
-    const lastDonation = donations.reduce((latest, current) =>
-      current.donationDate > latest.donationDate ? current : latest
-    );
+    // Get most recent donation via indexed desc query (avoids scanning all donations)
+    const lastDonation = (await ctx.db
+      .query("donations")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .order("desc")
+      .first())!;
 
     const now = Date.now();
     const daysSinceLastDonation = Math.floor(
