@@ -108,6 +108,9 @@ export const listCities = query({
 export const seedCities = mutation({
   args: {},
   handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
     // Check if cities already exist
     const existingCities = await ctx.db.query("cities").take(1);
     if (existingCities.length > 0) {
