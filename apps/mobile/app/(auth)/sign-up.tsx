@@ -144,6 +144,8 @@ export default function SignUp() {
             onChangeText={setCode}
             keyboardType="number-pad"
             autoComplete="one-time-code"
+            maxLength={8}
+            editable={!loading}
           />
 
           <TouchableOpacity
@@ -156,8 +158,13 @@ export default function SignUp() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => setPendingVerification(false)}>
-            <Text style={styles.linkSingle}>Use a different email</Text>
+          <TouchableOpacity
+            onPress={() => setPendingVerification(false)}
+            disabled={loading}
+          >
+            <Text style={[styles.linkSingle, loading && { opacity: 0.5 }]}>
+              Use a different email
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
