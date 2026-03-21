@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { mutation } from "./_generated/server";
 
 // Complete list of Azerbaijan cities and towns (80+)
 const AZERBAIJAN_CITIES = [
@@ -81,26 +81,6 @@ const AZERBAIJAN_CITIES = [
   "Zangilan",
   "Zardab",
 ];
-
-/**
- * Returns all cities sorted alphabetically.
- * Used for city autocomplete in LocationFilter.
- */
-export const listCities = query({
-  args: {},
-  handler: async (ctx) => {
-    // Cap at 200 to prevent unbounded data transfer (Azerbaijan has ~80 cities)
-    const cities = await ctx.db.query("cities").take(200);
-
-    // If no cities in DB, return from constant (fallback)
-    if (cities.length === 0) {
-      return AZERBAIJAN_CITIES;
-    }
-
-    // Return city names sorted alphabetically
-    return cities.map((c) => c.name).sort((a, b) => a.localeCompare(b));
-  },
-});
 
 /**
  * Seeds the cities table with all Azerbaijan cities.
