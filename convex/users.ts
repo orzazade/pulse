@@ -368,9 +368,11 @@ export const searchDonors = query({
     region: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Get current user to exclude from results
     const identity = await ctx.auth.getUserIdentity();
-    const currentUserClerkId = identity?.subject;
+    if (!identity) return [];
+
+    // Get current user to exclude from results
+    const currentUserClerkId = identity.subject;
 
     // Get compatible donor blood types if blood type filter provided
     const compatibleTypes = args.bloodType
