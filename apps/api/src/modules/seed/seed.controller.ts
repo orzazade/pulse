@@ -1,12 +1,14 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, UseGuards, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DonationCenter } from '../centers/entities/donation-center.entity';
 import { City } from '../cities/entities/city.entity';
 import { DONATION_CENTERS } from '../centers/centers.seed';
 import { AZERBAIJAN_CITIES } from '../cities/cities.seed';
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 
 @Controller('seed')
+@UseGuards(JwtAuthGuard)
 export class SeedController {
   constructor(
     @InjectRepository(DonationCenter)
@@ -17,6 +19,10 @@ export class SeedController {
 
   @Post('run')
   async seed() {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('Seeding is not allowed in production');
+    }
+
     const results = { centers: 0, cities: 0 };
 
     // Seed cities
