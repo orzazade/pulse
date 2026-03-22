@@ -12,6 +12,14 @@ import {
   Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import {
+  primaryColors,
+  backgroundColors,
+  textColors,
+  borderColors,
+  radius,
+  spacing,
+} from "@/theme/tokens";
 
 interface AddDonationModalProps {
   visible: boolean;
@@ -153,7 +161,7 @@ export function AddDonationModal({
               value={donationCenter}
               onChangeText={setDonationCenter}
               placeholder="Enter donation center name"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={textColors.tertiary}
               editable={!isSaving}
               maxLength={200}
             />
@@ -166,7 +174,7 @@ export function AddDonationModal({
               value={notes}
               onChangeText={setNotes}
               placeholder="Add any notes about this donation"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={textColors.tertiary}
               editable={!isSaving}
               multiline
               numberOfLines={3}
@@ -183,28 +191,28 @@ export function AddDonationModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9fafb",
+    backgroundColor: backgroundColors.input,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    padding: spacing(4),
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    backgroundColor: "white",
+    borderBottomColor: borderColors.default,
+    backgroundColor: backgroundColors.background,
   },
   headerTitle: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#111827",
+    color: textColors.primary,
   },
   headerButton: {
     fontSize: 17,
-    color: "#6b7280",
+    color: textColors.secondary,
   },
   saveButton: {
-    color: "#dc2626",
+    color: primaryColors.primary,
     fontWeight: "600",
   },
   disabled: {
@@ -212,42 +220,42 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
-    padding: 20,
+    padding: spacing(5),
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: spacing(5),
   },
   label: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#374151",
-    marginBottom: 8,
+    color: textColors.primary,
+    marginBottom: spacing(2),
   },
   input: {
-    backgroundColor: "white",
+    backgroundColor: backgroundColors.background,
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    padding: 12,
+    borderColor: borderColors.default,
+    borderRadius: radius.md,
+    padding: spacing(3),
     fontSize: 16,
-    color: "#111827",
+    color: textColors.primary,
   },
   notesInput: {
     minHeight: 80,
   },
   dateButton: {
-    backgroundColor: "white",
+    backgroundColor: backgroundColors.background,
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    padding: 12,
+    borderColor: borderColors.default,
+    borderRadius: radius.md,
+    padding: spacing(3),
   },
   dateButtonText: {
     fontSize: 16,
-    color: "#111827",
+    color: textColors.primary,
   },
   datePicker: {
-    backgroundColor: "white",
-    borderRadius: 8,
+    backgroundColor: backgroundColors.background,
+    borderRadius: radius.md,
   },
 });
