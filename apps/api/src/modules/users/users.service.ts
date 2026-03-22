@@ -91,7 +91,7 @@ export class UsersService {
     }));
   }
 
-  async getUserStats(userId: string): Promise<{ peoplHelped: number }> {
+  async getUserStats(userId: string): Promise<{ peopleHelped: number }> {
     const count = await this.userRepository.manager
       .createQueryBuilder()
       .from('requests', 'r')
@@ -99,6 +99,6 @@ export class UsersService {
       .andWhere('r.status = :status', { status: 'completed' })
       .getCount();
 
-    return { peoplHelped: count };
+    return { peopleHelped: count };
   }
 }
