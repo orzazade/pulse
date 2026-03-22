@@ -2,6 +2,8 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
+  InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +12,8 @@ import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -40,37 +44,59 @@ export class AuthService {
       throw new UnauthorizedException('Invalid OTP');
     }
 
-    let user = await this.userRepository.findOne({ where: { phone } });
+    let user: User;
+    try {
+      const existing = await this.userRepository.findOne({ where: { phone } });
 
-    if (!user) {
-      user = this.userRepository.create({
-        phone,
-        phoneVerified: true,
-      });
-      user = await this.userRepository.save(user);
-    } else {
-      if (!user.phoneVerified) {
-        user.phoneVerified = true;
+      if (!existing) {
+        user = this.userRepository.create({
+          phone,
+          phoneVerified: true,
+        });
         user = await this.userRepository.save(user);
+      } else {
+        if (!existing.phoneVerified) {
+          existing.phoneVerified = true;
+          user = await this.userRepository.save(existing);
+        } else {
+          user = existing;
+        }
       }
+    } catch (error) {
+      this.logger.error(`Failed to upsert user for phone ${phone}`, error instanceof Error ? error.stack : undefined);
+      throw new InternalServerErrorException('Authentication failed — please try again');
     }
 
-    const payload = { sub: user.id, phone: user.phone };
-    const accessToken = this.jwtService.sign(payload);
-
-    return { accessToken, user };
+    try {
+      const payload = { sub: user.id, phone: user.phone };
+      const accessToken = this.jwtService.sign(payload);
+      return { accessToken, user };
+    } catch (error) {
+      this.logger.error('Failed to sign JWT token', error instanceof Error ? error.stack : undefined);
+      throw new InternalServerErrorException('Authentication failed — please try again');
+    }
   }
 
   async refreshToken(userId: string): Promise<{ accessToken: string }> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    let user: User | null;
+    try {
+      user = await this.userRepository.findOne({ where: { id: userId } });
+    } catch (error) {
+      this.logger.error(`Failed to look up user ${userId}`, error instanceof Error ? error.stack : undefined);
+      throw new InternalServerErrorException('Could not refresh token — please try again');
+    }
 
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
-    const payload = { sub: user.id, phone: user.phone };
-    const accessToken = this.jwtService.sign(payload);
-
-    return { accessToken };
+    try {
+      const payload = { sub: user.id, phone: user.phone };
+      const accessToken = this.jwtService.sign(payload);
+      return { accessToken };
+    } catch (error) {
+      this.logger.error('Failed to sign JWT token', error instanceof Error ? error.stack : undefined);
+      throw new InternalServerErrorException('Could not refresh token — please try again');
+    }
   }
 }
