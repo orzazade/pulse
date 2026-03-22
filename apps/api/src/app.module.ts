@@ -11,8 +11,10 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { CentersModule } from './modules/centers/centers.module';
 import { CitiesModule } from './modules/cities/cities.module';
 import { SeedModule } from './modules/seed/seed.module';
+import { HealthController } from './health.controller';
 
 @Module({
+  controllers: [HealthController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
