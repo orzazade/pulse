@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Donation } from './entities/donation.entity';
@@ -14,9 +14,17 @@ export class DonationsService {
     userId: string,
     data: { donationDate: Date; donationCenter?: string; notes?: string },
   ): Promise<Donation> {
+    const donationDate = new Date(data.donationDate);
+    if (isNaN(donationDate.getTime())) {
+      throw new BadRequestException('Invalid donation date');
+    }
+    if (donationDate > new Date()) {
+      throw new BadRequestException('Donation date cannot be in the future');
+    }
+
     const donation = this.donationRepository.create({
       userId,
-      donationDate: data.donationDate,
+      donationDate,
       donationCenter: data.donationCenter,
       notes: data.notes,
     });
