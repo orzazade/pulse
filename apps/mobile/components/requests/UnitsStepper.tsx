@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   spacing,
   textColors,
+  backgroundColors,
   borderColors,
   fontWeight,
   headingStyles,
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: borderColors.default,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: backgroundColors.input,
     justifyContent: 'center',
     alignItems: 'center',
   },
