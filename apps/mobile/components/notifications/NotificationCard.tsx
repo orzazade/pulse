@@ -5,6 +5,8 @@ import {
   textColors,
   primaryColors,
   backgroundColors,
+  semanticColors,
+  illustrationColors,
   shadows,
   spacing,
   radius,
@@ -99,19 +101,19 @@ function getIconForType(type: NotificationType): keyof typeof Ionicons.glyphMap 
 function getIconColorForType(type: NotificationType): string {
   switch (type) {
     case "request_match":
-      return "#DC2626"; // Red for urgent
+      return primaryColors.primary;
     case "request_accepted":
     case "request_completed":
-      return "#10B981"; // Green for success
+      return semanticColors.success;
     case "request_cancelled":
     case "donor_withdrew":
-      return "#F59E0B"; // Amber for cancellation/withdrawal
+      return semanticColors.warning;
     case "eligibility_reminder":
-      return "#3B82F6"; // Blue for info
+      return semanticColors.info;
     case "thank_you":
     case "general":
     default:
-      return "#3B82F6"; // Blue for general
+      return semanticColors.info;
   }
 }
 
@@ -121,19 +123,19 @@ function getIconColorForType(type: NotificationType): string {
 function getIconBackgroundForType(type: NotificationType): string {
   switch (type) {
     case "request_match":
-      return "#FEE2E2"; // Light red
+      return primaryColors.primaryLight;
     case "request_accepted":
     case "request_completed":
-      return "#D1FAE5"; // Light green
+      return illustrationColors.greenCircle;
     case "request_cancelled":
     case "donor_withdrew":
-      return "#FEF3C7"; // Light amber
+      return backgroundColors.chipInactive;
     case "eligibility_reminder":
-      return "#DBEAFE"; // Light blue
+      return backgroundColors.chipInactive;
     case "thank_you":
     case "general":
     default:
-      return "#DBEAFE"; // Light blue
+      return backgroundColors.chipInactive;
   }
 }
 
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 44,
     height: 44,
-    borderRadius: 22, // Full circle
+    borderRadius: radius.full,
     justifyContent: "center",
     alignItems: "center",
   },
