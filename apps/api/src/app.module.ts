@@ -10,6 +10,7 @@ import { DonationsModule } from './modules/donations/donations.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CentersModule } from './modules/centers/centers.module';
 import { CitiesModule } from './modules/cities/cities.module';
+import { SeedModule } from './modules/seed/seed.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CitiesModule } from './modules/cities/cities.module';
     NotificationsModule,
     CentersModule,
     CitiesModule,
+    SeedModule,
   ],
 })
 export class AppModule {}
