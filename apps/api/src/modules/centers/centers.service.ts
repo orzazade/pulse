@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DonationCenter } from './entities/donation-center.entity';
@@ -22,6 +22,13 @@ export class CentersService {
     longitude: number,
     limit: number = 20,
   ): Promise<(DonationCenter & { distance: number })[]> {
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+      throw new BadRequestException('Invalid coordinates: latitude must be -90..90, longitude -180..180');
+    }
+    if (limit < 1 || limit > 100) {
+      limit = Math.max(1, Math.min(100, limit));
+    }
+
     const centers = await this.centerRepository
       .createQueryBuilder('center')
       .addSelect(

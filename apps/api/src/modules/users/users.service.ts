@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -56,6 +56,13 @@ export class UsersService {
     longitude: number,
     radiusKm: number = 50,
   ): Promise<(User & { distance: number })[]> {
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+      throw new BadRequestException('Invalid coordinates: latitude must be -90..90, longitude -180..180');
+    }
+    if (radiusKm <= 0 || radiusKm > 500) {
+      radiusKm = Math.max(1, Math.min(500, radiusKm));
+    }
+
     const compatibleTypes = getCompatibleDonorTypes(recipientBloodType);
 
     if (compatibleTypes.length === 0) return [];
