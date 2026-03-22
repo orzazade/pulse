@@ -199,9 +199,9 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   privacyCard: {
-    backgroundColor: "#F5F5F5",
+    backgroundColor: colors.chipInactive,
     borderLeftWidth: 3,
-    borderLeftColor: "#E0E0E0",
+    borderLeftColor: colors.default,
     borderRadius: radius.md,
     padding: spacing(4),
   },
