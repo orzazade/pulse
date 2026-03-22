@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import {
   backgroundColors,
   textColors,
+  borderColors,
   shadows,
   spacing,
   radius,
@@ -52,7 +53,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#E5E7EB", // Gray placeholder
+    backgroundColor: borderColors.default,
     justifyContent: "center",
     alignItems: "center",
     marginRight: spacing(3), // 12px
