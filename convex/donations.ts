@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { DONATION_CYCLE_DAYS, DONATION_CYCLE_MS } from "./lib/constants";
+import { getAuthenticatedUser } from "./lib/auth";
 
 /**
  * Add a new donation record
@@ -12,16 +13,7 @@ export const addDonation = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    // Get user
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Validate donationDate is a finite number (NaN bypasses range checks)
     const now = Date.now();

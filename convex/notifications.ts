@@ -7,6 +7,7 @@ import {
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { DONATION_CYCLE_DAYS } from "./lib/constants";
+import { getAuthenticatedUser } from "./lib/auth";
 
 /**
  * Notification System
@@ -84,15 +85,7 @@ export const getUnreadCount = query({
 export const markAsRead = mutation({
   args: { notificationId: v.id("notifications") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     const notification = await ctx.db.get(args.notificationId);
     if (!notification) throw new Error("Notification not found");
@@ -113,15 +106,7 @@ export const markAsRead = mutation({
  */
 export const markAllAsRead = mutation({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Get unread notifications for this user, capped at 200 to stay within
     // Convex per-mutation write limits for users with large backlogs
