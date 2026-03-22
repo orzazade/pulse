@@ -3,6 +3,16 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Id } from "@convex/_generated/dataModel";
 import { getTimeAgo } from "@/lib/timeFormat";
+import {
+  primaryColors,
+  backgroundColors,
+  textColors,
+  semanticColors,
+  shadows,
+  radius,
+  spacing,
+  bloodTypeBadgeSpec,
+} from "@/theme/tokens";
 
 type RequestStatus = "open" | "accepted" | "cancelled" | "completed";
 
@@ -47,15 +57,15 @@ function getStatusLabel(status: RequestStatus): string {
 function getStatusColor(status: RequestStatus): string {
   switch (status) {
     case "open":
-      return "#3b82f6"; // blue
+      return semanticColors.info;
     case "accepted":
-      return "#22c55e"; // green
+      return semanticColors.success;
     case "cancelled":
-      return "#6b7280"; // gray
+      return textColors.secondary;
     case "completed":
-      return "#8b5cf6"; // purple
+      return textColors.secondary;
     default:
-      return "#6b7280";
+      return textColors.secondary;
   }
 }
 
@@ -130,7 +140,7 @@ export function RequestCard({ request, variant, onPress }: RequestCardProps) {
       </View>
 
       {/* Chevron */}
-      <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
+      <Ionicons name="chevron-forward" size={24} color={textColors.tertiary} />
     </TouchableOpacity>
   );
 }
@@ -139,17 +149,11 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    // iOS shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // Android shadow
-    elevation: 2,
+    backgroundColor: backgroundColors.card,
+    borderRadius: radius.lg,
+    padding: spacing(4),
+    marginBottom: spacing(3),
+    ...shadows.medium,
     overflow: "hidden",
   },
   cardUrgent: {
@@ -161,24 +165,24 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 4,
-    backgroundColor: "#dc2626",
+    backgroundColor: primaryColors.primary,
   },
   bloodTypeBadge: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#dc2626",
+    width: bloodTypeBadgeSpec.large.size,
+    height: bloodTypeBadgeSpec.large.size,
+    borderRadius: bloodTypeBadgeSpec.large.borderRadius,
+    backgroundColor: bloodTypeBadgeSpec.large.backgroundColor,
     justifyContent: "center",
     alignItems: "center",
   },
   bloodTypeText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
+    fontSize: bloodTypeBadgeSpec.large.fontSize,
+    fontWeight: bloodTypeBadgeSpec.large.fontWeight,
+    color: bloodTypeBadgeSpec.large.textColor,
   },
   content: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: spacing(4),
   },
   titleRow: {
     flexDirection: "row",
@@ -188,34 +192,34 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F2937",
+    color: textColors.primary,
     flex: 1,
   },
   urgentDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#dc2626",
-    marginLeft: 8,
+    width: spacing(2),
+    height: spacing(2),
+    borderRadius: radius.sm,
+    backgroundColor: primaryColors.primary,
+    marginLeft: spacing(2),
   },
   location: {
     fontSize: 14,
-    color: "#6b7280",
+    color: textColors.secondary,
     marginBottom: 2,
   },
   meta: {
     fontSize: 12,
-    color: "#9ca3af",
+    color: textColors.tertiary,
   },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: spacing(2),
   },
   statusBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing(2),
     paddingVertical: 3,
-    borderRadius: 4,
+    borderRadius: radius.sm,
   },
   statusText: {
     fontSize: 12,
@@ -223,8 +227,8 @@ const styles = StyleSheet.create({
   },
   donorFoundText: {
     fontSize: 13,
-    color: "#22c55e",
+    color: semanticColors.success,
     fontWeight: "500",
-    marginLeft: 8,
+    marginLeft: spacing(2),
   },
 });
