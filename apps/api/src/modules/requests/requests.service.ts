@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,6 +15,8 @@ import { BloodType, RequestStatus, Urgency, getCompatibleDonorTypes } from '@pul
 
 @Injectable()
 export class RequestsService {
+  private readonly logger = new Logger(RequestsService.name);
+
   constructor(
     @InjectRepository(Request)
     private readonly requestRepository: Repository<Request>,
@@ -47,12 +50,16 @@ export class RequestsService {
 
     const saved = await this.requestRepository.save(request);
 
-    // Queue notification to matching donors
-    await this.notificationQueue.add('notify-matching-donors', {
-      requestId: saved.id,
-      bloodType: data.bloodType,
-      seekerId,
-    });
+    // Queue notification to matching donors (best-effort — don't fail the request)
+    try {
+      await this.notificationQueue.add('notify-matching-donors', {
+        requestId: saved.id,
+        bloodType: data.bloodType,
+        seekerId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to queue donor notification for request ${saved.id}`, error instanceof Error ? error.stack : undefined);
+    }
 
     return saved;
   }
@@ -106,12 +113,16 @@ export class RequestsService {
 
     const saved = await this.requestRepository.save(request);
 
-    // Notify seeker that request was accepted
-    await this.notificationQueue.add('request-accepted', {
-      requestId: saved.id,
-      seekerId: request.seekerId,
-      donorId,
-    });
+    // Notify seeker that request was accepted (best-effort)
+    try {
+      await this.notificationQueue.add('request-accepted', {
+        requestId: saved.id,
+        seekerId: request.seekerId,
+        donorId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to queue acceptance notification for request ${saved.id}`, error instanceof Error ? error.stack : undefined);
+    }
 
     return saved;
   }
