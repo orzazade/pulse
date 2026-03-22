@@ -2,6 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { BLOOD_TYPES } from "./lib/bloodType";
+import { getAuthenticatedUser } from "./lib/auth";
 
 // Strip internal fields before returning user data to the client
 // clerkId is an internal auth identifier; pushToken could be used to send unsolicited notifications
@@ -96,15 +97,7 @@ export const getCurrentUser = query({
 export const updatePhone = mutation({
   args: { phone: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Validate phone: must be 5-20 chars, only digits, spaces, dashes, parens, plus
     const phone = args.phone.trim();
@@ -164,15 +157,7 @@ export const updateMode = mutation({
     mode: v.union(v.literal("donor"), v.literal("seeker"), v.literal("both")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Block switching away from donor mode if user has an active accepted request.
     // Without this, the request would be orphaned — the donor can no longer see or
@@ -212,15 +197,7 @@ export const updateLocation = mutation({
     longitude: v.number(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Validate coordinates are finite numbers (NaN/Infinity bypass range checks)
     if (!Number.isFinite(args.latitude) || !Number.isFinite(args.longitude)) {
@@ -269,15 +246,7 @@ export const updateLocation = mutation({
 
 export const skipLocation = mutation({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     await ctx.db.patch(user._id, {
       locationGranted: false,
@@ -294,15 +263,7 @@ export const updateProfile = mutation({
     preferredDonationCenter: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Validate and sanitize string inputs
     const city = args.city !== undefined ? (args.city.trim() || undefined) : undefined;
@@ -358,15 +319,7 @@ export const getAvailability = query({
 
 export const toggleAvailability = mutation({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Toggle: if undefined or true, set to false; if false, set to true
     const newAvailability = user.isAvailable === false;
@@ -422,15 +375,7 @@ export const getUserStats = query({
 export const updatePushToken = mutation({
   args: { pushToken: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Validate push token format (Expo push tokens)
     const token = args.pushToken.trim();
@@ -499,15 +444,7 @@ export const updateNotificationPreferences = mutation({
     notifyEligibility: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Build update object with only provided fields
     const updates: {

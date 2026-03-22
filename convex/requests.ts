@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { getCompatibleDonorTypes, BLOOD_TYPES } from "./lib/bloodType";
 import { DONATION_CYCLE_DAYS, DONATION_CYCLE_MS } from "./lib/constants";
+import { getAuthenticatedUser } from "./lib/auth";
 import type { QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 
@@ -35,18 +36,6 @@ function sortByUrgencyThenDate<T extends { urgency: string; createdAt: number }>
     if (aPriority !== bPriority) return aPriority - bPriority;
     return b.createdAt - a.createdAt;
   });
-}
-
-/** Authenticate the caller and return their user document, or throw. */
-async function getAuthenticatedUser(ctx: QueryCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) throw new Error("Not authenticated");
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) throw new Error("User not found");
-  return user;
 }
 
 /**
