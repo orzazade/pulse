@@ -14,7 +14,6 @@ import * as Location from "expo-location";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   colors,
-  typography,
   spacing,
   radius,
   buttonSpec,

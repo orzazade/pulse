@@ -26,7 +26,6 @@ import {
   bodyStyles,
   fontWeight,
   touchTargetSpec,
-  spacingValues,
   shadows,
 } from "@/theme/tokens";
 import { SocialLoginSection } from "@/components/auth/SocialLoginSection";

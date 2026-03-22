@@ -10,7 +10,6 @@ import {
   spacing,
   radius,
   buttonSpec,
-  inputSpec,
   touchTargetSpec,
   shadows,
 } from "@/theme/tokens";

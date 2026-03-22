@@ -27,7 +27,6 @@ import {
   bodyStyles,
   spacing,
   iconSpec,
-  touchTargetSpec,
 } from '@/theme/tokens';
 import { BLOOD_TYPES } from '@convex/lib/bloodType';
 

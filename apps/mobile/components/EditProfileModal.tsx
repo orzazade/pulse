@@ -17,10 +17,7 @@ import {
   borderColors,
   fontWeight,
   spacing,
-  headingStyles,
   touchTargetSpec,
-  radius,
-  shadows,
   iconSpec,
 } from "@/theme/tokens";
 import { Ionicons } from "@expo/vector-icons";

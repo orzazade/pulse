@@ -10,7 +10,6 @@ import {
   headingStyles,
   bodyStyles,
   fontWeight,
-  touchTargetSpec,
 } from '@/theme/tokens';
 
 // Blood type badge background colors based on blood type
