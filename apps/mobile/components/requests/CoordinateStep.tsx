@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   textColors,
   backgroundColors,
+  borderColors,
   shadows,
   radius,
   spacing,
@@ -58,14 +59,14 @@ export function CoordinateStep({
               onPress={onCall}
               activeOpacity={0.7}
             >
-              <Ionicons name="call" size={20} color="#FFFFFF" />
+              <Ionicons name="call" size={20} color={textColors.onPrimary} />
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionButton, styles.messageButton]}
               onPress={onMessage}
               activeOpacity={0.7}
             >
-              <Ionicons name="chatbubble" size={20} color="#FFFFFF" />
+              <Ionicons name="chatbubble" size={20} color={textColors.onPrimary} />
             </TouchableOpacity>
           </View>
         ) : (
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.full,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: borderColors.default,
     justifyContent: "center",
     alignItems: "center",
     marginRight: spacing(3),
