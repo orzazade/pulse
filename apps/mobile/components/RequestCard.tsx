@@ -2,16 +2,16 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Id } from "@convex/_generated/dataModel";
+import { getTimeAgo } from "@/lib/timeFormat";
 import {
   primaryColors,
   backgroundColors,
   textColors,
   semanticColors,
-  headingStyles,
-  bodyStyles,
   shadows,
   radius,
   spacing,
+  bloodTypeBadgeSpec,
 } from "@/theme/tokens";
 
 type RequestStatus = "open" | "accepted" | "cancelled" | "completed";
@@ -20,7 +20,7 @@ interface RequestCardProps {
   request: {
     _id: Id<"requests">;
     bloodType: string;
-    urgency: "normal" | "urgent";
+    urgency: string;
     city?: string;
     notes?: string;
     status: RequestStatus;
@@ -37,20 +37,6 @@ interface RequestCardProps {
   };
   variant: "seeker" | "donor";
   onPress: () => void;
-}
-
-function getTimeAgo(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes} min ago`;
-  if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
-  return new Date(timestamp).toLocaleDateString();
 }
 
 function getStatusLabel(status: RequestStatus): string {
@@ -71,26 +57,28 @@ function getStatusLabel(status: RequestStatus): string {
 function getStatusColor(status: RequestStatus): string {
   switch (status) {
     case "open":
-      return semanticColors.info; // blue
+      return semanticColors.info;
     case "accepted":
-      return semanticColors.success; // green
+      return semanticColors.success;
     case "cancelled":
-      return textColors.tertiary; // gray
+      return textColors.secondary;
     case "completed":
-      return "#8b5cf6"; // purple (no token for this yet)
+      return textColors.secondary;
     default:
-      return textColors.tertiary;
+      return textColors.secondary;
   }
 }
 
 export function RequestCard({ request, variant, onPress }: RequestCardProps) {
-  const isUrgent = request.urgency === "urgent";
+  const isUrgent = request.urgency === "urgent" || request.urgency === "critical";
   const timeAgo = getTimeAgo(request.createdAt);
 
-  // Generate title to match design: "Urgent: B- Needed" or "O+ Needed"
-  const title = isUrgent
-    ? `Urgent: ${request.bloodType} Needed`
-    : `${request.bloodType} Needed`;
+  // Generate title to match design: "Critical: B- Needed", "Urgent: B- Needed", or "O+ Needed"
+  const title = request.urgency === "critical"
+    ? `Critical: ${request.bloodType} Needed`
+    : isUrgent
+      ? `Urgent: ${request.bloodType} Needed`
+      : `${request.bloodType} Needed`;
 
   // Get location display text
   const locationText = request.city || request.seeker?.city || null;
@@ -163,9 +151,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: backgroundColors.card,
     borderRadius: radius.lg,
-    padding: spacing(4), // 16px
-    marginBottom: spacing(3), // 12px
-    ...shadows.medium, // Consistent shadow with design tokens
+    padding: spacing(4),
+    marginBottom: spacing(3),
+    ...shadows.medium,
     overflow: "hidden",
   },
   cardUrgent: {
@@ -177,24 +165,24 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 4,
-    backgroundColor: primaryColors.primary, // Use primary red
+    backgroundColor: primaryColors.primary,
   },
   bloodTypeBadge: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: primaryColors.primary, // Use primary red
+    width: bloodTypeBadgeSpec.large.size,
+    height: bloodTypeBadgeSpec.large.size,
+    borderRadius: bloodTypeBadgeSpec.large.borderRadius,
+    backgroundColor: bloodTypeBadgeSpec.large.backgroundColor,
     justifyContent: "center",
     alignItems: "center",
   },
   bloodTypeText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: textColors.onPrimary, // White text
+    fontSize: bloodTypeBadgeSpec.large.fontSize,
+    fontWeight: bloodTypeBadgeSpec.large.fontWeight,
+    color: bloodTypeBadgeSpec.large.textColor,
   },
   content: {
     flex: 1,
-    marginLeft: spacing(4), // 16px
+    marginLeft: spacing(4),
   },
   titleRow: {
     flexDirection: "row",
@@ -202,35 +190,36 @@ const styles = StyleSheet.create({
     marginBottom: spacing(0.5), // 2px
   },
   title: {
-    ...headingStyles.cardTitle, // 16px semibold
+    fontSize: 16,
+    fontWeight: "600",
     color: textColors.primary,
     flex: 1,
   },
   urgentDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: primaryColors.primary, // Use primary red
-    marginLeft: spacing(2), // 8px
+    width: spacing(2),
+    height: spacing(2),
+    borderRadius: radius.sm,
+    backgroundColor: primaryColors.primary,
+    marginLeft: spacing(2),
   },
   location: {
-    ...bodyStyles.bodySmall, // 14px
+    fontSize: 14,
     color: textColors.secondary,
-    marginBottom: spacing(0.5), // 2px
+    marginBottom: 2,
   },
   meta: {
-    ...bodyStyles.caption, // 12px
+    fontSize: 12,
     color: textColors.tertiary,
   },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: spacing(2), // 8px
+    marginTop: spacing(2),
   },
   statusBadge: {
-    paddingHorizontal: spacing(2), // 8px
-    paddingVertical: spacing(0.75), // 3px
-    borderRadius: radius.sm, // 4px
+    paddingHorizontal: spacing(2),
+    paddingVertical: 3,
+    borderRadius: radius.sm,
   },
   statusText: {
     ...bodyStyles.caption, // 12px
@@ -238,8 +227,8 @@ const styles = StyleSheet.create({
   },
   donorFoundText: {
     fontSize: 13,
-    color: semanticColors.success, // Green
+    color: semanticColors.success,
     fontWeight: "500",
-    marginLeft: spacing(2), // 8px
+    marginLeft: spacing(2),
   },
 });

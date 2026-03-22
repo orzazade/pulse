@@ -77,7 +77,7 @@ export function EditProfileModal({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onRequestClose={isSaving ? undefined : onClose}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -118,6 +118,7 @@ export function EditProfileModal({
               onChangeText={setCity}
               placeholder="Enter your city"
               editable={!isSaving}
+              maxLength={100}
             />
           </View>
 
@@ -128,6 +129,7 @@ export function EditProfileModal({
               onChangeText={setRegion}
               placeholder="Enter your region"
               editable={!isSaving}
+              maxLength={100}
             />
           </View>
 
@@ -138,6 +140,7 @@ export function EditProfileModal({
               onChangeText={setPreferredDonationCenter}
               placeholder="Enter preferred donation center"
               editable={!isSaving}
+              maxLength={200}
             />
           </View>
         </ScrollView>

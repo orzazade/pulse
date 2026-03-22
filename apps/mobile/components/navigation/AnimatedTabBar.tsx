@@ -26,7 +26,7 @@ import { colors, spacing, tabBarSpec, animationSpec, iconSpec, touchTargetSpec }
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const TAB_COUNT = 5;
 const TAB_WIDTH = SCREEN_WIDTH / TAB_COUNT;
-const INDICATOR_WIDTH = TAB_WIDTH - spacing[4]; // 16px margin on each side
+const INDICATOR_WIDTH = TAB_WIDTH - spacing(4); // 16px margin on each side
 const INDICATOR_HEIGHT = 36;
 
 // =============================================================================
@@ -50,7 +50,7 @@ interface TabItemProps {
 
 function TabItem({
   route,
-  index,
+  index: _index,
   isFocused,
   tabBarLabel,
   iconName,
@@ -156,7 +156,7 @@ export function AnimatedTabBar({
       style={[
         styles.container,
         {
-          paddingBottom: insets.bottom > 0 ? insets.bottom : spacing[2],
+          paddingBottom: insets.bottom > 0 ? insets.bottom : spacing(2),
         },
       ]}
     >
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     backgroundColor: tabBarSpec.backgroundColor,
     borderTopWidth: tabBarSpec.borderTopWidth,
     borderTopColor: tabBarSpec.borderTopColor,
-    paddingTop: spacing[2],
+    paddingTop: spacing(2),
   },
 
   tabsContainer: {
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
 
   indicator: {
     position: 'absolute',
-    top: spacing[2],
+    top: spacing(2),
     width: INDICATOR_WIDTH,
     height: INDICATOR_HEIGHT,
     backgroundColor: colors.primaryLight,

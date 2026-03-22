@@ -1,8 +1,42 @@
 import { mutation, query, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { getCompatibleDonorTypes } from "./lib/bloodType";
-import { Id } from "./_generated/dataModel";
+import { getCompatibleDonorTypes, BLOOD_TYPES } from "./lib/bloodType";
+import { DONATION_CYCLE_DAYS, DONATION_CYCLE_MS } from "./lib/constants";
+import { getAuthenticatedUser } from "./lib/auth";
+import type { QueryCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+
+/** Enrich requests with public seeker info (city only — no phone for privacy) */
+async function enrichWithSeekerInfo<T extends { seekerId: Id<"users"> }>(
+  ctx: QueryCtx,
+  requests: T[],
+) {
+  return Promise.all(
+    requests.map(async (request) => {
+      const seeker = await ctx.db.get(request.seekerId);
+      return {
+        ...request,
+        seeker: seeker
+          ? { _id: seeker._id, city: seeker.city }
+          : null,
+      };
+    })
+  );
+}
+
+// Urgency priority for sorting: critical first, standard last
+const URGENCY_PRIORITY: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
+
+/** Sort requests by urgency (critical first), then by createdAt (newest first) */
+function sortByUrgencyThenDate<T extends { urgency: string; createdAt: number }>(requests: T[]): T[] {
+  return requests.sort((a, b) => {
+    const aPriority = URGENCY_PRIORITY[a.urgency] ?? 2;
+    const bPriority = URGENCY_PRIORITY[b.urgency] ?? 2;
+    if (aPriority !== bPriority) return aPriority - bPriority;
+    return b.createdAt - a.createdAt;
+  });
+}
 
 /**
  * Request System
@@ -27,31 +61,49 @@ export const createRequest = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
-
-    // Validate user mode - must be seeker or both
-    if (user.mode === "donor") {
+    // Validate user mode - must be seeker or both (not donor-only or unset)
+    if (user.mode !== "seeker" && user.mode !== "both") {
       throw new Error("Only seekers can create blood requests");
     }
 
-    // Validate blood type
-    const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-    if (!VALID_BLOOD_TYPES.includes(args.bloodType)) {
-      throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    // Rate limit: max 5 open requests per user
+    // Capped at 50 to prevent loading entire request history (only need to detect 5 open)
+    const openRequests = await ctx.db
+      .query("requests")
+      .withIndex("by_seeker", (q) => q.eq("seekerId", user._id))
+      .filter((q) => q.eq(q.field("status"), "open"))
+      .take(50);
+
+    if (openRequests.length >= 5) {
+      throw new Error("You can have at most 5 open requests. Please cancel or wait for existing ones to be fulfilled.");
     }
 
-    // Validate units (1-10, defaults to 1)
+    // Validate blood type
+    if (!BLOOD_TYPES.includes(args.bloodType as typeof BLOOD_TYPES[number])) {
+      throw new Error(`Invalid blood type. Must be one of: ${BLOOD_TYPES.join(", ")}`);
+    }
+
+    // Validate units (1-10, must be whole number, defaults to 1)
     const units = args.units ?? 1;
-    if (units < 1 || units > 10) {
-      throw new Error("Units must be between 1 and 10");
+    if (!Number.isFinite(units) || !Number.isInteger(units) || units < 1 || units > 10) {
+      throw new Error("Units must be a whole number between 1 and 10");
+    }
+
+    // Sanitize and validate string inputs
+    const hospital = args.hospital?.trim() || undefined;
+    const city = args.city?.trim() || undefined;
+    const notes = args.notes?.trim() || undefined;
+
+    if (notes && notes.length > 500) {
+      throw new Error("Notes must be 500 characters or less");
+    }
+    if (hospital && hospital.length > 200) {
+      throw new Error("Hospital name must be 200 characters or less");
+    }
+    if (city && city.length > 100) {
+      throw new Error("City name must be 100 characters or less");
     }
 
     const requestId = await ctx.db.insert("requests", {
@@ -59,9 +111,9 @@ export const createRequest = mutation({
       bloodType: args.bloodType,
       units,
       urgency: args.urgency,
-      hospital: args.hospital,
-      city: args.city,
-      notes: args.notes,
+      hospital,
+      city,
+      notes,
       status: "open",
       createdAt: Date.now(),
     });
@@ -71,7 +123,7 @@ export const createRequest = mutation({
       requestId,
       bloodType: args.bloodType,
       urgency: args.urgency,
-      city: args.city,
+      city,
       seekerId: user._id,
     });
 
@@ -91,28 +143,31 @@ export const broadcastEmergency = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
-
-    // Validate user mode - must be seeker or both
-    if (user.mode === "donor") {
+    // Validate user mode - must be seeker or both (not donor-only or unset)
+    if (user.mode !== "seeker" && user.mode !== "both") {
       throw new Error("Only seekers can broadcast emergency requests");
     }
 
     // Validate blood type
-    const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-    if (!VALID_BLOOD_TYPES.includes(args.bloodType)) {
-      throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    if (!BLOOD_TYPES.includes(args.bloodType as typeof BLOOD_TYPES[number])) {
+      throw new Error(`Invalid blood type. Must be one of: ${BLOOD_TYPES.join(", ")}`);
+    }
+
+    // Sanitize and validate string inputs
+    const city = args.city?.trim() || undefined;
+    const notes = args.notes?.trim() || undefined;
+
+    if (notes && notes.length > 500) {
+      throw new Error("Notes must be 500 characters or less");
+    }
+    if (city && city.length > 100) {
+      throw new Error("City name must be 100 characters or less");
     }
 
     // Rate limiting: Check for critical/urgent requests in the last hour
+    // Capped at 50 to prevent loading entire request history (only need to detect 1 recent urgent)
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
     const recentUrgentRequests = await ctx.db
       .query("requests")
@@ -126,10 +181,22 @@ export const broadcastEmergency = mutation({
           )
         )
       )
-      .collect();
+      .take(50);
 
     if (recentUrgentRequests.length > 0) {
       throw new Error("Please wait before sending another emergency broadcast");
+    }
+
+    // Rate limit: max 5 open requests per user (consistent with createRequest)
+    // Capped at 50 to prevent loading entire request history (only need to detect 5 open)
+    const openRequests = await ctx.db
+      .query("requests")
+      .withIndex("by_seeker", (q) => q.eq("seekerId", user._id))
+      .filter((q) => q.eq(q.field("status"), "open"))
+      .take(50);
+
+    if (openRequests.length >= 5) {
+      throw new Error("You can have at most 5 open requests. Please cancel or wait for existing ones to be fulfilled.");
     }
 
     const requestId = await ctx.db.insert("requests", {
@@ -137,8 +204,8 @@ export const broadcastEmergency = mutation({
       bloodType: args.bloodType,
       units: 1, // Default to 1 unit for emergency
       urgency: "critical",
-      city: args.city,
-      notes: args.notes,
+      city,
+      notes,
       status: "open",
       createdAt: Date.now(),
     });
@@ -148,7 +215,7 @@ export const broadcastEmergency = mutation({
       requestId,
       bloodType: args.bloodType,
       urgency: "critical",
-      city: args.city,
+      city,
       seekerId: user._id,
     });
 
@@ -158,37 +225,107 @@ export const broadcastEmergency = mutation({
 
 /**
  * Cancel a request
- * Only the seeker who created it can cancel, and only if still open
+ * - Seekers can cancel their own open or accepted requests
+ * - Donors can withdraw from accepted requests (reverts to open)
  */
 export const cancelRequest = mutation({
   args: { requestId: v.id("requests") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     const request = await ctx.db.get(args.requestId);
     if (!request) throw new Error("Request not found");
 
-    // Verify ownership
-    if (request.seekerId !== user._id) {
+    const isSeeker = request.seekerId === user._id;
+    const isDonor = request.acceptedDonorId === user._id;
+
+    // Donor withdrawing from an accepted request
+    if (isDonor && request.status === "accepted") {
+      await ctx.db.patch(args.requestId, {
+        status: "open",
+        acceptedDonorId: undefined,
+        acceptedAt: undefined,
+      });
+
+      // Notify the seeker that the donor withdrew
+      const seeker = await ctx.db.get(request.seekerId);
+      if (seeker) {
+        await ctx.db.insert("notifications", {
+          userId: request.seekerId,
+          type: "donor_withdrew",
+          title: "Donor Withdrew",
+          body: `The donor for your ${request.bloodType} blood request has withdrawn. Your request is open again for other donors.`,
+          read: false,
+          data: { requestId: args.requestId },
+          createdAt: Date.now(),
+        });
+
+        if (seeker.pushToken && seeker.notifyRequestAccepted !== false) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.sendPushNotification,
+            {
+              pushToken: seeker.pushToken,
+              title: "Donor Withdrew",
+              body: `The donor for your ${request.bloodType} blood request has withdrawn. Your request is open again for other donors.`,
+              data: { type: "donor_withdrew", requestId: args.requestId },
+            }
+          );
+        }
+      }
+
+      return { success: true };
+    }
+
+    // Seeker cancelling their own request
+    if (!isSeeker) {
       throw new Error("You can only cancel your own requests");
     }
 
-    // Only allow cancellation of open requests
-    if (request.status !== "open") {
-      throw new Error("Can only cancel open requests");
+    if (request.status !== "open" && request.status !== "accepted") {
+      throw new Error("Can only cancel open or accepted requests");
     }
 
-    await ctx.db.patch(args.requestId, {
+    // Clear donor association when cancelling an accepted request (privacy: don't
+    // retain the link between donor and a cancelled record). Notification below
+    // uses the pre-patch `request` snapshot so the donorId is still available.
+    const cancelPatch: { status: "cancelled"; acceptedDonorId?: undefined; acceptedAt?: undefined } = {
       status: "cancelled",
-    });
+    };
+    if (request.status === "accepted" && request.acceptedDonorId) {
+      cancelPatch.acceptedDonorId = undefined;
+      cancelPatch.acceptedAt = undefined;
+    }
+    await ctx.db.patch(args.requestId, cancelPatch);
+
+    // Notify the accepted donor that the request was cancelled
+    if (request.status === "accepted" && request.acceptedDonorId) {
+      const donor = await ctx.db.get(request.acceptedDonorId);
+      if (donor) {
+        await ctx.db.insert("notifications", {
+          userId: request.acceptedDonorId,
+          type: "request_cancelled",
+          title: "Request Cancelled",
+          body: `The ${request.bloodType} blood request you accepted has been cancelled by the seeker.`,
+          read: false,
+          data: { requestId: args.requestId },
+          createdAt: Date.now(),
+        });
+
+        if (donor.pushToken && donor.notifyRequestAccepted !== false) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.sendPushNotification,
+            {
+              pushToken: donor.pushToken,
+              title: "Request Cancelled",
+              body: `The ${request.bloodType} blood request you accepted has been cancelled by the seeker.`,
+              data: { type: "request_cancelled", requestId: args.requestId },
+            }
+          );
+        }
+      }
+    }
 
     return { success: true };
   },
@@ -201,18 +338,10 @@ export const cancelRequest = mutation({
 export const acceptRequest = mutation({
   args: { requestId: v.id("requests") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
-
-    // Verify donor mode
-    if (user.mode === "seeker") {
+    // Verify donor mode - must be donor or both (not seeker-only or unset)
+    if (user.mode !== "donor" && user.mode !== "both") {
       throw new Error("Only donors can accept blood requests");
     }
 
@@ -245,6 +374,66 @@ export const acceptRequest = mutation({
       throw new Error("You cannot accept your own request");
     }
 
+    // Verify donor is eligible (56-day donation cycle)
+    // Check 1: donations table (primary source)
+    const lastDonation = await ctx.db
+      .query("donations")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .order("desc")
+      .first();
+
+    if (lastDonation) {
+      const daysSince = Math.floor(
+        (Date.now() - lastDonation.donationDate) / (1000 * 60 * 60 * 24)
+      );
+      if (daysSince < DONATION_CYCLE_DAYS) {
+        const daysLeft = DONATION_CYCLE_DAYS - daysSince;
+        throw new Error(
+          `You are not yet eligible to donate. ${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining until your next eligible donation.`
+        );
+      }
+    }
+
+    // Check 2: recently completed requests (tamper-proof — donors can't delete these)
+    // Prevents bypass via deleting auto-recorded donation records
+    // Capped at 100 to prevent unbounded data loading for prolific long-term donors
+    // (100 completed requests ≈ 15+ years of donations at the 56-day cycle rate)
+    const recentlyCompletedAsDonor = await ctx.db
+      .query("requests")
+      .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
+      .filter((q) => q.eq(q.field("status"), "completed"))
+      .take(100);
+
+    const cycleMsMin = DONATION_CYCLE_MS;
+    const now = Date.now();
+    const tooRecentCompletion = recentlyCompletedAsDonor.find(
+      (r) => r.acceptedAt && now - r.acceptedAt < cycleMsMin
+    );
+
+    const tooRecentAcceptedAt = tooRecentCompletion?.acceptedAt;
+    if (tooRecentCompletion && tooRecentAcceptedAt) {
+      const daysSince = Math.floor(
+        (now - tooRecentAcceptedAt) / (1000 * 60 * 60 * 24)
+      );
+      const daysLeft = DONATION_CYCLE_DAYS - daysSince;
+      throw new Error(
+        `You are not yet eligible to donate. ${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining until your next eligible donation.`
+      );
+    }
+
+    // Prevent donor from accepting multiple requests simultaneously
+    const activeAccepted = await ctx.db
+      .query("requests")
+      .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
+      .filter((q) => q.eq(q.field("status"), "accepted"))
+      .first();
+
+    if (activeAccepted) {
+      throw new Error(
+        "You already have an active accepted request. Complete or withdraw from it before accepting another."
+      );
+    }
+
     await ctx.db.patch(args.requestId, {
       status: "accepted",
       acceptedDonorId: user._id,
@@ -262,38 +451,13 @@ export const acceptRequest = mutation({
 });
 
 /**
- * Decline a request (placeholder for future)
- * Currently, donors simply don't accept - this could track declined donors
- * to not show the request to them again in the future
- */
-export const declineRequest = mutation({
-  args: { requestId: v.id("requests") },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    // Placeholder - just verify auth for now
-    // Future: track declined donors in a separate table
-    return { success: true, message: "Request declined (not tracking yet)" };
-  },
-});
-
-/**
  * Mark a request as completed
  * Only the seeker who created it can mark as complete
  */
 export const completeRequest = mutation({
   args: { requestId: v.id("requests") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     const request = await ctx.db.get(args.requestId);
     if (!request) throw new Error("Request not found");
@@ -311,6 +475,62 @@ export const completeRequest = mutation({
     await ctx.db.patch(args.requestId, {
       status: "completed",
     });
+
+    // Auto-record donation for the accepted donor so the 56-day eligibility
+    // cycle is enforced even if the donor doesn't manually log it.
+    const acceptedDonorId = request.acceptedDonorId;
+    if (acceptedDonorId) {
+      const now = Date.now();
+      const cycleMsMin = DONATION_CYCLE_MS;
+
+      // Only record if no donation exists within the last 56 days
+      // (donor may have already logged it manually via addDonation)
+      const recentDonation = await ctx.db
+        .query("donations")
+        .withIndex("by_user", (q) => q.eq("userId", acceptedDonorId))
+        .order("desc")
+        .first();
+
+      const alreadyRecorded =
+        recentDonation && now - recentDonation.donationDate < cycleMsMin;
+
+      if (!alreadyRecorded) {
+        await ctx.db.insert("donations", {
+          userId: acceptedDonorId,
+          donationDate: now,
+          donationCenter: request.hospital,
+          notes: `Auto-recorded from completed request (${request.bloodType})`,
+          createdAt: now,
+        });
+      }
+
+      // Notify the donor that the request was completed (thank you)
+      const donor = await ctx.db.get(acceptedDonorId);
+      if (donor) {
+        await ctx.db.insert("notifications", {
+          userId: acceptedDonorId,
+          type: "request_completed",
+          title: "Thank You for Donating!",
+          body: `The ${request.bloodType} blood request has been marked as completed. Your donation made a difference.`,
+          read: false,
+          data: { requestId: args.requestId },
+          createdAt: Date.now(),
+        });
+
+        if (donor.pushToken && donor.notifyRequestAccepted !== false) {
+          await ctx.scheduler.runAfter(
+            0,
+            internal.notifications.sendPushNotification,
+            {
+              pushToken: donor.pushToken,
+              title: "Thank You for Donating!",
+              body: `The ${request.bloodType} blood request has been marked as completed. Your donation made a difference.`,
+              data: { type: "request_completed", requestId: args.requestId },
+            }
+          );
+        }
+      }
+    }
 
     return { success: true };
   },
@@ -334,13 +554,18 @@ export const getMyRequests = query({
 
     if (!user) return [];
 
+    // Fetch most recent requests, capped at 200 to prevent unbounded data transfer
+    // (result is sliced to 100 after sorting; 200 provides margin)
     const requests = await ctx.db
       .query("requests")
       .withIndex("by_seeker", (q) => q.eq("seekerId", user._id))
-      .collect();
+      .order("desc")
+      .take(200);
 
-    // Sort by createdAt descending (most recent first)
-    const sortedRequests = requests.sort((a, b) => b.createdAt - a.createdAt);
+    // Sort by createdAt descending (most recent first), cap at 100 results
+    const sortedRequests = requests
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, 100);
 
     // Fetch accepted donor info for accepted requests
     const requestsWithDonor = await Promise.all(
@@ -395,11 +620,13 @@ export const getIncomingRequests = query({
       return [];
     }
 
-    // Get all open requests
+    // Get open requests, capped at 500 to prevent unbounded data transfer
+    // (result is sliced to 50 after filtering; 500 provides ample margin)
     const openRequests = await ctx.db
       .query("requests")
       .withIndex("by_status", (q) => q.eq("status", "open"))
-      .collect();
+      .order("desc")
+      .take(500);
 
     // Filter by compatibility, city, and exclude self
     const filteredRequests = openRequests.filter((request) => {
@@ -422,33 +649,13 @@ export const getIncomingRequests = query({
       return true;
     });
 
-    // Sort: critical > urgent > normal > standard, then by createdAt (newest first within same urgency)
-    const urgencyPriority: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
-    const sortedRequests = filteredRequests.sort((a, b) => {
-      const aPriority = urgencyPriority[a.urgency] ?? 2;
-      const bPriority = urgencyPriority[b.urgency] ?? 2;
-      if (aPriority !== bPriority) return aPriority - bPriority;
-      return b.createdAt - a.createdAt;
-    });
+    const sortedRequests = sortByUrgencyThenDate(filteredRequests);
 
-    // Fetch seeker info for each request
-    const requestsWithSeeker = await Promise.all(
-      sortedRequests.map(async (request) => {
-        const seeker = await ctx.db.get(request.seekerId);
-        return {
-          ...request,
-          seeker: seeker
-            ? {
-                _id: seeker._id,
-                city: seeker.city,
-                // Note: phone NOT included - privacy until accepted
-              }
-            : null,
-        };
-      })
-    );
+    // Limit results to prevent excessive data transfer as request volume grows.
+    // Sorted by urgency first, so the most critical requests are always included.
+    const limitedRequests = sortedRequests.slice(0, 50);
 
-    return requestsWithSeeker;
+    return enrichWithSeekerInfo(ctx, limitedRequests);
   },
 });
 
@@ -472,16 +679,23 @@ export const getHomeFeedRequests = query({
 
     if (!user) return [];
 
+    // Only donors or both mode users see the donor-oriented home feed
+    if (user.mode === "seeker") {
+      return [];
+    }
+
     // Must have blood type set to see compatible requests
     if (!user.bloodType) {
       return [];
     }
 
-    // Get all open requests
+    // Get open requests, capped at 200 most recent to prevent unbounded data transfer
+    // (home feed only shows 10 results; 200 provides ample margin for blood type filtering)
     const openRequests = await ctx.db
       .query("requests")
       .withIndex("by_status", (q) => q.eq("status", "open"))
-      .collect();
+      .order("desc")
+      .take(200);
 
     // Filter based on user mode and blood type compatibility
     const filteredRequests = openRequests.filter((request) => {
@@ -496,36 +710,12 @@ export const getHomeFeedRequests = query({
       return compatibleDonors.includes(user.bloodType!);
     });
 
-    // Sort: critical > urgent > normal > standard, then by createdAt (newest first)
-    const urgencyPriority: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
-    const sortedRequests = filteredRequests.sort((a, b) => {
-      const aPriority = urgencyPriority[a.urgency] ?? 2;
-      const bPriority = urgencyPriority[b.urgency] ?? 2;
-      if (aPriority !== bPriority) return aPriority - bPriority;
-      return b.createdAt - a.createdAt;
-    });
+    const sortedRequests = sortByUrgencyThenDate(filteredRequests);
 
     // Limit to 10 most recent
     const limitedRequests = sortedRequests.slice(0, 10);
 
-    // Fetch seeker info (city only, NOT phone for privacy)
-    const requestsWithSeeker = await Promise.all(
-      limitedRequests.map(async (request) => {
-        const seeker = await ctx.db.get(request.seekerId);
-        return {
-          ...request,
-          seeker: seeker
-            ? {
-                _id: seeker._id,
-                city: seeker.city,
-                // Note: phone NOT included - privacy until accepted
-              }
-            : null,
-        };
-      })
-    );
-
-    return requestsWithSeeker;
+    return enrichWithSeekerInfo(ctx, limitedRequests);
   },
 });
 
@@ -540,11 +730,16 @@ export const listOpenRequests = query({
     urgency: v.optional(v.union(v.literal("normal"), v.literal("urgent"), v.literal("critical"), v.literal("standard"))),
   },
   handler: async (ctx, args) => {
-    // Get all open requests
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    // Get open requests, capped at 500 to prevent unbounded data transfer
+    // (result is sliced to 100 after sorting; 500 provides ample margin for filtering)
     let requests = await ctx.db
       .query("requests")
       .withIndex("by_status", (q) => q.eq("status", "open"))
-      .collect();
+      .order("desc")
+      .take(500);
 
     // Filter by blood type if specified
     if (args.bloodType) {
@@ -556,32 +751,13 @@ export const listOpenRequests = query({
       requests = requests.filter((r) => r.urgency === args.urgency);
     }
 
-    // Sort: critical > urgent > normal > standard, then by createdAt (newest first)
-    const urgencyPriority: Record<string, number> = { critical: 0, urgent: 1, normal: 2, standard: 3 };
-    const sortedRequests = requests.sort((a, b) => {
-      const aPriority = urgencyPriority[a.urgency] ?? 2;
-      const bPriority = urgencyPriority[b.urgency] ?? 2;
-      if (aPriority !== bPriority) return aPriority - bPriority;
-      return b.createdAt - a.createdAt;
-    });
+    const sortedRequests = sortByUrgencyThenDate(requests);
 
-    // Fetch seeker info for each request
-    const requestsWithSeeker = await Promise.all(
-      sortedRequests.map(async (request) => {
-        const seeker = await ctx.db.get(request.seekerId);
-        return {
-          ...request,
-          seeker: seeker
-            ? {
-                _id: seeker._id,
-                city: seeker.city,
-              }
-            : null,
-        };
-      })
-    );
+    // Limit results to prevent excessive data transfer as request volume grows.
+    // Sorted by urgency first, so the most critical requests are always included.
+    const limitedRequests = sortedRequests.slice(0, 100);
 
-    return requestsWithSeeker;
+    return enrichWithSeekerInfo(ctx, limitedRequests);
   },
 });
 
@@ -612,31 +788,34 @@ export const getRequestDetail = query({
     const isSeeker = request.seekerId === user._id;
     const isDonor = request.acceptedDonorId === user._id;
 
-    // Build seeker info with conditional phone
+    // Build seeker info with conditional phone and name
+    // Privacy: fullName only visible to the seeker themselves or the accepted donor
+    const isAcceptedOrCompleted = request.status === "accepted" || request.status === "completed";
     let seekerInfo = null;
     if (seeker) {
       seekerInfo = {
         _id: seeker._id,
+        fullName: isSeeker || (isAcceptedOrCompleted && isDonor) ? seeker.fullName : undefined,
         bloodType: seeker.bloodType,
         city: seeker.city,
-        // Phone only visible to accepted donor
-        phone:
-          request.status === "accepted" && isDonor ? seeker.phone : undefined,
+        // Phone visible to donor after acceptance (including after completion for follow-up)
+        phone: isAcceptedOrCompleted && isDonor ? seeker.phone : undefined,
       };
     }
 
     // Fetch donor info if accepted
+    // Privacy: fullName only visible to the donor themselves or the seeker
     let donorInfo = null;
     if (request.acceptedDonorId) {
       const donor = await ctx.db.get(request.acceptedDonorId);
       if (donor) {
         donorInfo = {
           _id: donor._id,
+          fullName: isDonor || (isAcceptedOrCompleted && isSeeker) ? donor.fullName : undefined,
           bloodType: donor.bloodType,
           city: donor.city,
-          // Phone only visible to seeker
-          phone:
-            request.status === "accepted" && isSeeker ? donor.phone : undefined,
+          // Phone visible to seeker after acceptance (including after completion for follow-up)
+          phone: isAcceptedOrCompleted && isSeeker ? donor.phone : undefined,
         };
       }
     }
@@ -682,8 +861,9 @@ export const notifyMatchingDonors = internalMutation({
     const compatibleDonorTypes = getCompatibleDonorTypes(args.bloodType);
     if (compatibleDonorTypes.length === 0) return { notificationsSent: 0 };
 
-    // Get all potential donors
-    const allUsers = await ctx.db.query("users").collect();
+    // Get potential donors, capped at 2000 to prevent loading entire users table
+    // (result is sliced to 100 after filtering; 2000 provides ample margin)
+    const allUsers = await ctx.db.query("users").take(2000);
 
     // Filter to matching donors
     const matchingDonors = allUsers.filter((user) => {

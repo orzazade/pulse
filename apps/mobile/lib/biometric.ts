@@ -4,20 +4,26 @@ import * as SecureStore from "expo-secure-store";
 const BIOMETRIC_ENABLED_KEY = "biometric_enabled";
 
 export async function isBiometricAvailable(): Promise<boolean> {
-  const compatible = await LocalAuthentication.hasHardwareAsync();
-  if (!compatible) return false;
+  try {
+    const compatible = await LocalAuthentication.hasHardwareAsync();
+    if (!compatible) return false;
 
-  const enrolled = await LocalAuthentication.isEnrolledAsync();
-  return enrolled;
+    const enrolled = await LocalAuthentication.isEnrolledAsync();
+    return enrolled;
+  } catch {
+    // Some devices throw on biometric hardware queries — safe fallback
+    return false;
+  }
 }
 
 export async function isBiometricEnabled(): Promise<boolean> {
-  const value = await SecureStore.getItemAsync(BIOMETRIC_ENABLED_KEY);
-  return value === "true";
-}
-
-export async function setBiometricEnabled(enabled: boolean): Promise<void> {
-  await SecureStore.setItemAsync(BIOMETRIC_ENABLED_KEY, enabled ? "true" : "false");
+  try {
+    const value = await SecureStore.getItemAsync(BIOMETRIC_ENABLED_KEY);
+    return value === "true";
+  } catch {
+    // SecureStore failure — assume biometric not enabled to avoid locking user out
+    return false;
+  }
 }
 
 export async function authenticateWithBiometric(): Promise<boolean> {
@@ -32,15 +38,19 @@ export async function authenticateWithBiometric(): Promise<boolean> {
 }
 
 export async function getBiometricType(): Promise<"fingerprint" | "facial" | "iris" | null> {
-  const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
-  if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-    return "facial";
+  try {
+    const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+    if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+      return "facial";
+    }
+    if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+      return "fingerprint";
+    }
+    if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
+      return "iris";
+    }
+    return null;
+  } catch {
+    return null;
   }
-  if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
-    return "fingerprint";
-  }
-  if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
-    return "iris";
-  }
-  return null;
 }

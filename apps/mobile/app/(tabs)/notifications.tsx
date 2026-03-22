@@ -1,4 +1,4 @@
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -36,10 +36,15 @@ export default function NotificationsScreen() {
     // Navigate based on type
     if (
       (notification.type === "request_match" ||
-        notification.type === "request_accepted") &&
+        notification.type === "request_accepted" ||
+        notification.type === "request_completed" ||
+        notification.type === "donor_withdrew" ||
+        notification.type === "request_cancelled") &&
       notification.data?.requestId
     ) {
       router.push("/requests");
+    } else if (notification.type === "eligibility_reminder") {
+      router.push("/profile");
     }
   };
 
@@ -49,6 +54,7 @@ export default function NotificationsScreen() {
       await markAllAsRead();
     } catch (error) {
       console.error("Failed to mark all as read:", error);
+      Alert.alert("Error", "Failed to mark notifications as read. Please try again.");
     }
   };
 

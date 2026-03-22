@@ -30,43 +30,12 @@ import { RequesterCard } from "./requests/RequesterCard";
 import { LocationCard } from "./requests/LocationCard";
 import { TimelineInfoCard } from "./requests/TimelineInfoCard";
 import { RequestAcceptedScreen } from "./requests/RequestAcceptedScreen";
+import { mapUrgency, formatNeededBy } from "@/lib/urgency";
 
 interface RequestDetailModalProps {
   visible: boolean;
   requestId: Id<"requests"> | null;
   onClose: () => void;
-}
-
-/**
- * Map urgency string to UrgencyBanner urgency level
- */
-function mapUrgency(urgency: string): "critical" | "urgent" | "standard" {
-  if (urgency === "critical") return "critical";
-  if (urgency === "urgent") return "urgent";
-  return "standard";
-}
-
-/**
- * Format date for "Needed by" display
- */
-function formatNeededBy(urgency: string): string {
-  const now = new Date();
-
-  if (urgency === "critical") {
-    // Same day
-    const hours = now.getHours();
-    const period = hours >= 12 ? "PM" : "AM";
-    const displayHour = hours % 12 || 12;
-    return `Today, ${displayHour}:00 ${period}`;
-  }
-
-  if (urgency === "urgent") {
-    // 1-2 days
-    return `Tomorrow`;
-  }
-
-  // Standard - within a week
-  return `Within 7 days`;
 }
 
 export function RequestDetailModal({
@@ -75,6 +44,7 @@ export function RequestDetailModal({
   onClose,
 }: RequestDetailModalProps) {
   const [showAcceptedScreen, setShowAcceptedScreen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [acceptedRequestData, setAcceptedRequestData] = useState<{
     requesterName: string;
     requesterPhone: string;
@@ -89,18 +59,22 @@ export function RequestDetailModal({
   );
   const acceptRequest = useMutation(api.requests.acceptRequest);
   const cancelRequest = useMutation(api.requests.cancelRequest);
+  const completeRequest = useMutation(api.requests.completeRequest);
 
   const isLoading = requestId && detail === undefined;
 
   // Handle close - reset accepted screen state
+  // Block close during active mutations so the user sees the result feedback
   const handleClose = () => {
+    if (isSubmitting) return;
     setShowAcceptedScreen(false);
     setAcceptedRequestData(null);
     onClose();
   };
 
   const handleAccept = async () => {
-    if (!requestId || !detail) return;
+    if (!requestId || !detail || isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await acceptRequest({ requestId });
       // Show the Request Accepted screen with seeker info
@@ -118,11 +92,13 @@ export function RequestDetailModal({
         error instanceof Error ? error.message : "Failed to accept request",
         [{ text: "OK" }]
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleCancel = async () => {
-    if (!requestId) return;
+    if (!requestId || isSubmitting) return;
     Alert.alert(
       "Cancel Request",
       "Are you sure you want to cancel this request?",
@@ -132,6 +108,7 @@ export function RequestDetailModal({
           text: "Yes, Cancel",
           style: "destructive",
           onPress: async () => {
+            setIsSubmitting(true);
             try {
               await cancelRequest({ requestId });
               handleClose();
@@ -141,6 +118,8 @@ export function RequestDetailModal({
                 error instanceof Error ? error.message : "Failed to cancel request",
                 [{ text: "OK" }]
               );
+            } finally {
+              setIsSubmitting(false);
             }
           },
         },
@@ -148,8 +127,81 @@ export function RequestDetailModal({
     );
   };
 
-  const handleCall = (phone: string) => {
-    Linking.openURL(`tel:${phone}`);
+  const handleComplete = async () => {
+    if (!requestId || isSubmitting) return;
+    Alert.alert(
+      "Mark as Complete",
+      "Confirm the donation was received? The donor will be thanked and their eligibility timer will reset.",
+      [
+        { text: "Not Yet", style: "cancel" },
+        {
+          text: "Yes, Complete",
+          onPress: async () => {
+            setIsSubmitting(true);
+            try {
+              await completeRequest({ requestId });
+              Alert.alert(
+                "Request Completed",
+                "Thank you! The donor has been notified.",
+                [{ text: "OK", onPress: handleClose }]
+              );
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error instanceof Error ? error.message : "Failed to complete request",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsSubmitting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleWithdraw = async () => {
+    if (!requestId || isSubmitting) return;
+    Alert.alert(
+      "Withdraw from Request",
+      "Are you sure you want to withdraw? The request will be reopened for other donors.",
+      [
+        { text: "No, Stay", style: "cancel" },
+        {
+          text: "Yes, Withdraw",
+          style: "destructive",
+          onPress: async () => {
+            setIsSubmitting(true);
+            try {
+              await cancelRequest({ requestId });
+              handleClose();
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error instanceof Error ? error.message : "Failed to withdraw",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsSubmitting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleCall = async (phone: string) => {
+    const url = `tel:${phone}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Cannot Make Call", "Phone calls are not supported on this device.");
+      }
+    } catch {
+      Alert.alert("Error", "Failed to open phone app.");
+    }
   };
 
   // If showing accepted screen, render that instead
@@ -318,11 +370,16 @@ export function RequestDetailModal({
                       <Text style={styles.declineButtonText}>Decline</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={styles.acceptButton}
+                      style={[styles.acceptButton, isSubmitting && styles.buttonDisabled]}
                       onPress={handleAccept}
                       activeOpacity={0.8}
+                      disabled={isSubmitting}
                     >
-                      <Text style={styles.acceptButtonText}>Accept Request</Text>
+                      {isSubmitting ? (
+                        <ActivityIndicator size="small" color={textColors.onPrimary} />
+                      ) : (
+                        <Text style={styles.acceptButtonText}>Accept Request</Text>
+                      )}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -330,11 +387,54 @@ export function RequestDetailModal({
                 {/* Seeker viewing their own request */}
                 {detail.isSeeker && (
                   <TouchableOpacity
-                    style={styles.cancelButton}
+                    style={[styles.cancelButton, isSubmitting && styles.buttonDisabled]}
                     onPress={handleCancel}
                     activeOpacity={0.7}
+                    disabled={isSubmitting}
                   >
                     <Text style={styles.cancelButtonText}>Cancel Request</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
+            {detail.status === "accepted" && (
+              <View style={styles.actionContainer}>
+                {/* Seeker: mark as complete or cancel */}
+                {detail.isSeeker && (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={[styles.declineButton, isSubmitting && styles.buttonDisabled]}
+                      onPress={handleCancel}
+                      activeOpacity={0.7}
+                      disabled={isSubmitting}
+                    >
+                      <Text style={styles.declineButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.acceptButton, isSubmitting && styles.buttonDisabled]}
+                      onPress={handleComplete}
+                      activeOpacity={0.8}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <ActivityIndicator size="small" color={textColors.onPrimary} />
+                      ) : (
+                        <Text style={styles.acceptButtonText}>Mark as Complete</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Donor: withdraw */}
+                {detail.isDonor && (
+                  <TouchableOpacity
+                    style={[styles.cancelButton, isSubmitting && styles.buttonDisabled]}
+                    onPress={handleWithdraw}
+                    activeOpacity={0.7}
+                    disabled={isSubmitting}
+                  >
+                    <Text style={styles.cancelButtonText}>Withdraw</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -534,6 +634,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: fontWeight.semibold,
     color: textColors.primary,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   emptyContainer: {
     flex: 1,

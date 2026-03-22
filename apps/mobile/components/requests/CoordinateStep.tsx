@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   textColors,
   backgroundColors,
+  borderColors,
   shadows,
   radius,
   spacing,
@@ -26,6 +27,7 @@ export function CoordinateStep({
   onCall,
   onMessage,
 }: CoordinateStepProps) {
+  const hasPhone = phone.trim().length > 0;
   // Get initials from name
   const getInitials = (fullName: string) => {
     const parts = fullName.trim().split(" ");
@@ -50,22 +52,28 @@ export function CoordinateStep({
             <Text style={styles.subtitle}>Requester</Text>
           </View>
         </View>
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.callButton]}
-            onPress={onCall}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="call" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.messageButton]}
-            onPress={onMessage}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="chatbubble" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
+        {hasPhone ? (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.callButton]}
+              onPress={onCall}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="call" size={20} color={textColors.onPrimary} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.messageButton]}
+              onPress={onMessage}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="chatbubble" size={20} color={textColors.onPrimary} />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Text style={styles.phoneUnavailable}>
+            View request for contact info
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -100,7 +108,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.full,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: borderColors.default,
     justifyContent: "center",
     alignItems: "center",
     marginRight: spacing(3),
@@ -141,5 +149,12 @@ const styles = StyleSheet.create({
   },
   messageButton: {
     backgroundColor: semanticColors.info,
+  },
+  phoneUnavailable: {
+    fontSize: bodyStyles.bodySmall.fontSize,
+    color: textColors.tertiary,
+    fontStyle: "italic",
+    maxWidth: 100,
+    textAlign: "right",
   },
 });

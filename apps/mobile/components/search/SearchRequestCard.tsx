@@ -15,23 +15,23 @@ import {
 
 // Blood type badge background colors based on blood type
 const getBloodTypeBadgeColors = (bloodType: string) => {
-  // A and AB types get light red
+  // A and AB types get light red (brand association)
   if (bloodType.startsWith('A')) {
     return {
-      backgroundColor: '#FEE2E2',
+      backgroundColor: primaryColors.primaryLight,
       textColor: primaryColors.primary,
     };
   }
   // O types get light gray
   if (bloodType.startsWith('O')) {
     return {
-      backgroundColor: '#F3F4F6',
+      backgroundColor: backgroundColors.chipInactive,
       textColor: textColors.secondary,
     };
   }
-  // B types get light pink
+  // B types get light red
   return {
-    backgroundColor: '#FCE7F3',
+    backgroundColor: primaryColors.primaryLight,
     textColor: textColors.secondary,
   };
 };
@@ -140,9 +140,9 @@ const styles = StyleSheet.create({
     ...shadows.medium,
   },
   badge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: radius.full,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing(3),

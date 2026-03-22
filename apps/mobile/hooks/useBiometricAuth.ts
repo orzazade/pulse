@@ -20,19 +20,25 @@ export function useBiometricAuth() {
         return;
       }
 
-      const available = await isBiometricAvailable();
-      const enabled = await isBiometricEnabled();
+      try {
+        const available = await isBiometricAvailable();
+        const enabled = await isBiometricEnabled();
 
-      if (available && enabled) {
-        setIsLocked(true);
-        const success = await authenticateWithBiometric();
-        if (!success) {
-          // User cancelled or failed - stay locked
-          // They can retry or sign out
+        if (available && enabled) {
+          setIsLocked(true);
+          const success = await authenticateWithBiometric();
+          if (!success) {
+            // User cancelled or failed - stay locked
+            // They can retry or sign out
+          }
+          setIsLocked(!success);
         }
-        setIsLocked(!success);
+      } catch {
+        // Biometric check failed — don't lock the user out
+        setIsLocked(false);
+      } finally {
+        setIsChecking(false);
       }
-      setIsChecking(false);
     };
 
     checkBiometric();
@@ -42,13 +48,18 @@ export function useBiometricAuth() {
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
       if (nextAppState === "active" && isSignedIn) {
-        const available = await isBiometricAvailable();
-        const enabled = await isBiometricEnabled();
+        try {
+          const available = await isBiometricAvailable();
+          const enabled = await isBiometricEnabled();
 
-        if (available && enabled) {
-          setIsLocked(true);
-          const success = await authenticateWithBiometric();
-          setIsLocked(!success);
+          if (available && enabled) {
+            setIsLocked(true);
+            const success = await authenticateWithBiometric();
+            setIsLocked(!success);
+          }
+        } catch {
+          // Biometric check failed on resume — don't lock the user out
+          setIsLocked(false);
         }
       }
     };
@@ -58,9 +69,15 @@ export function useBiometricAuth() {
   }, [isSignedIn]);
 
   const unlock = async () => {
-    const success = await authenticateWithBiometric();
-    setIsLocked(!success);
-    return success;
+    try {
+      const success = await authenticateWithBiometric();
+      setIsLocked(!success);
+      return success;
+    } catch {
+      // Authentication threw — unlock to prevent user being stuck
+      setIsLocked(false);
+      return false;
+    }
   };
 
   return { isLocked, isChecking, unlock, signOut };

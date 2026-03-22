@@ -6,10 +6,8 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-
-// 56-day donation cycle (8 weeks between donations)
-const DONATION_CYCLE_DAYS = 56;
-const DONATION_CYCLE_MS = DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+import { DONATION_CYCLE_DAYS } from "./lib/constants";
+import { getAuthenticatedUser } from "./lib/auth";
 
 /**
  * Notification System
@@ -39,17 +37,16 @@ export const getNotifications = query({
 
     if (!user) return [];
 
+    // Fetch most recent 50 notifications (capped to prevent unbounded data transfer)
     const notifications = await ctx.db
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
+      .order("desc")
+      .take(50);
 
     // Sort by createdAt descending (most recent first)
-    const sortedNotifications = notifications
-      .sort((a, b) => b.createdAt - a.createdAt)
-      .slice(0, 50);
-
-    return sortedNotifications;
+    // (order("desc") sorts by _creationTime, but we sort by our createdAt field for consistency)
+    return notifications.sort((a, b) => b.createdAt - a.createdAt);
   },
 });
 
@@ -68,12 +65,13 @@ export const getUnreadCount = query({
 
     if (!user) return 0;
 
+    // Cap at 500 — badge only needs a count, not the full list
     const unreadNotifications = await ctx.db
       .query("notifications")
       .withIndex("by_user_read", (q) =>
         q.eq("userId", user._id).eq("read", false)
       )
-      .collect();
+      .take(500);
 
     return unreadNotifications.length;
   },
@@ -87,15 +85,7 @@ export const getUnreadCount = query({
 export const markAsRead = mutation({
   args: { notificationId: v.id("notifications") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     const notification = await ctx.db.get(args.notificationId);
     if (!notification) throw new Error("Notification not found");
@@ -116,71 +106,29 @@ export const markAsRead = mutation({
  */
 export const markAllAsRead = mutation({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
-
-    // Get all unread notifications for this user
-    const unreadNotifications = await ctx.db
+    // Get unread notifications for this user, capped at 200 to stay within
+    // Convex per-mutation write limits for users with large backlogs
+    const batch = await ctx.db
       .query("notifications")
       .withIndex("by_user_read", (q) =>
         q.eq("userId", user._id).eq("read", false)
       )
-      .collect();
+      .take(200);
 
     // Mark each as read
     await Promise.all(
-      unreadNotifications.map((notification) =>
+      batch.map((notification) =>
         ctx.db.patch(notification._id, { read: true })
       )
     );
 
-    return { success: true, count: unreadNotifications.length };
+    return { success: true, count: batch.length };
   },
 });
 
 // ============ INTERNAL MUTATIONS ============
-
-/**
- * Create a notification (for use by other functions like cron jobs)
- * This is an internal mutation, not exposed to clients
- */
-export const createNotification = internalMutation({
-  args: {
-    userId: v.id("users"),
-    type: v.union(
-      v.literal("request_match"),
-      v.literal("request_accepted"),
-      v.literal("eligibility_reminder")
-    ),
-    title: v.string(),
-    body: v.string(),
-    data: v.optional(
-      v.object({
-        requestId: v.optional(v.id("requests")),
-      })
-    ),
-  },
-  handler: async (ctx, args) => {
-    const notificationId = await ctx.db.insert("notifications", {
-      userId: args.userId,
-      type: args.type,
-      title: args.title,
-      body: args.body,
-      read: false,
-      data: args.data,
-      createdAt: Date.now(),
-    });
-
-    return notificationId;
-  },
-});
 
 /**
  * Check and send eligibility reminders to donors who just became eligible
@@ -196,11 +144,11 @@ export const checkEligibilityReminders = internalMutation({
   handler: async (ctx) => {
     const now = Date.now();
 
-    // Get all users who might need eligibility reminders
+    // Get users who might need eligibility reminders, capped at 2000
     // - mode is donor or both
     // - have a push token
     // - notifyEligibility is not explicitly false (defaults to true)
-    const allUsers = await ctx.db.query("users").collect();
+    const allUsers = await ctx.db.query("users").take(2000);
 
     const eligibleUsers = allUsers.filter(
       (user) =>
@@ -289,7 +237,7 @@ export const sendPushNotification = internalAction({
     body: v.string(),
     data: v.optional(v.any()),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const message = {
       to: args.pushToken,
       sound: "default",
@@ -298,20 +246,35 @@ export const sendPushNotification = internalAction({
       data: args.data ?? {},
     };
 
-    const response = await fetch("https://exp.host/--/api/v2/push/send", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Accept-encoding": "gzip, deflate",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(message),
-    });
+    try {
+      const response = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Accept-encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      });
 
-    const result = await response.json();
-    if (result.data?.status === "error") {
-      console.error("Push notification error:", result.data.message);
+      if (!response.ok) {
+        console.error(
+          `Push notification HTTP error: ${response.status} ${response.statusText}`
+        );
+        return { error: true, status: response.status };
+      }
+
+      const result = await response.json();
+      if (result.data?.status === "error") {
+        console.error("Push notification error:", result.data.message);
+      }
+      return result;
+    } catch (error) {
+      console.error(
+        "Push notification network error:",
+        error instanceof Error ? error.message : error
+      );
+      return { error: true, message: "Network error sending push notification" };
     }
-    return result;
   },
 });

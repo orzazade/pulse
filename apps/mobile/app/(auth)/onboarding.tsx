@@ -69,6 +69,7 @@ export default function Onboarding() {
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -82,7 +83,13 @@ export default function Onboarding() {
   };
 
   const handleGetStarted = async () => {
-    await markOnboardingComplete();
+    if (isNavigating) return;
+    setIsNavigating(true);
+    try {
+      await markOnboardingComplete();
+    } catch {
+      // Best-effort — proceed to sign-up even if storage fails
+    }
     router.replace("/sign-up");
   };
 
@@ -139,18 +146,22 @@ export default function Onboarding() {
       >
         {isLastSlide ? (
           <TouchableOpacity
-            style={styles.getStartedButton}
+            style={[styles.getStartedButton, isNavigating && { opacity: 0.7 }]}
             onPress={handleGetStarted}
+            disabled={isNavigating}
           >
-            <Text style={styles.getStartedText}>Get Started</Text>
+            <Text style={styles.getStartedText}>
+              {isNavigating ? "Loading..." : "Get Started"}
+            </Text>
           </TouchableOpacity>
         ) : (
           <>
             <TouchableOpacity
               style={styles.skipButton}
               onPress={handleGetStarted}
+              disabled={isNavigating}
             >
-              <Text style={styles.skipText}>Skip</Text>
+              <Text style={[styles.skipText, isNavigating && { opacity: 0.5 }]}>Skip</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.nextButton} onPress={goToNext}>
               <Text style={styles.nextText}>Next</Text>

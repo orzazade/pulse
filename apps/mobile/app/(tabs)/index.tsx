@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +7,7 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -21,8 +23,7 @@ import {
   textColors,
   headingStyles,
   bodyStyles,
-  shadows,
-  radius,
+
   spacing,
   iconSpec,
 } from "@/theme/tokens";
@@ -43,7 +44,7 @@ export default function HomeScreen() {
   const homeFeedRequests = useQuery(api.requests.getHomeFeedRequests);
 
   // Mutations
-  const createRequest = useMutation(api.requests.createRequest);
+  const broadcastEmergency = useMutation(api.requests.broadcastEmergency);
 
   // Derived state
   const firstName = currentUser?.fullName?.split(" ")[0] || "User";
@@ -52,26 +53,54 @@ export default function HomeScreen() {
   const isLoading = currentUser === undefined;
 
   const handleRequestPress = (requestId: Id<"requests">) => {
-    console.log("Request pressed:", requestId);
     // Future: navigate to request detail
+    void requestId;
   };
 
-  const handleEmergencyBroadcast = async () => {
-    if (!currentUser?.bloodType) {
-      console.log("No blood type set");
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+
+  const handleEmergencyBroadcast = () => {
+    if (!currentUser?.bloodType || isBroadcasting) {
+      if (!currentUser?.bloodType) console.warn("No blood type set");
       return;
     }
 
-    try {
-      await createRequest({
-        bloodType: currentUser.bloodType,
-        urgency: "urgent",
-        notes: "Emergency broadcast request",
-      });
-      console.log("Emergency broadcast sent");
-    } catch (error) {
-      console.error("Failed to send emergency broadcast:", error);
-    }
+    // Confirm before broadcasting — this sends push notifications to all compatible
+    // donors and should not be triggered accidentally.
+    Alert.alert(
+      "Send Emergency Broadcast?",
+      "This will notify all compatible donors nearby. Only use this for genuine emergencies.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Send Broadcast",
+          style: "destructive",
+          onPress: async () => {
+            setIsBroadcasting(true);
+            try {
+              await broadcastEmergency({
+                bloodType: currentUser.bloodType!,
+                city: currentUser.city || undefined,
+                notes: "Emergency broadcast request",
+              });
+              Alert.alert(
+                "Emergency Broadcast Sent",
+                "Matching donors nearby have been notified."
+              );
+            } catch (error) {
+              Alert.alert(
+                "Broadcast Failed",
+                error instanceof Error
+                  ? error.message
+                  : "Failed to send emergency broadcast. Please try again."
+              );
+            } finally {
+              setIsBroadcasting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const renderRequestItem = ({
@@ -182,7 +211,7 @@ export default function HomeScreen() {
       <View style={[styles.emergencyButtonContainer, { paddingBottom: insets.bottom + spacing(2) }]}>
         <EmergencyBroadcastButton
           onPress={handleEmergencyBroadcast}
-          disabled={!currentUser?.bloodType}
+          disabled={!currentUser?.bloodType || isBroadcasting}
         />
       </View>
     </View>

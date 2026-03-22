@@ -18,7 +18,6 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   spacing,
   textColors,
-  primaryColors,
   backgroundColors,
   borderColors,
   buttonSpec,
@@ -56,7 +55,7 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validation
-  const isValid = bloodType !== null;
+  const isValid = bloodType !== null && hospital.trim().length > 0;
 
   const handleSubmit = async () => {
     if (!isValid || isSubmitting) return;
@@ -102,8 +101,9 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={styles.closeButton}
+          style={[styles.closeButton, isSubmitting && { opacity: 0.3 }]}
           onPress={onClose}
+          disabled={isSubmitting}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Ionicons name="close" size={24} color={textColors.primary} />
@@ -127,6 +127,7 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
           onChange={setUnits}
           min={1}
           max={10}
+          disabled={isSubmitting}
         />
 
         {/* Urgency Section */}
@@ -142,6 +143,8 @@ export function NewRequestScreen({ onClose, onSuccess }: NewRequestScreenProps) 
             value={hospital}
             onChangeText={setHospital}
             autoCapitalize="words"
+            maxLength={200}
+            editable={!isSubmitting}
           />
         </View>
       </ScrollView>

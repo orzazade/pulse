@@ -5,6 +5,8 @@ import {
   textColors,
   primaryColors,
   backgroundColors,
+  semanticColors,
+  illustrationColors,
   shadows,
   spacing,
   radius,
@@ -15,6 +17,9 @@ import { Id } from "@convex/_generated/dataModel";
 type NotificationType =
   | "request_match"
   | "request_accepted"
+  | "request_completed"
+  | "request_cancelled"
+  | "donor_withdrew"
   | "eligibility_reminder"
   | "thank_you"
   | "general";
@@ -77,6 +82,11 @@ function getIconForType(type: NotificationType): keyof typeof Ionicons.glyphMap 
       return "water"; // Blood drop for blood request
     case "request_accepted":
       return "checkmark-circle"; // Green checkmark
+    case "request_completed":
+      return "heart-circle"; // Completed donation
+    case "request_cancelled":
+    case "donor_withdrew":
+      return "close-circle"; // Cancelled/withdrawn
     case "eligibility_reminder":
       return "calendar"; // Calendar for eligibility
     case "thank_you":
@@ -93,16 +103,20 @@ function getIconForType(type: NotificationType): keyof typeof Ionicons.glyphMap 
 function getIconColorForType(type: NotificationType): string {
   switch (type) {
     case "request_match":
-      return primaryColors.primary; // #E53935 - Red for blood request
+      return primaryColors.primary;
     case "request_accepted":
-      return "#10B981"; // Green for success
+    case "request_completed":
+      return semanticColors.success;
+    case "request_cancelled":
+    case "donor_withdrew":
+      return semanticColors.warning;
     case "eligibility_reminder":
-      return "#3B82F6"; // Blue for eligibility
+      return semanticColors.info;
     case "thank_you":
       return "#EC4899"; // Pink for thank you
     case "general":
     default:
-      return "#6B7280"; // Gray for general
+      return semanticColors.info;
   }
 }
 
@@ -112,16 +126,20 @@ function getIconColorForType(type: NotificationType): string {
 function getIconBackgroundForType(type: NotificationType): string {
   switch (type) {
     case "request_match":
-      return "#FEE2E2"; // Light red
+      return primaryColors.primaryLight;
     case "request_accepted":
-      return "#D1FAE5"; // Light green
+    case "request_completed":
+      return illustrationColors.greenCircle;
+    case "request_cancelled":
+    case "donor_withdrew":
+      return backgroundColors.chipInactive;
     case "eligibility_reminder":
-      return "#DBEAFE"; // Light blue
+      return backgroundColors.chipInactive;
     case "thank_you":
       return "#FCE7F3"; // Light pink
     case "general":
     default:
-      return "#F3F4F6"; // Light gray
+      return backgroundColors.chipInactive;
   }
 }
 
@@ -177,9 +195,9 @@ const styles = StyleSheet.create({
     ...shadows.light,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24, // Full circle
+    width: 44,
+    height: 44,
+    borderRadius: radius.full,
     justifyContent: "center",
     alignItems: "center",
   },

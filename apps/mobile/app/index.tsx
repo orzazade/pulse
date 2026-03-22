@@ -1,7 +1,13 @@
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Redirect } from "expo-router";
 import { useState, useEffect } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { hasSeenOnboarding } from "../lib/onboarding";
@@ -14,12 +20,18 @@ export default function Index() {
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
+  const [createUserError, setCreateUserError] = useState(false);
 
   // Check onboarding status on mount
   useEffect(() => {
     const checkOnboarding = async () => {
-      const seen = await hasSeenOnboarding();
-      setHasCompletedOnboarding(seen);
+      try {
+        const seen = await hasSeenOnboarding();
+        setHasCompletedOnboarding(seen);
+      } catch {
+        // AsyncStorage failure — assume onboarding completed to avoid blocking signed-in users
+        setHasCompletedOnboarding(true);
+      }
       setOnboardingChecked(true);
     };
     checkOnboarding();
@@ -30,13 +42,14 @@ export default function Index() {
     const ensureUserExists = async () => {
       if (isSignedIn && clerkUser && convexUser === null && !creatingUser) {
         setCreatingUser(true);
+        setCreateUserError(false);
         try {
           await getOrCreateUser({
-            clerkId: clerkUser.id,
             email: clerkUser.emailAddresses[0]?.emailAddress,
           });
         } catch (error) {
           console.error("Failed to create user:", error);
+          setCreateUserError(true);
         }
         setCreatingUser(false);
       }
@@ -62,6 +75,23 @@ export default function Index() {
   // Redirect to sign-in if not authenticated but has seen onboarding
   if (!isSignedIn) {
     return <Redirect href="/sign-in" />;
+  }
+
+  // Show error state if user creation failed
+  if (createUserError && !creatingUser) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>
+          Something went wrong setting up your profile.
+        </Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => setCreateUserError(false)}
+        >
+          <Text style={styles.retryText}>Tap to Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   // Show loading while fetching user data or creating user
@@ -106,5 +136,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6b7280",
     marginTop: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#dc2626",
+    textAlign: "center",
+    marginBottom: 16,
+    paddingHorizontal: 32,
+  },
+  retryButton: {
+    backgroundColor: "#dc2626",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

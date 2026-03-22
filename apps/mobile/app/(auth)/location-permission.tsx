@@ -112,6 +112,7 @@ export default function LocationPermissionScreen() {
       router.replace("/(tabs)");
     } catch (error) {
       console.error("Skip location error:", error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
       setIsLoading(false);
     }
   };

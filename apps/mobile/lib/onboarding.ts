@@ -29,15 +29,3 @@ export async function markOnboardingComplete(): Promise<void> {
     // Silently fail - user may see onboarding again but that's not critical
   }
 }
-
-/**
- * Reset onboarding status - for testing/development
- * This allows re-showing onboarding slides
- */
-export async function resetOnboarding(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(ONBOARDING_KEY);
-  } catch (error) {
-    console.error("Error resetting onboarding:", error);
-  }
-}

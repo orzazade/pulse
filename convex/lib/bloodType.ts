@@ -56,15 +56,3 @@ export function getCompatibleDonorTypes(recipientBloodType: string): string[] {
 
   return COMPATIBILITY_MAP[recipientBloodType as BloodType];
 }
-
-/**
- * Check if a donor can give blood to a recipient.
- *
- * @param donorType - The blood type of the donor
- * @param recipientType - The blood type of the recipient
- * @returns true if the donor can donate to the recipient, false otherwise
- */
-export function canDonate(donorType: string, recipientType: string): boolean {
-  const compatibleDonors = getCompatibleDonorTypes(recipientType);
-  return compatibleDonors.includes(donorType);
-}

@@ -17,7 +17,7 @@ import {
   spacing,
   radius,
   textColors,
-  borderColors,
+
   primaryColors,
   inputSpec,
   buttonSpec,
@@ -57,7 +57,7 @@ export default function SignIn() {
         router.replace("/");
       } else {
         // Handle other statuses if needed (e.g., needs_first_factor)
-        console.log("Sign in status:", result.status);
+        console.warn("Sign in status:", result.status);
         setError("Sign in incomplete. Please try again.");
       }
     } catch (err: unknown) {
@@ -98,6 +98,8 @@ export default function SignIn() {
           autoCapitalize="none"
           keyboardType="email-address"
           autoComplete="email"
+          maxLength={254}
+          editable={!loading}
         />
 
         {/* Password Input */}
@@ -109,6 +111,8 @@ export default function SignIn() {
           onChangeText={setPassword}
           secureTextEntry
           autoComplete="password"
+          maxLength={128}
+          editable={!loading}
         />
 
         {/* Forgot Password Link - Right aligned */}

@@ -12,18 +12,13 @@ import {
   Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Ionicons } from "@expo/vector-icons";
 import {
   primaryColors,
   backgroundColors,
   textColors,
   borderColors,
-  fontWeight,
-  spacing,
   radius,
-  shadows,
-  touchTargetSpec,
-  iconSpec,
+  spacing,
 } from "@/theme/tokens";
 
 interface AddDonationModalProps {
@@ -79,11 +74,19 @@ export function AddDonationModal({
       return;
     }
 
-    await onAdd({
-      donationDate: donationDate.getTime(),
-      donationCenter: donationCenter.trim() || undefined,
-      notes: notes.trim() || undefined,
-    });
+    try {
+      await onAdd({
+        donationDate: donationDate.getTime(),
+        donationCenter: donationCenter.trim() || undefined,
+        notes: notes.trim() || undefined,
+      });
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Failed to save donation. Please try again.",
+        [{ text: "OK" }]
+      );
+    }
   };
 
   const formatDate = (date: Date): string => {
@@ -99,7 +102,7 @@ export function AddDonationModal({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onRequestClose={isSaving ? undefined : onClose}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -164,8 +167,9 @@ export function AddDonationModal({
               value={donationCenter}
               onChangeText={setDonationCenter}
               placeholder="Enter donation center name"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={textColors.tertiary}
               editable={!isSaving}
+              maxLength={200}
             />
           </View>
 
@@ -176,11 +180,12 @@ export function AddDonationModal({
               value={notes}
               onChangeText={setNotes}
               placeholder="Add any notes about this donation"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={textColors.tertiary}
               editable={!isSaving}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
+              maxLength={500}
             />
           </View>
         </ScrollView>
@@ -198,52 +203,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: spacing(4),
-    paddingVertical: spacing(3),
+    padding: spacing(4),
     borderBottomWidth: 1,
     borderBottomColor: borderColors.default,
     backgroundColor: backgroundColors.background,
   },
-  closeButton: {
-    width: touchTargetSpec.minimum,
-    height: touchTargetSpec.minimum,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: fontWeight.semibold,
+    fontSize: 17,
+    fontWeight: "600",
     color: textColors.primary,
   },
-  saveButtonContainer: {
-    minWidth: touchTargetSpec.minimum,
-    minHeight: touchTargetSpec.minimum,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   headerButton: {
-    fontSize: 16,
-    fontWeight: fontWeight.medium,
+    fontSize: 17,
     color: textColors.secondary,
   },
   saveButton: {
     color: primaryColors.primary,
-    fontWeight: fontWeight.semibold,
+    fontWeight: "600",
   },
   disabled: {
     opacity: 0.5,
   },
   form: {
     flex: 1,
-    paddingHorizontal: spacing(5),
-    paddingTop: spacing(5),
+    padding: spacing(5),
   },
   inputGroup: {
     marginBottom: spacing(5),
   },
   label: {
     fontSize: 14,
-    fontWeight: fontWeight.medium,
+    fontWeight: "500",
     color: textColors.primary,
     marginBottom: spacing(2),
   },

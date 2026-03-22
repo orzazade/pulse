@@ -95,18 +95,23 @@ export default function SignUp() {
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         // Create user in Convex database with fullName and bloodType
+        // Wrapped separately so a Convex failure doesn't block navigation
+        // after successful verification — index.tsx retries on next load
         const userId = result.createdUserId;
         if (userId) {
-          await getOrCreateUser({
-            clerkId: userId,
-            email,
-            fullName: fullName || undefined,
-            bloodType: bloodType || undefined,
-          });
+          try {
+            await getOrCreateUser({
+              email,
+              fullName: fullName || undefined,
+              bloodType: bloodType || undefined,
+            });
+          } catch (convexErr) {
+            console.error("Failed to create Convex user during sign-up:", convexErr);
+          }
         }
         router.replace("/");
       } else {
-        console.log("Verification status:", result.status);
+        console.warn("Verification status:", result.status);
         setError("Verification incomplete. Please try again.");
       }
     } catch (err: unknown) {
@@ -142,6 +147,8 @@ export default function SignUp() {
             onChangeText={setCode}
             keyboardType="number-pad"
             autoComplete="one-time-code"
+            maxLength={8}
+            editable={!loading}
           />
 
           <TouchableOpacity
@@ -154,8 +161,13 @@ export default function SignUp() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => setPendingVerification(false)}>
-            <Text style={styles.linkSingle}>Use a different email</Text>
+          <TouchableOpacity
+            onPress={() => setPendingVerification(false)}
+            disabled={loading}
+          >
+            <Text style={[styles.linkSingle, loading && { opacity: 0.5 }]}>
+              Use a different email
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -191,6 +203,8 @@ export default function SignUp() {
           onChangeText={setFullName}
           autoCapitalize="words"
           autoComplete="name"
+          maxLength={100}
+          editable={!loading}
         />
 
         {/* Blood Type Picker */}
@@ -209,6 +223,8 @@ export default function SignUp() {
           autoCapitalize="none"
           keyboardType="email-address"
           autoComplete="email"
+          maxLength={254}
+          editable={!loading}
         />
 
         {/* Password Input */}
@@ -220,6 +236,8 @@ export default function SignUp() {
           onChangeText={setPassword}
           secureTextEntry
           autoComplete="new-password"
+          maxLength={128}
+          editable={!loading}
         />
 
         {/* Terms Checkbox */}

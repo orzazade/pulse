@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.lg, // 12px
-    paddingHorizontal: spacing[6], // 24px
+    paddingHorizontal: spacing(6), // 24px
   },
 
   // Size variations

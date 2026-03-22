@@ -1,30 +1,48 @@
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
-import { getCompatibleDonorTypes } from "./lib/bloodType";
-import { geospatial } from "./geospatial";
+import { BLOOD_TYPES } from "./lib/bloodType";
+import { getAuthenticatedUser } from "./lib/auth";
 
-const VALID_BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
+// Strip internal fields before returning user data to the client
+// clerkId is an internal auth identifier; pushToken could be used to send unsolicited notifications
+function sanitizeUser<T extends Record<string, unknown>>(user: T): Omit<T, "clerkId" | "pushToken"> {
+  const { clerkId: _, pushToken: __, ...safe } = user;
+  return safe as Omit<T, "clerkId" | "pushToken">;
+}
 
 export const getOrCreateUser = mutation({
   args: {
-    clerkId: v.string(),
     email: v.optional(v.string()),
     fullName: v.optional(v.string()),
     bloodType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const clerkId = identity.subject;
     const existing = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
       .unique();
 
     if (existing) return existing._id;
 
+    // Sanitize and validate input
+    const email = args.email?.trim() || undefined;
+    const fullName = args.fullName?.trim() || undefined;
+
+    if (email && email.length > 254) {
+      throw new Error("Email must be 254 characters or less");
+    }
+    if (fullName && fullName.length > 100) {
+      throw new Error("Full name must be 100 characters or less");
+    }
+
     // Validate blood type if provided
-    if (args.bloodType && !VALID_BLOOD_TYPES.includes(args.bloodType as typeof VALID_BLOOD_TYPES[number])) {
-      throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    if (args.bloodType && !BLOOD_TYPES.includes(args.bloodType as typeof BLOOD_TYPES[number])) {
+      throw new Error(`Invalid blood type. Must be one of: ${BLOOD_TYPES.join(", ")}`);
     }
 
     // Build user object with optional fields
@@ -36,12 +54,12 @@ export const getOrCreateUser = mutation({
       mode?: "donor" | "seeker" | "both";
       createdAt: number;
     } = {
-      clerkId: args.clerkId,
+      clerkId,
       createdAt: Date.now(),
     };
 
-    if (args.email) userData.email = args.email;
-    if (args.fullName) userData.fullName = args.fullName;
+    if (email) userData.email = email;
+    if (fullName) userData.fullName = fullName;
     if (args.bloodType) {
       userData.bloodType = args.bloodType;
       // Set mode to "donor" when blood type is provided during registration
@@ -66,28 +84,32 @@ export const getCurrentUser = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
-    return await ctx.db
+    const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
+
+    if (!user) return null;
+    return sanitizeUser(user);
   },
 });
 
 export const updatePhone = mutation({
   args: { phone: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    // Validate phone: must be 5-20 chars, only digits, spaces, dashes, parens, plus
+    const phone = args.phone.trim();
+    if (phone.length < 5 || phone.length > 20) {
+      throw new Error("Phone number must be between 5 and 20 characters");
+    }
+    if (!/^[+\d\s()-]+$/.test(phone)) {
+      throw new Error("Phone number contains invalid characters");
+    }
 
     await ctx.db.patch(user._id, {
-      phone: args.phone,
+      phone,
       phoneVerified: false, // Will be verified later if needed
     });
   },
@@ -100,8 +122,8 @@ export const updateBloodType = mutation({
     if (!identity) throw new Error("Not authenticated");
 
     // Validate blood type
-    if (!VALID_BLOOD_TYPES.includes(args.bloodType as typeof VALID_BLOOD_TYPES[number])) {
-      throw new Error(`Invalid blood type. Must be one of: ${VALID_BLOOD_TYPES.join(", ")}`);
+    if (!BLOOD_TYPES.includes(args.bloodType as typeof BLOOD_TYPES[number])) {
+      throw new Error(`Invalid blood type. Must be one of: ${BLOOD_TYPES.join(", ")}`);
     }
 
     const user = await ctx.db
@@ -126,7 +148,7 @@ export const updateBloodType = mutation({
       userId: user._id,
     });
 
-    return { ...user, ...updates };
+    return sanitizeUser({ ...user, ...updates });
   },
 });
 
@@ -135,15 +157,24 @@ export const updateMode = mutation({
     mode: v.union(v.literal("donor"), v.literal("seeker"), v.literal("both")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
+    // Block switching away from donor mode if user has an active accepted request.
+    // Without this, the request would be orphaned — the donor can no longer see or
+    // withdraw from it since their UI filters by mode.
+    if (args.mode === "seeker" && (user.mode === "donor" || user.mode === "both")) {
+      const activeAccepted = await ctx.db
+        .query("requests")
+        .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
+        .filter((q) => q.eq(q.field("status"), "accepted"))
+        .first();
 
-    if (!user) throw new Error("User not found");
+      if (activeAccepted) {
+        throw new Error(
+          "You have an active accepted request. Complete or withdraw from it before switching to seeker mode."
+        );
+      }
+    }
 
     await ctx.db.patch(user._id, {
       mode: args.mode,
@@ -154,7 +185,7 @@ export const updateMode = mutation({
       userId: user._id,
     });
 
-    return { ...user, mode: args.mode };
+    return sanitizeUser({ ...user, mode: args.mode });
   },
 });
 
@@ -166,19 +197,32 @@ export const updateLocation = mutation({
     longitude: v.number(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
+    // Validate coordinates are finite numbers (NaN/Infinity bypass range checks)
+    if (!Number.isFinite(args.latitude) || !Number.isFinite(args.longitude)) {
+      throw new Error("Coordinates must be valid numbers");
+    }
+    if (args.latitude < -90 || args.latitude > 90) {
+      throw new Error("Latitude must be between -90 and 90");
+    }
+    if (args.longitude < -180 || args.longitude > 180) {
+      throw new Error("Longitude must be between -180 and 180");
+    }
 
-    if (!user) throw new Error("User not found");
+    // Validate and sanitize string inputs
+    const city = args.city?.trim() || undefined;
+    const region = args.region?.trim() || undefined;
+    if (city && city.length > 100) {
+      throw new Error("City name must be 100 characters or less");
+    }
+    if (region && region.length > 100) {
+      throw new Error("Region name must be 100 characters or less");
+    }
 
     await ctx.db.patch(user._id, {
-      city: args.city,
-      region: args.region,
+      city,
+      region,
       latitude: args.latitude,
       longitude: args.longitude,
       locationGranted: true,
@@ -189,34 +233,26 @@ export const updateLocation = mutation({
       userId: user._id,
     });
 
-    return {
+    return sanitizeUser({
       ...user,
-      city: args.city,
-      region: args.region,
+      city,
+      region,
       latitude: args.latitude,
       longitude: args.longitude,
       locationGranted: true,
-    };
+    });
   },
 });
 
 export const skipLocation = mutation({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     await ctx.db.patch(user._id, {
       locationGranted: false,
     });
 
-    return { ...user, locationGranted: false };
+    return sanitizeUser({ ...user, locationGranted: false });
   },
 });
 
@@ -227,15 +263,24 @@ export const updateProfile = mutation({
     preferredDonationCenter: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
+    // Validate and sanitize string inputs
+    const city = args.city !== undefined ? (args.city.trim() || undefined) : undefined;
+    const region = args.region !== undefined ? (args.region.trim() || undefined) : undefined;
+    const preferredDonationCenter = args.preferredDonationCenter !== undefined
+      ? (args.preferredDonationCenter.trim() || undefined)
+      : undefined;
 
-    if (!user) throw new Error("User not found");
+    if (city && city.length > 100) {
+      throw new Error("City name must be 100 characters or less");
+    }
+    if (region && region.length > 100) {
+      throw new Error("Region name must be 100 characters or less");
+    }
+    if (preferredDonationCenter && preferredDonationCenter.length > 200) {
+      throw new Error("Donation center name must be 200 characters or less");
+    }
 
     // Build update object with only provided fields
     const updates: {
@@ -244,14 +289,14 @@ export const updateProfile = mutation({
       preferredDonationCenter?: string;
     } = {};
 
-    if (args.city !== undefined) updates.city = args.city;
-    if (args.region !== undefined) updates.region = args.region;
+    if (args.city !== undefined) updates.city = city;
+    if (args.region !== undefined) updates.region = region;
     if (args.preferredDonationCenter !== undefined)
-      updates.preferredDonationCenter = args.preferredDonationCenter;
+      updates.preferredDonationCenter = preferredDonationCenter;
 
     await ctx.db.patch(user._id, updates);
 
-    return { ...user, ...updates };
+    return sanitizeUser({ ...user, ...updates });
   },
 });
 
@@ -274,15 +319,7 @@ export const getAvailability = query({
 
 export const toggleAvailability = mutation({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Toggle: if undefined or true, set to false; if false, set to true
     const newAvailability = user.isAvailable === false;
@@ -296,169 +333,7 @@ export const toggleAvailability = mutation({
       userId: user._id,
     });
 
-    return { ...user, isAvailable: newAvailability };
-  },
-});
-
-export const searchDonors = query({
-  args: {
-    bloodType: v.optional(v.string()),
-    city: v.optional(v.string()),
-    region: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    // Get current user to exclude from results
-    const identity = await ctx.auth.getUserIdentity();
-    const currentUserClerkId = identity?.subject;
-
-    // Get compatible donor blood types if blood type filter provided
-    const compatibleTypes = args.bloodType
-      ? getCompatibleDonorTypes(args.bloodType)
-      : null;
-
-    // If invalid blood type provided, return empty results
-    if (args.bloodType && compatibleTypes?.length === 0) {
-      return [];
-    }
-
-    // Query all users and filter
-    const allUsers = await ctx.db.query("users").collect();
-
-    const donors = allUsers
-      .filter((user) => {
-        // Exclude current user
-        if (currentUserClerkId && user.clerkId === currentUserClerkId) {
-          return false;
-        }
-
-        // Filter by mode: must be "donor" or "both" (not "seeker")
-        if (user.mode === "seeker") {
-          return false;
-        }
-
-        // Filter by availability: true or undefined (defaults to available)
-        if (user.isAvailable === false) {
-          return false;
-        }
-
-        // Filter by blood type compatibility if specified
-        if (compatibleTypes && user.bloodType) {
-          if (!compatibleTypes.includes(user.bloodType)) {
-            return false;
-          }
-        }
-
-        // Filter by city if specified
-        if (args.city && user.city !== args.city) {
-          return false;
-        }
-
-        // Filter by region if specified
-        if (args.region && user.region !== args.region) {
-          return false;
-        }
-
-        return true;
-      })
-      .slice(0, 50); // Limit to 50 results
-
-    // Return only necessary fields
-    return donors.map((user) => ({
-      _id: user._id,
-      bloodType: user.bloodType,
-      city: user.city,
-      region: user.region,
-      isAvailable: user.isAvailable !== false, // Normalize to boolean
-    }));
-  },
-});
-
-/**
- * Search for donors near a geographic location using geospatial index
- * Returns donors within maxDistance meters of the given coordinates
- */
-export const searchNearbyDonors = query({
-  args: {
-    latitude: v.number(),
-    longitude: v.number(),
-    bloodType: v.optional(v.string()),
-    maxDistance: v.optional(v.number()), // meters, default 50000 (50km)
-  },
-  handler: async (ctx, args) => {
-    // Get current user to exclude from results
-    const identity = await ctx.auth.getUserIdentity();
-    const currentUserClerkId = identity?.subject;
-
-    // Get compatible donor blood types if blood type filter provided
-    const compatibleTypes = args.bloodType
-      ? getCompatibleDonorTypes(args.bloodType)
-      : null;
-
-    // If invalid blood type provided, return empty results
-    if (args.bloodType && compatibleTypes?.length === 0) {
-      return [];
-    }
-
-    // Query geospatial index for nearby users
-    const nearbyResults = await geospatial.nearest(ctx, {
-      point: { latitude: args.latitude, longitude: args.longitude },
-      limit: 50,
-      maxDistance: args.maxDistance ?? 50000, // Default 50km
-      filter: (q) => q.eq("type", "user").eq("isAvailable", true),
-    });
-
-    // Get user IDs from results
-    const userIds = nearbyResults.map((result) => result.key as Id<"users">);
-
-    // Fetch full user documents
-    const usersWithDistance = await Promise.all(
-      userIds.map(async (userId, index) => {
-        const user = await ctx.db.get(userId);
-        if (!user) return null;
-        // Attach distance from geospatial result
-        const nearbyResult = nearbyResults[index];
-        return {
-          _id: user._id as Id<"users">,
-          clerkId: (user as { clerkId?: string }).clerkId,
-          bloodType: (user as { bloodType?: string }).bloodType,
-          city: (user as { city?: string }).city,
-          region: (user as { region?: string }).region,
-          isAvailable: (user as { isAvailable?: boolean }).isAvailable,
-          distance: nearbyResult?.distance ?? 0,
-        };
-      })
-    );
-
-    // Filter results
-    const donors = usersWithDistance.filter(
-      (user): user is NonNullable<typeof user> => {
-        if (!user) return false;
-
-        // Exclude current user
-        if (currentUserClerkId && user.clerkId === currentUserClerkId) {
-          return false;
-        }
-
-        // Filter by blood type compatibility if specified
-        if (compatibleTypes && user.bloodType) {
-          if (!compatibleTypes.includes(user.bloodType)) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-    );
-
-    // Return only necessary fields with distance
-    return donors.map((user) => ({
-      _id: user._id,
-      bloodType: user.bloodType,
-      city: user.city,
-      region: user.region,
-      isAvailable: user.isAvailable !== false,
-      distance: user.distance,
-    }));
+    return sanitizeUser({ ...user, isAvailable: newAvailability });
   },
 });
 
@@ -479,10 +354,11 @@ export const getUserStats = query({
     if (!user) return { helpedCount: 0 };
 
     // Count accepted/completed requests where user is the donor
+    // Capped at 500 to prevent unbounded data transfer for prolific donors
     const acceptedRequests = await ctx.db
       .query("requests")
       .withIndex("by_donor", (q) => q.eq("acceptedDonorId", user._id))
-      .collect();
+      .take(500);
 
     const helpedCount = acceptedRequests.filter(
       (r) => r.status === "accepted" || r.status === "completed"
@@ -499,18 +375,19 @@ export const getUserStats = query({
 export const updatePushToken = mutation({
   args: { pushToken: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    // Validate push token format (Expo push tokens)
+    const token = args.pushToken.trim();
+    if (token.length === 0 || token.length > 200) {
+      throw new Error("Invalid push token");
+    }
+    if (!token.startsWith("ExponentPushToken[") && !token.startsWith("ExpoPushToken[")) {
+      throw new Error("Invalid push token format");
+    }
 
     await ctx.db.patch(user._id, {
-      pushToken: args.pushToken,
+      pushToken: token,
     });
 
     return { success: true };
@@ -567,15 +444,7 @@ export const updateNotificationPreferences = mutation({
     notifyEligibility: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Build update object with only provided fields
     const updates: {

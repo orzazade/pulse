@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,6 @@ import {
   illustrationColors,
   semanticColors,
   spacing,
-  radius,
   headingStyles,
   bodyStyles,
   buttonSpec,
@@ -50,28 +49,62 @@ export function RequestAcceptedScreen({
   onClose,
 }: RequestAcceptedScreenProps) {
   const cancelAcceptance = useMutation(api.requests.cancelRequest);
+  const [isCancelling, setIsCancelling] = useState(false);
 
-  const handleCall = () => {
-    Linking.openURL(`tel:${requesterPhone}`);
+  const handleCall = async () => {
+    if (!requesterPhone.trim()) {
+      Alert.alert("Phone Unavailable", "View the request details to see contact information.");
+      return;
+    }
+    const url = `tel:${requesterPhone}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Cannot Make Call", "Phone calls are not supported on this device.");
+      }
+    } catch {
+      Alert.alert("Error", "Failed to open phone app.");
+    }
   };
 
-  const handleMessage = () => {
-    Linking.openURL(`sms:${requesterPhone}`);
+  const handleMessage = async () => {
+    if (!requesterPhone.trim()) {
+      Alert.alert("Phone Unavailable", "View the request details to see contact information.");
+      return;
+    }
+    const url = `sms:${requesterPhone}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Cannot Send Message", "SMS is not supported on this device.");
+      }
+    } catch {
+      Alert.alert("Error", "Failed to open messaging app.");
+    }
   };
 
-  const handleGetDirections = () => {
+  const handleGetDirections = async () => {
     const encodedAddress = encodeURIComponent(`${location}, ${address}`);
     const url = Platform.select({
       ios: `maps:?q=${encodedAddress}`,
       android: `geo:0,0?q=${encodedAddress}`,
     });
-    if (url) {
-      Linking.openURL(url).catch(() => {
-        // Fallback to Google Maps
-        Linking.openURL(
+    if (!url) return;
+    try {
+      await Linking.openURL(url);
+    } catch {
+      // Fallback to Google Maps
+      try {
+        await Linking.openURL(
           `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`
         );
-      });
+      } catch {
+        Alert.alert("Error", "Could not open maps. Please search for the address manually.");
+      }
     }
   };
 
@@ -80,6 +113,7 @@ export function RequestAcceptedScreen({
   };
 
   const handleCancelDonation = () => {
+    if (isCancelling) return;
     Alert.alert(
       "Cancel Donation",
       "Are you sure you want to cancel your commitment to donate? The requester will be notified.",
@@ -89,6 +123,7 @@ export function RequestAcceptedScreen({
           text: "Yes, Cancel",
           style: "destructive",
           onPress: async () => {
+            setIsCancelling(true);
             try {
               await cancelAcceptance({ requestId });
               onClose();
@@ -100,6 +135,8 @@ export function RequestAcceptedScreen({
                   : "Failed to cancel donation",
                 [{ text: "OK" }]
               );
+            } finally {
+              setIsCancelling(false);
             }
           },
         },
@@ -176,11 +213,14 @@ export function RequestAcceptedScreen({
 
         {/* Cancel Donation Link */}
         <TouchableOpacity
-          style={styles.cancelLink}
+          style={[styles.cancelLink, isCancelling && { opacity: 0.5 }]}
           onPress={handleCancelDonation}
           activeOpacity={0.7}
+          disabled={isCancelling}
         >
-          <Text style={styles.cancelLinkText}>Cancel Donation</Text>
+          <Text style={styles.cancelLinkText}>
+            {isCancelling ? "Cancelling..." : "Cancel Donation"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

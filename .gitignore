@@ -50,3 +50,7 @@ ios/
 
 # Convex
 .convex-generated/
+.crius/
+
+# Crius improvement agent
+.crius/

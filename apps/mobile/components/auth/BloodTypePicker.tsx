@@ -13,14 +13,11 @@ import {
   spacing,
   radius,
   textColors,
-  borderColors,
-  primaryColors,
+
   bloodTypeChipSpec,
   inputSpec,
 } from "@/theme/tokens";
-
-const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
-type BloodType = (typeof BLOOD_TYPES)[number];
+import { BLOOD_TYPES, BloodType } from "@convex/lib/bloodType";
 
 interface BloodTypePickerProps {
   /** Currently selected blood type */

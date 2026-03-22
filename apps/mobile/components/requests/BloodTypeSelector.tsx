@@ -6,8 +6,7 @@ import {
   textColors,
   fontWeight,
 } from '@/theme/tokens';
-
-const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+import { BLOOD_TYPES } from '@convex/lib/bloodType';
 
 interface BloodTypeSelectorProps {
   value: string | null;

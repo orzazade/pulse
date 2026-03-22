@@ -6,6 +6,7 @@ import {
   FlatList,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,6 +29,7 @@ import {
   iconSpec,
   touchTargetSpec,
 } from '@/theme/tokens';
+import { BLOOD_TYPES } from '@convex/lib/bloodType';
 
 // Filter options
 const FILTER_OPTIONS = [
@@ -44,8 +46,6 @@ const FILTER_OPTIONS = [
   'AB-',
 ];
 
-const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
-
 export default function SearchScreen() {
   const insets = useSafeAreaInsets();
 
@@ -54,22 +54,20 @@ export default function SearchScreen() {
   const [activeFilter, setActiveFilter] = useState('All Requests');
 
   // Location state for "Near Me" filter
-  const [userLocation, setUserLocation] = useState<{
+  const [_userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   // Determine query args based on filter
+  // Note: "Urgent" filter is handled client-side to include both urgent AND critical
   const queryArgs = useMemo(() => {
     // Blood type filter
     if (BLOOD_TYPES.includes(activeFilter)) {
       return { bloodType: activeFilter };
     }
-    // Urgent filter
-    if (activeFilter === 'Urgent') {
-      return { urgency: 'urgent' as const };
-    }
-    // All Requests or Near Me (no server-side filtering for Near Me)
+    // All Requests, Near Me, and Urgent use no server-side filtering
     return {};
   }, [activeFilter]);
 
@@ -77,9 +75,11 @@ export default function SearchScreen() {
   const requests = useQuery(api.requests.listOpenRequests, queryArgs);
 
   // Handle "Near Me" filter selection
+  // Guarded with isLocating to prevent concurrent location requests from rapid taps
   const handleFilterPress = async (filter: string) => {
     if (filter === 'Near Me') {
-      // Request location permission and get location
+      if (isLocating) return;
+      setIsLocating(true);
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status === 'granted') {
@@ -90,9 +90,19 @@ export default function SearchScreen() {
             lat: location.coords.latitude,
             lng: location.coords.longitude,
           });
+        } else {
+          Alert.alert(
+            'Location Permission Denied',
+            'Enable location in your device settings to use the "Near Me" filter.'
+          );
         }
       } catch {
-        // Location not available, continue without distance
+        Alert.alert(
+          'Location Unavailable',
+          'Unable to get your location. Please try again.'
+        );
+      } finally {
+        setIsLocating(false);
       }
     }
     setActiveFilter(filter);
@@ -106,6 +116,14 @@ export default function SearchScreen() {
     if (!requests) return [] as RequestWithSeeker[];
 
     let filtered = requests;
+
+    // Apply "Urgent" filter client-side to include both urgent AND critical
+    if (activeFilter === 'Urgent') {
+      filtered = filtered.filter(
+        (request: RequestWithSeeker) =>
+          request.urgency === 'urgent' || request.urgency === 'critical'
+      );
+    }
 
     // Apply search query filter
     if (searchQuery.trim()) {
@@ -123,7 +141,7 @@ export default function SearchScreen() {
     // For now, we just show all requests since distance isn't in the data
 
     return filtered;
-  }, [requests, searchQuery, activeFilter, userLocation]);
+  }, [requests, searchQuery, activeFilter]);
 
   // Transform requests to SearchRequest format
   const displayRequests: SearchRequest[] = useMemo(() => {
@@ -145,7 +163,7 @@ export default function SearchScreen() {
 
   const handleRequestPress = (request: SearchRequest) => {
     // Navigate to request details (placeholder for now)
-    console.log('Request pressed:', request._id);
+    console.warn('Request pressed:', request._id);
   };
 
   const renderEmptyList = () => (

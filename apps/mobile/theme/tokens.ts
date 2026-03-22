@@ -500,18 +500,6 @@ export const filterChipSpec = {
 } as const;
 
 /**
- * Request Card Specifications
- */
-export const requestCardSpec = {
-  borderRadius: radius.lg, // 12px
-  padding: spacing(4), // 16px
-  backgroundColor: backgroundColors.card,
-  shadow: shadows.medium,
-  urgentBorderWidth: 4,
-  urgentBorderColor: primaryColors.primary,
-} as const;
-
-/**
  * Tab Bar Specifications
  */
 export const tabBarSpec = {

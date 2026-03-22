@@ -1,8 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-
-// 56-day donation cycle (8 weeks between donations)
-const DONATION_CYCLE_DAYS = 56;
+import { DONATION_CYCLE_DAYS, DONATION_CYCLE_MS } from "./lib/constants";
+import { getAuthenticatedUser } from "./lib/auth";
 
 /**
  * Add a new donation record
@@ -14,64 +13,60 @@ export const addDonation = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const user = await getAuthenticatedUser(ctx);
 
-    // Get user
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
-
-    // Validate donationDate is not in the future
+    // Validate donationDate is a finite number (NaN bypasses range checks)
     const now = Date.now();
+    if (!Number.isFinite(args.donationDate)) {
+      throw new Error("Donation date must be a valid number");
+    }
     if (args.donationDate > now) {
       throw new Error("Donation date cannot be in the future");
+    }
+
+    // Validate donationDate is not unreasonably old (max 10 years)
+    const tenYearsMs = 10 * 365.25 * 24 * 60 * 60 * 1000;
+    if (args.donationDate < now - tenYearsMs) {
+      throw new Error("Donation date cannot be more than 10 years ago");
+    }
+
+    // Sanitize and validate string inputs
+    const donationCenter = args.donationCenter?.trim() || undefined;
+    const notes = args.notes?.trim() || undefined;
+
+    if (donationCenter && donationCenter.length > 200) {
+      throw new Error("Donation center name must be 200 characters or less");
+    }
+    if (notes && notes.length > 500) {
+      throw new Error("Notes must be 500 characters or less");
+    }
+
+    // Enforce 56-day donation cycle — no two donations within 56 days of each other
+    // Capped at 500 to prevent unbounded data transfer (no user will have 500+ donations)
+    const existingDonations = await ctx.db
+      .query("donations")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .take(500);
+
+    const cycleMsMin = DONATION_CYCLE_MS;
+    const tooClose = existingDonations.find(
+      (d) => Math.abs(args.donationDate - d.donationDate) < cycleMsMin
+    );
+    if (tooClose) {
+      const daysBetween = Math.floor(Math.abs(args.donationDate - tooClose.donationDate) / (1000 * 60 * 60 * 24));
+      throw new Error(`Donations must be at least ${DONATION_CYCLE_DAYS} days apart. An existing donation is ${daysBetween} days from this date.`);
     }
 
     // Insert donation
     const donationId = await ctx.db.insert("donations", {
       userId: user._id,
       donationDate: args.donationDate,
-      donationCenter: args.donationCenter,
-      notes: args.notes,
+      donationCenter,
+      notes,
       createdAt: now,
     });
 
     return donationId;
-  },
-});
-
-/**
- * Delete a donation record
- */
-export const deleteDonation = mutation({
-  args: {
-    donationId: v.id("donations"),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    // Get user
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
-
-    // Get donation and verify ownership
-    const donation = await ctx.db.get(args.donationId);
-    if (!donation) throw new Error("Donation not found");
-
-    if (donation.userId !== user._id) {
-      throw new Error("Not authorized to delete this donation");
-    }
-
-    await ctx.db.delete(args.donationId);
   },
 });
 
@@ -90,41 +85,17 @@ export const getDonationHistory = query({
 
     if (!user) return { donations: [], totalCount: 0 };
 
+    // Cap at 50 to prevent unbounded data transfer (UI shows 5)
     const donations = await ctx.db
       .query("donations")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .order("desc")
-      .collect();
+      .take(50);
 
     return {
       donations,
       totalCount: donations.length,
     };
-  },
-});
-
-/**
- * Get the most recent donation
- */
-export const getLastDonation = query({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) return null;
-
-    const lastDonation = await ctx.db
-      .query("donations")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .order("desc")
-      .first();
-
-    return lastDonation;
   },
 });
 
@@ -155,10 +126,11 @@ export const getDonationStats = query({
       };
     }
 
+    // Cap at 500 to prevent unbounded data transfer (only need count + latest)
     const donations = await ctx.db
       .query("donations")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .collect();
+      .take(500);
 
     const totalDonations = donations.length;
 
@@ -170,9 +142,9 @@ export const getDonationStats = query({
       };
     }
 
-    // Find most recent donation
-    const lastDonation = donations.reduce((latest, current) =>
-      current.donationDate > latest.donationDate ? current : latest
+    // Find most recent donation from the already-fetched list (avoids redundant DB query)
+    const lastDonation = donations.reduce((latest, d) =>
+      d.donationDate > latest.donationDate ? d : latest
     );
 
     const now = Date.now();
@@ -250,7 +222,7 @@ export const getEligibilityStatus = query({
     // Calculate next eligible date
     const nextEligibleDate = isEligible
       ? null
-      : lastDonation.donationDate + DONATION_CYCLE_DAYS * 24 * 60 * 60 * 1000;
+      : lastDonation.donationDate + DONATION_CYCLE_MS;
 
     return {
       isEligible,

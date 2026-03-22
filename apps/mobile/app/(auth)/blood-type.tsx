@@ -6,14 +6,24 @@ import {
   StyleSheet,
   Linking,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
-type BloodType = (typeof BLOOD_TYPES)[number];
+import { BLOOD_TYPES, BloodType } from "@convex/lib/bloodType";
+import {
+  backgroundColors,
+  textColors,
+  primaryColors,
+  semanticColors,
+  borderColors,
+  spacing,
+  radius,
+  headingStyles,
+  bodyStyles,
+} from "@/theme/tokens";
 
 export default function BloodTypeSelection() {
   const router = useRouter();
@@ -40,11 +50,18 @@ export default function BloodTypeSelection() {
     }
   };
 
-  const handleDontKnow = () => {
-    // Link to information about blood type testing
-    Linking.openURL(
-      "https://www.redcrossblood.org/donate-blood/blood-types.html"
-    );
+  const handleDontKnow = async () => {
+    const url = "https://www.redcrossblood.org/donate-blood/blood-types.html";
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Cannot Open Link", "Unable to open the browser on this device.");
+      }
+    } catch {
+      Alert.alert("Cannot Open Link", "Unable to open the browser on this device.");
+    }
   };
 
   return (
@@ -98,7 +115,7 @@ export default function BloodTypeSelection() {
         disabled={!selected || loading}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={textColors.onPrimary} />
         ) : (
           <Text style={styles.continueButtonText}>Continue</Text>
         )}
@@ -110,77 +127,75 @@ export default function BloodTypeSelection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    backgroundColor: "#ffffff",
+    paddingHorizontal: spacing(6),
+    backgroundColor: backgroundColors.background,
     justifyContent: "center",
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 12,
-    color: "#111827",
+    ...headingStyles.pageTitle,
+    marginBottom: spacing(3),
+    color: textColors.primary,
   },
   subtitle: {
-    fontSize: 16,
-    color: "#374151",
-    marginBottom: 32,
-    lineHeight: 24,
+    ...bodyStyles.body,
+    color: textColors.secondary,
+    marginBottom: spacing(8),
   },
   error: {
-    color: "#dc2626",
-    marginBottom: 16,
-    fontSize: 14,
+    color: semanticColors.error,
+    marginBottom: spacing(4),
+    ...bodyStyles.bodySmall,
   },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
-    marginBottom: 24,
+    gap: spacing(3),
+    marginBottom: spacing(6),
   },
   typeButton: {
     width: "22%",
     aspectRatio: 1,
     borderWidth: 2,
-    borderColor: "#e5e7eb",
-    borderRadius: 12,
+    borderColor: borderColors.default,
+    borderRadius: radius.lg,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: backgroundColors.background,
   },
   typeButtonSelected: {
-    borderColor: "#dc2626",
-    backgroundColor: "#fef2f2",
+    borderColor: primaryColors.primary,
+    backgroundColor: primaryColors.primaryLight,
   },
   typeText: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#374151",
+    color: textColors.primary,
   },
   typeTextSelected: {
-    color: "#dc2626",
+    color: primaryColors.primary,
   },
   dontKnowButton: {
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: spacing(6),
   },
   dontKnowText: {
-    color: "#6b7280",
-    fontSize: 14,
+    color: textColors.secondary,
+    ...bodyStyles.bodySmall,
     textDecorationLine: "underline",
   },
   continueButton: {
-    backgroundColor: "#dc2626",
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: primaryColors.primary,
+    paddingVertical: spacing(4),
+    borderRadius: radius.lg,
     alignItems: "center",
     minHeight: 48,
     justifyContent: "center",
   },
   continueButtonDisabled: {
-    backgroundColor: "#fca5a5",
+    opacity: 0.5,
   },
   continueButtonText: {
-    color: "#ffffff",
+    color: textColors.onPrimary,
     fontWeight: "bold",
     fontSize: 16,
   },
