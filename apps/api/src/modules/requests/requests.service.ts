@@ -103,6 +103,10 @@ export class RequestsService {
   async acceptRequest(requestId: string, donorId: string): Promise<Request> {
     const request = await this.getRequestDetail(requestId);
 
+    if (request.seekerId === donorId) {
+      throw new BadRequestException('You cannot accept your own request');
+    }
+
     if (request.status !== RequestStatus.OPEN) {
       throw new ConflictException(`Cannot accept request with status "${request.status}"`);
     }
