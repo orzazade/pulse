@@ -5,6 +5,7 @@ import {
   Param,
   Body,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
@@ -51,27 +52,27 @@ export class RequestsController {
   }
 
   @Get(':id')
-  getRequestDetail(@Param('id') id: string) {
+  getRequestDetail(@Param('id', ParseUUIDPipe) id: string) {
     return this.requestsService.getRequestDetail(id);
   }
 
   @Post(':id/accept')
-  acceptRequest(@Param('id') id: string, @CurrentUser() user: User) {
+  acceptRequest(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
     return this.requestsService.acceptRequest(id, user.id);
   }
 
   @Post(':id/decline')
-  declineRequest(@Param('id') id: string, @CurrentUser() user: User) {
+  declineRequest(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
     return this.requestsService.declineRequest(id, user.id);
   }
 
   @Post(':id/complete')
-  completeRequest(@Param('id') id: string, @CurrentUser() user: User) {
+  completeRequest(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
     return this.requestsService.completeRequest(id, user.id);
   }
 
   @Post(':id/cancel')
-  cancelRequest(@Param('id') id: string, @CurrentUser() user: User) {
+  cancelRequest(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
     return this.requestsService.cancelRequest(id, user.id);
   }
 }
