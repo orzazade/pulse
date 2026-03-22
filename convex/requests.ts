@@ -37,6 +37,18 @@ function sortByUrgencyThenDate<T extends { urgency: string; createdAt: number }>
   });
 }
 
+/** Authenticate the caller and return their user document, or throw. */
+async function getAuthenticatedUser(ctx: QueryCtx) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) throw new Error("Not authenticated");
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+    .unique();
+  if (!user) throw new Error("User not found");
+  return user;
+}
+
 /**
  * Request System
  *
@@ -60,15 +72,7 @@ export const createRequest = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Validate user mode - must be seeker or both (not donor-only or unset)
     if (user.mode !== "seeker" && user.mode !== "both") {
@@ -150,15 +154,7 @@ export const broadcastEmergency = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Validate user mode - must be seeker or both (not donor-only or unset)
     if (user.mode !== "seeker" && user.mode !== "both") {
@@ -246,15 +242,7 @@ export const broadcastEmergency = mutation({
 export const cancelRequest = mutation({
   args: { requestId: v.id("requests") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     const request = await ctx.db.get(args.requestId);
     if (!request) throw new Error("Request not found");
@@ -361,15 +349,7 @@ export const cancelRequest = mutation({
 export const acceptRequest = mutation({
   args: { requestId: v.id("requests") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     // Verify donor mode - must be donor or both (not seeker-only or unset)
     if (user.mode !== "donor" && user.mode !== "both") {
@@ -488,15 +468,7 @@ export const acceptRequest = mutation({
 export const completeRequest = mutation({
   args: { requestId: v.id("requests") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (!user) throw new Error("User not found");
+    const user = await getAuthenticatedUser(ctx);
 
     const request = await ctx.db.get(args.requestId);
     if (!request) throw new Error("Request not found");
