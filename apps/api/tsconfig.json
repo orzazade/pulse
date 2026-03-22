@@ -9,16 +9,15 @@
     "target": "ES2022",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@pulse/shared": ["../../packages/shared/src"]
-    }
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../../packages/shared/src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
