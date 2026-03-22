@@ -10,6 +10,7 @@ import { ConvexClientProvider } from "../convex/ConvexClientProvider";
 import { ModeProvider } from "../contexts/ModeContext";
 import { useBiometricAuth } from "../hooks/useBiometricAuth";
 import { getBiometricType } from "../lib/biometric";
+import { primaryColors, backgroundColors, textColors } from "../theme/tokens";
 import { registerForPushNotificationsAsync } from "../lib/notifications";
 import React, { useEffect, useState, useRef } from "react";
 
@@ -62,12 +63,12 @@ function LockScreen({ onUnlock, onSignOut }: { onUnlock: () => void; onSignOut: 
   return (
     <View style={lockStyles.container}>
       <View style={lockStyles.logoContainer}>
-        <Ionicons name="water" size={80} color="#dc2626" />
+        <Ionicons name="water" size={80} color={primaryColors.primary} />
         <Text style={lockStyles.title}>Pulse</Text>
       </View>
 
       <TouchableOpacity style={lockStyles.unlockButton} onPress={onUnlock}>
-        <Ionicons name={biometricIcon} size={32} color="#fff" />
+        <Ionicons name={biometricIcon} size={32} color={textColors.onPrimary} />
         <Text style={lockStyles.unlockText}>Unlock with {biometricLabel}</Text>
       </TouchableOpacity>
 
@@ -83,7 +84,7 @@ const lockStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: backgroundColors.background,
     padding: 20,
   },
   logoContainer: {
@@ -93,20 +94,20 @@ const lockStyles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#dc2626",
+    color: primaryColors.primary,
     marginTop: 10,
   },
   unlockButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#dc2626",
+    backgroundColor: primaryColors.primary,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 12,
     gap: 12,
   },
   unlockText: {
-    color: "#fff",
+    color: textColors.onPrimary,
     fontSize: 18,
     fontWeight: "600",
   },
@@ -115,7 +116,7 @@ const lockStyles = StyleSheet.create({
     padding: 10,
   },
   signOutText: {
-    color: "#6b7280",
+    color: textColors.secondary,
     fontSize: 16,
   },
 });
@@ -158,8 +159,8 @@ function BiometricGate({ children }: { children: React.ReactNode }) {
 
   if (isChecking) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" }}>
-        <ActivityIndicator size="large" color="#dc2626" />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: backgroundColors.background }}>
+        <ActivityIndicator size="large" color={primaryColors.primary} />
       </View>
     );
   }
