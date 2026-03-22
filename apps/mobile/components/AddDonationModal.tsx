@@ -12,6 +12,7 @@ import {
   Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Ionicons } from "@expo/vector-icons";
 import {
   primaryColors,
   backgroundColors,
@@ -19,6 +20,7 @@ import {
   borderColors,
   radius,
   spacing,
+  iconSpec,
 } from "@/theme/tokens";
 
 interface AddDonationModalProps {
