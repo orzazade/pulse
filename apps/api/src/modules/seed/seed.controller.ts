@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, UseGuards, ForbiddenException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DonationCenter } from '../centers/entities/donation-center.entity';
@@ -10,6 +10,8 @@ import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 @Controller('seed')
 @UseGuards(JwtAuthGuard)
 export class SeedController {
+  private readonly logger = new Logger(SeedController.name);
+
   constructor(
     @InjectRepository(DonationCenter)
     private readonly centerRepository: Repository<DonationCenter>,
@@ -23,31 +25,38 @@ export class SeedController {
       throw new ForbiddenException('Seeding is not allowed in production');
     }
 
-    const results = { centers: 0, cities: 0 };
+    try {
+      return await this.centerRepository.manager.transaction(async (manager) => {
+        const results = { centers: 0, cities: 0 };
 
-    // Seed cities
-    const existingCities = await this.cityRepository.count();
-    if (existingCities === 0) {
-      const cities = this.cityRepository.create(AZERBAIJAN_CITIES);
-      await this.cityRepository.save(cities);
-      results.cities = cities.length;
+        // Seed cities
+        const existingCities = await manager.count(City);
+        if (existingCities === 0) {
+          const cities = manager.create(City, AZERBAIJAN_CITIES);
+          await manager.save(cities);
+          results.cities = cities.length;
+        }
+
+        // Seed centers
+        const existingCenters = await manager.count(DonationCenter);
+        if (existingCenters === 0) {
+          const centers = manager.create(DonationCenter, DONATION_CENTERS);
+          await manager.save(centers);
+          results.centers = centers.length;
+        }
+
+        return {
+          message: 'Seed complete',
+          inserted: results,
+          skipped: {
+            cities: existingCities > 0 ? 'already seeded' : null,
+            centers: existingCenters > 0 ? 'already seeded' : null,
+          },
+        };
+      });
+    } catch (error) {
+      this.logger.error('Seed operation failed', error instanceof Error ? error.stack : undefined);
+      throw new InternalServerErrorException('Seed operation failed — rolled back');
     }
-
-    // Seed centers
-    const existingCenters = await this.centerRepository.count();
-    if (existingCenters === 0) {
-      const centers = this.centerRepository.create(DONATION_CENTERS);
-      await this.centerRepository.save(centers);
-      results.centers = centers.length;
-    }
-
-    return {
-      message: 'Seed complete',
-      inserted: results,
-      skipped: {
-        cities: existingCities > 0 ? 'already seeded' : null,
-        centers: existingCenters > 0 ? 'already seeded' : null,
-      },
-    };
   }
 }
