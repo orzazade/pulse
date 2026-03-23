@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   primaryColors,
   backgroundColors,
+  borderColors,
   textColors,
   headingStyles,
   bodyStyles,
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 3,
-    borderColor: "#FFFFFF",
+    borderColor: backgroundColors.background,
     ...shadows.medium,
   },
   avatarFallback: {
@@ -142,8 +143,8 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 3,
-    borderColor: "#FFFFFF",
-    backgroundColor: "#E5E7EB",
+    borderColor: backgroundColors.background,
+    backgroundColor: borderColors.default,
     justifyContent: "center",
     alignItems: "center",
     ...shadows.medium,
