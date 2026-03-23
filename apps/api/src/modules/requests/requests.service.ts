@@ -172,11 +172,20 @@ export class RequestsService {
       throw new BadRequestException('Cannot decline this request');
     }
 
+    // Atomic update with WHERE status=ACCEPTED AND acceptedDonorId matches
+    // to prevent race condition with concurrent cancel or complete
+    const result = await this.requestRepository.update(
+      { id: requestId, status: RequestStatus.ACCEPTED, acceptedDonorId: donorId },
+      { status: RequestStatus.OPEN, acceptedDonorId: null, acceptedAt: null },
+    );
+    if (result.affected === 0) {
+      throw new ConflictException('Request status changed before decline');
+    }
+
     request.status = RequestStatus.OPEN;
     request.acceptedDonorId = null;
     request.acceptedAt = null;
-
-    return this.requestRepository.save(request);
+    return request;
   }
 
   async completeRequest(requestId: string, seekerId: string): Promise<Request> {
