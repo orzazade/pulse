@@ -190,8 +190,17 @@ export class RequestsService {
       throw new BadRequestException(`Cannot complete request with status "${request.status}"`);
     }
 
+    // Atomic update with WHERE status=ACCEPTED to prevent race condition
+    const result = await this.requestRepository.update(
+      { id: requestId, status: RequestStatus.ACCEPTED },
+      { status: RequestStatus.COMPLETED },
+    );
+    if (result.affected === 0) {
+      throw new ConflictException('Request status changed before completion');
+    }
+
     request.status = RequestStatus.COMPLETED;
-    return this.requestRepository.save(request);
+    return request;
   }
 
   async cancelRequest(requestId: string, seekerId: string): Promise<Request> {
