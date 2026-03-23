@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     borderColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing(1),
   },
 
   badgeText: {
