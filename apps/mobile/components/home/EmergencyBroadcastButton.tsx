@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     ...shadows.large, // Large shadow for maximum prominence
   },
   buttonDisabled: {
-    backgroundColor: '#9CA3AF',
+    backgroundColor: textColors.tertiary,
   },
   iconContainer: {
     marginRight: spacing(2),
