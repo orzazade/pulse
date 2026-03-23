@@ -86,6 +86,7 @@ export class RequestsService {
       .leftJoinAndSelect('request.seeker', 'seeker')
       .where('request.status = :status', { status: RequestStatus.OPEN })
       .andWhere('request.blood_type IN (:...types)', { types: compatibleTypes })
+      .andWhere('request.seeker_id != :donorId', { donorId })
       .orderBy('request.created_at', 'DESC')
       .getMany();
   }
