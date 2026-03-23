@@ -38,10 +38,15 @@ export class AuthService {
       throw new BadRequestException('Phone and OTP are required');
     }
 
-    // TODO: Verify OTP via Firebase Auth
-    // For development, accept OTP "123456"
-    if (process.env.NODE_ENV !== 'development' && otp !== '123456') {
-      throw new UnauthorizedException('Invalid OTP');
+    // TODO: Integrate Firebase Auth for production OTP verification
+    if (process.env.NODE_ENV === 'development') {
+      // Dev-only backdoor: accept hardcoded OTP for testing
+      if (otp !== '123456') {
+        throw new UnauthorizedException('Invalid OTP');
+      }
+    } else {
+      // Production: reject all OTPs until Firebase Auth is integrated
+      throw new UnauthorizedException('OTP verification is not configured for this environment');
     }
 
     let user: User;
