@@ -562,8 +562,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     backgroundColor: semanticColors.success,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    paddingHorizontal: spacing(6),
+    paddingVertical: spacing(3.5),
     borderRadius: radius.lg,
   },
   callButtonText: {
