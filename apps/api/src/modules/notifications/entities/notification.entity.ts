@@ -11,6 +11,7 @@ import { NotificationType } from '@pulse/shared';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('notifications')
+@Index(['userId', 'read'])
 export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
