@@ -37,7 +37,7 @@ class UpdateProfileDto {
 }
 
 class UpdatePushTokenDto {
-  @IsString() pushToken: string;
+  @IsString() @MinLength(1) pushToken: string;
 }
 
 class UpdateNotificationPrefsDto {
