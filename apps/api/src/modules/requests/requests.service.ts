@@ -134,11 +134,22 @@ export class RequestsService {
       throw new BadRequestException('Your blood type is not compatible with this request');
     }
 
+    // Atomic update with WHERE status=OPEN to prevent race condition
+    // where two donors accept the same request simultaneously
+    const acceptedAt = new Date();
+    const result = await this.requestRepository.update(
+      { id: requestId, status: RequestStatus.OPEN },
+      { status: RequestStatus.ACCEPTED, acceptedDonorId: donorId, acceptedAt },
+    );
+    if (result.affected === 0) {
+      throw new ConflictException('Request has already been accepted by another donor');
+    }
+
     request.status = RequestStatus.ACCEPTED;
     request.acceptedDonorId = donorId;
-    request.acceptedAt = new Date();
+    request.acceptedAt = acceptedAt;
 
-    const saved = await this.requestRepository.save(request);
+    const saved = request;
 
     // Notify seeker that request was accepted (best-effort)
     try {
