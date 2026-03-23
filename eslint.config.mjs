@@ -90,6 +90,22 @@ export default [
       },
     },
   },
+  // Test files (Jest globals)
+  {
+    files: ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.tsx", "**/*.test.tsx"],
+    languageOptions: {
+      globals: {
+        describe: "readonly",
+        it: "readonly",
+        expect: "readonly",
+        jest: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+      },
+    },
+  },
   // ES modules
   {
     files: ["**/*.mjs"],
