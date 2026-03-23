@@ -113,7 +113,7 @@ function getIconColorForType(type: NotificationType): string {
     case "eligibility_reminder":
       return semanticColors.info;
     case "thank_you":
-      return "#EC4899"; // Pink for thank you
+      return primaryColors.primary;
     case "general":
     default:
       return semanticColors.info;
@@ -136,7 +136,7 @@ function getIconBackgroundForType(type: NotificationType): string {
     case "eligibility_reminder":
       return backgroundColors.chipInactive;
     case "thank_you":
-      return "#FCE7F3"; // Light pink
+      return primaryColors.primaryLight;
     case "general":
     default:
       return backgroundColors.chipInactive;
