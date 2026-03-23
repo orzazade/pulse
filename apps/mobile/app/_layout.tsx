@@ -10,7 +10,7 @@ import { ConvexClientProvider } from "../convex/ConvexClientProvider";
 import { ModeProvider } from "../contexts/ModeContext";
 import { useBiometricAuth } from "../hooks/useBiometricAuth";
 import { getBiometricType } from "../lib/biometric";
-import { primaryColors, backgroundColors, textColors } from "../theme/tokens";
+import { primaryColors, backgroundColors, textColors, spacing } from "../theme/tokens";
 import { registerForPushNotificationsAsync } from "../lib/notifications";
 import React, { useEffect, useState, useRef } from "react";
 
@@ -85,11 +85,11 @@ const lockStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: backgroundColors.background,
-    padding: 20,
+    padding: spacing(5),
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 60,
+    marginBottom: spacing(15),
   },
   title: {
     fontSize: 32,
