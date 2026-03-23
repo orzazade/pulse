@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
@@ -12,6 +12,7 @@ import { CentersModule } from './modules/centers/centers.module';
 import { CitiesModule } from './modules/cities/cities.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { HealthController } from './health.controller';
+import { LoggingMiddleware } from './shared/middleware/logging.middleware';
 
 @Module({
   controllers: [HealthController],
@@ -50,4 +51,8 @@ import { HealthController } from './health.controller';
     SeedModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}
