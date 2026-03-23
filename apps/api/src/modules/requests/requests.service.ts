@@ -37,6 +37,12 @@ export class RequestsService {
       notes?: string;
     },
   ): Promise<Request> {
+    // Verify user is allowed to create requests (seeker or both mode)
+    const user = await this.userRepository.findOne({ where: { id: seekerId } });
+    if (user?.mode === UserMode.DONOR) {
+      throw new BadRequestException('Donor-only users cannot create blood requests');
+    }
+
     // Limit open requests per user to prevent abuse
     const openCount = await this.requestRepository.count({
       where: { seekerId, status: RequestStatus.OPEN },
