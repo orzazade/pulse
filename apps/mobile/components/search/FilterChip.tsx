@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { filterChipSpec, touchTargetSpec, fontWeight } from '@/theme/tokens';
+import { filterChipSpec, touchTargetSpec, fontWeight, spacing } from '@/theme/tokens';
 
 interface FilterChipProps {
   label: string;
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     backgroundColor: filterChipSpec.inactive.backgroundColor,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
+    marginRight: spacing(2),
   },
   chipActive: {
     backgroundColor: filterChipSpec.active.backgroundColor,
