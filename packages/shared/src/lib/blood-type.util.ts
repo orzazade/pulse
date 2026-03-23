@@ -14,7 +14,3 @@ const COMPATIBILITY_MAP: Record<BloodType, BloodType[]> = {
 export function getCompatibleDonorTypes(recipientBloodType: BloodType): BloodType[] {
   return COMPATIBILITY_MAP[recipientBloodType] ?? [];
 }
-
-export function canDonate(donorType: BloodType, recipientType: BloodType): boolean {
-  return getCompatibleDonorTypes(recipientType).includes(donorType);
-}
