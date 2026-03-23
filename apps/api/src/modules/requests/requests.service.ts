@@ -79,6 +79,7 @@ export class RequestsService {
       .addSelect(['donor.id', 'donor.fullName', 'donor.bloodType', 'donor.city', 'donor.region'])
       .where('request.seeker_id = :seekerId', { seekerId })
       .orderBy('request.created_at', 'DESC')
+      .limit(100)
       .getMany();
   }
 
