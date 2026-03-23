@@ -8,6 +8,7 @@ import {
   fontWeight,
   semanticColors,
   touchTargetSpec,
+  backgroundColors,
 } from '@/theme/tokens';
 
 type UrgencyLevel = 'critical' | 'urgent' | 'standard';
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     borderColor: borderColors.default,
     borderRadius: 12,
     padding: spacing(4),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: backgroundColors.card,
   },
   optionSelected: {
     borderColor: primaryColors.primary,
