@@ -37,6 +37,14 @@ export class RequestsService {
       notes?: string;
     },
   ): Promise<Request> {
+    // Limit open requests per user to prevent abuse
+    const openCount = await this.requestRepository.count({
+      where: { seekerId, status: RequestStatus.OPEN },
+    });
+    if (openCount >= 5) {
+      throw new BadRequestException('Maximum of 5 open requests allowed. Complete or cancel existing requests first.');
+    }
+
     const request = this.requestRepository.create({
       seekerId,
       bloodType: data.bloodType,
