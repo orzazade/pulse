@@ -100,6 +100,7 @@ export class RequestsService {
       .andWhere('request.blood_type IN (:...types)', { types: compatibleTypes })
       .andWhere('request.seeker_id != :donorId', { donorId })
       .orderBy('request.created_at', 'DESC')
+      .limit(100)
       .getMany();
   }
 
