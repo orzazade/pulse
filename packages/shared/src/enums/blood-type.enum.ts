@@ -32,5 +32,10 @@ export enum Urgency {
 export enum NotificationType {
   REQUEST_MATCH = 'request_match',
   REQUEST_ACCEPTED = 'request_accepted',
+  REQUEST_COMPLETED = 'request_completed',
+  REQUEST_CANCELLED = 'request_cancelled',
+  DONOR_WITHDREW = 'donor_withdrew',
   ELIGIBILITY_REMINDER = 'eligibility_reminder',
+  THANK_YOU = 'thank_you',
+  GENERAL = 'general',
 }
