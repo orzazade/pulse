@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { BloodType, getCompatibleDonorTypes } from '@pulse/shared';
+import { BloodType, RequestStatus, getCompatibleDonorTypes } from '@pulse/shared';
 
 @Injectable()
 export class UsersService {
@@ -100,7 +100,7 @@ export class UsersService {
       .createQueryBuilder()
       .from('requests', 'r')
       .where('r.accepted_donor_id = :userId', { userId })
-      .andWhere('r.status = :status', { status: 'completed' })
+      .andWhere('r.status = :status', { status: RequestStatus.COMPLETED })
       .getCount();
 
     return { peopleHelped: count };
