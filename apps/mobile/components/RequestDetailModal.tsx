@@ -322,7 +322,7 @@ export function RequestDetailModal({
                     onPress={() => handleCall(detail.donor!.phone!)}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="call" size={20} color="#fff" />
+                    <Ionicons name="call" size={20} color={textColors.onPrimary} />
                     <Text style={styles.callButtonText}>{detail.donor.phone}</Text>
                   </TouchableOpacity>
                 </View>
@@ -338,7 +338,7 @@ export function RequestDetailModal({
                     onPress={() => handleCall(detail.seeker!.phone!)}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="call" size={20} color="#fff" />
+                    <Ionicons name="call" size={20} color={textColors.onPrimary} />
                     <Text style={styles.callButtonText}>{detail.seeker.phone}</Text>
                   </TouchableOpacity>
                 </View>
