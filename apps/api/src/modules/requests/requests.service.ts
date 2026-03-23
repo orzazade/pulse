@@ -101,10 +101,14 @@ export class RequestsService {
   }
 
   async getRequestDetail(requestId: string): Promise<Request> {
-    const request = await this.requestRepository.findOne({
-      where: { id: requestId },
-      relations: ['seeker', 'donor'],
-    });
+    const request = await this.requestRepository
+      .createQueryBuilder('request')
+      .leftJoin('request.seeker', 'seeker')
+      .addSelect(['seeker.id', 'seeker.fullName', 'seeker.bloodType', 'seeker.city', 'seeker.region'])
+      .leftJoin('request.donor', 'donor')
+      .addSelect(['donor.id', 'donor.fullName', 'donor.bloodType', 'donor.city', 'donor.region'])
+      .where('request.id = :requestId', { requestId })
+      .getOne();
 
     if (!request) throw new NotFoundException('Request not found');
     return request;
