@@ -91,7 +91,8 @@ export class RequestsService {
 
     return this.requestRepository
       .createQueryBuilder('request')
-      .leftJoinAndSelect('request.seeker', 'seeker')
+      .leftJoin('request.seeker', 'seeker')
+      .addSelect(['seeker.id', 'seeker.fullName', 'seeker.city', 'seeker.region'])
       .where('request.status = :status', { status: RequestStatus.OPEN })
       .andWhere('request.blood_type IN (:...types)', { types: compatibleTypes })
       .andWhere('request.seeker_id != :donorId', { donorId })
