@@ -3,22 +3,25 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { IsString, IsNotEmpty, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
 
 class RequestOtpDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(7)
+  @MaxLength(20)
   phone: string;
 }
 
 class VerifyOtpDto {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(20)
   phone: string;
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(10)
   otp: string;
 }
 
