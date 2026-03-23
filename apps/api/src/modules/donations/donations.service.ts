@@ -22,6 +22,19 @@ export class DonationsService {
       throw new BadRequestException('Donation date cannot be in the future');
     }
 
+    // Enforce 56-day minimum interval between donations
+    const lastDonation = await this.getLastDonationDate(userId);
+    if (lastDonation) {
+      const daysSinceLast = Math.floor(
+        (donationDate.getTime() - lastDonation.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      if (daysSinceLast < 56) {
+        throw new BadRequestException(
+          `Must wait at least 56 days between donations (${56 - daysSinceLast} days remaining)`,
+        );
+      }
+    }
+
     const donation = this.donationRepository.create({
       userId,
       donationDate,
