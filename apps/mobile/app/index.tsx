@@ -11,7 +11,7 @@ import {
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { hasSeenOnboarding } from "../lib/onboarding";
-import { primaryColors, semanticColors } from "@/theme/tokens";
+import { primaryColors, semanticColors, backgroundColors, textColors } from "@/theme/tokens";
 
 export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -131,11 +131,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: backgroundColors.background,
   },
   loadingText: {
     fontSize: 16,
-    color: "#6b7280",
+    color: textColors.secondary,
     marginTop: 16,
   },
   errorText: {
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   retryText: {
-    color: "#fff",
+    color: textColors.onPrimary,
     fontSize: 16,
     fontWeight: "600",
   },
