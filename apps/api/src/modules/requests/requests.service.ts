@@ -161,8 +161,8 @@ export class RequestsService {
     }
 
     request.status = RequestStatus.OPEN;
-    request.acceptedDonorId = null as unknown as string;
-    request.acceptedAt = null as unknown as Date;
+    request.acceptedDonorId = null;
+    request.acceptedAt = null;
 
     return this.requestRepository.save(request);
   }

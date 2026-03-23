@@ -47,14 +47,14 @@ export class Request {
   status: RequestStatus;
 
   @Column({ name: 'accepted_donor_id', nullable: true })
-  acceptedDonorId: string;
+  acceptedDonorId: string | null;
 
   @ManyToOne(() => User, (user) => user.donorRequests, { nullable: true })
   @JoinColumn({ name: 'accepted_donor_id' })
   donor: User;
 
   @Column({ name: 'accepted_at', type: 'timestamptz', nullable: true })
-  acceptedAt: Date;
+  acceptedAt: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
