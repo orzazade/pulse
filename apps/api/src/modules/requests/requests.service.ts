@@ -11,7 +11,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Request } from './entities/request.entity';
 import { User } from '../users/entities/user.entity';
-import { BloodType, RequestStatus, Urgency, getCompatibleDonorTypes } from '@pulse/shared';
+import { BloodType, RequestStatus, Urgency, UserMode, getCompatibleDonorTypes } from '@pulse/shared';
 
 @Injectable()
 export class RequestsService {
@@ -116,6 +116,9 @@ export class RequestsService {
     const donor = await this.userRepository.findOne({ where: { id: donorId } });
     if (!donor?.bloodType) {
       throw new BadRequestException('Your blood type must be set before accepting requests');
+    }
+    if (donor.mode === UserMode.SEEKER) {
+      throw new BadRequestException('Only donors can accept blood requests');
     }
     const compatibleTypes = getCompatibleDonorTypes(request.bloodType);
     if (!compatibleTypes.includes(donor.bloodType)) {
