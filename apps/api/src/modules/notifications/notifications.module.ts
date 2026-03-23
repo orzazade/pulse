@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
-import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { NotificationProcessor } from './processors/notification.processor';
@@ -13,7 +12,6 @@ import { Request } from '../requests/entities/request.entity';
   imports: [
     TypeOrmModule.forFeature([Notification, User, Request]),
     BullModule.registerQueue({ name: 'notifications' }),
-    ScheduleModule,
   ],
   controllers: [NotificationsController],
   providers: [NotificationsService, NotificationProcessor],
