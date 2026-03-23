@@ -73,11 +73,13 @@ export class RequestsService {
   }
 
   async getMyRequests(seekerId: string): Promise<Request[]> {
-    return this.requestRepository.find({
-      where: { seekerId },
-      relations: ['donor'],
-      order: { createdAt: 'DESC' },
-    });
+    return this.requestRepository
+      .createQueryBuilder('request')
+      .leftJoin('request.donor', 'donor')
+      .addSelect(['donor.id', 'donor.fullName', 'donor.bloodType', 'donor.city', 'donor.region'])
+      .where('request.seeker_id = :seekerId', { seekerId })
+      .orderBy('request.created_at', 'DESC')
+      .getMany();
   }
 
   async getIncomingRequests(donorId: string): Promise<Request[]> {
