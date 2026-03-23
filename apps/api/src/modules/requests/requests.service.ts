@@ -112,6 +112,16 @@ export class RequestsService {
       throw new ConflictException(`Cannot accept request with status "${request.status}"`);
     }
 
+    // Verify donor has a compatible blood type
+    const donor = await this.userRepository.findOne({ where: { id: donorId } });
+    if (!donor?.bloodType) {
+      throw new BadRequestException('Your blood type must be set before accepting requests');
+    }
+    const compatibleTypes = getCompatibleDonorTypes(request.bloodType);
+    if (!compatibleTypes.includes(donor.bloodType)) {
+      throw new BadRequestException('Your blood type is not compatible with this request');
+    }
+
     request.status = RequestStatus.ACCEPTED;
     request.acceptedDonorId = donorId;
     request.acceptedAt = new Date();
