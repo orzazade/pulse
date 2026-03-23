@@ -6,6 +6,7 @@ import {
   Body,
   UseGuards,
   ParseUUIDPipe,
+  ForbiddenException,
 } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
@@ -53,8 +54,16 @@ export class RequestsController {
   }
 
   @Get(':id')
-  getRequestDetail(@Param('id', ParseUUIDPipe) id: string) {
-    return this.requestsService.getRequestDetail(id);
+  async getRequestDetail(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: User,
+  ) {
+    const request = await this.requestsService.getRequestDetail(id);
+    // Only the seeker or accepted donor can view request details
+    if (request.seekerId !== user.id && request.acceptedDonorId !== user.id) {
+      throw new ForbiddenException('You do not have access to this request');
+    }
+    return request;
   }
 
   @Post(':id/accept')
