@@ -489,7 +489,7 @@ export const filterChipSpec = {
   borderRadius: 18, // pill shape
   inactive: {
     backgroundColor: backgroundColors.chipInactive,
-    textColor: '#374151',
+    textColor: textColors.primary,
   },
   active: {
     backgroundColor: primaryColors.primary,
