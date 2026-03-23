@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Request } from './entities/request.entity';
@@ -214,7 +214,16 @@ export class RequestsService {
       throw new BadRequestException(`Cannot cancel request with status "${request.status}"`);
     }
 
+    // Atomic update with WHERE status IN (OPEN, ACCEPTED) to prevent race condition
+    const result = await this.requestRepository.update(
+      { id: requestId, status: In([RequestStatus.OPEN, RequestStatus.ACCEPTED]) },
+      { status: RequestStatus.CANCELLED },
+    );
+    if (result.affected === 0) {
+      throw new ConflictException('Request status changed before cancellation');
+    }
+
     request.status = RequestStatus.CANCELLED;
-    return this.requestRepository.save(request);
+    return request;
   }
 }
