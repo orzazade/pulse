@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: primaryColors.primary, // #E53935
     borderWidth: 2,
-    borderColor: "#FFFFFF",
+    borderColor: textColors.onPrimary,
     marginTop: spacing(1), // 4px offset from top
   },
 });
