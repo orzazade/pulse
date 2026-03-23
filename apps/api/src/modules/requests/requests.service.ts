@@ -94,7 +94,7 @@ export class RequestsService {
     if (!donor?.bloodType) return [];
 
     // Find open requests where this donor's blood type is compatible
-    const compatibleTypes = getCompatibleDonorTypes(donor.bloodType as BloodType);
+    const compatibleTypes = getCompatibleDonorTypes(donor.bloodType);
 
     if (compatibleTypes.length === 0) return [];
 
