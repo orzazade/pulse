@@ -16,13 +16,14 @@ import {
   IsEnum,
   IsNumber,
   IsBoolean,
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BloodType, UserMode } from '@pulse/shared';
 
 class UpdateProfileDto {
   @IsOptional() @IsString() fullName?: string;
-  @IsOptional() @IsString() email?: string;
+  @IsOptional() @IsEmail() email?: string;
   @IsOptional() @IsEnum(BloodType) bloodType?: BloodType;
   @IsOptional() @IsEnum(UserMode) mode?: UserMode;
   @IsOptional() @IsString() city?: string;
