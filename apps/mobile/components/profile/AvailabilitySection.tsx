@@ -3,6 +3,7 @@ import { View, Text, Switch, StyleSheet, ActivityIndicator } from "react-native"
 import {
   primaryColors,
   backgroundColors,
+  borderColors,
   textColors,
   fontWeight,
   bodyStyles,
@@ -33,9 +34,9 @@ export function AvailabilitySection({
           <Switch
             value={isAvailable}
             onValueChange={onToggle}
-            trackColor={{ false: "#E5E7EB", true: primaryColors.primaryLight }}
-            thumbColor={isAvailable ? primaryColors.primary : "#f4f3f4"}
-            ios_backgroundColor="#E5E7EB"
+            trackColor={{ false: borderColors.default, true: primaryColors.primaryLight }}
+            thumbColor={isAvailable ? primaryColors.primary : backgroundColors.chipInactive}
+            ios_backgroundColor={borderColors.default}
           />
         )}
       </View>
