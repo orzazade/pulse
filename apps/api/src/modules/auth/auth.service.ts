@@ -49,28 +49,7 @@ export class AuthService {
       throw new UnauthorizedException('OTP verification is not configured for this environment');
     }
 
-    let user: User;
-    try {
-      const existing = await this.userRepository.findOne({ where: { phone } });
-
-      if (!existing) {
-        user = this.userRepository.create({
-          phone,
-          phoneVerified: true,
-        });
-        user = await this.userRepository.save(user);
-      } else {
-        if (!existing.phoneVerified) {
-          existing.phoneVerified = true;
-          user = await this.userRepository.save(existing);
-        } else {
-          user = existing;
-        }
-      }
-    } catch (error) {
-      this.logger.error(`Failed to upsert user for phone ${phone}`, error instanceof Error ? error.stack : undefined);
-      throw new InternalServerErrorException('Authentication failed — please try again');
-    }
+    const user = await this.findOrCreateUser(phone);
 
     try {
       const payload = { sub: user.id, phone: user.phone };
@@ -78,6 +57,27 @@ export class AuthService {
       return { accessToken, user };
     } catch (error) {
       this.logger.error('Failed to sign JWT token', error instanceof Error ? error.stack : undefined);
+      throw new InternalServerErrorException('Authentication failed — please try again');
+    }
+  }
+
+  private async findOrCreateUser(phone: string): Promise<User> {
+    try {
+      const existing = await this.userRepository.findOne({ where: { phone } });
+
+      if (!existing) {
+        const user = this.userRepository.create({ phone, phoneVerified: true });
+        return this.userRepository.save(user);
+      }
+
+      if (!existing.phoneVerified) {
+        existing.phoneVerified = true;
+        return this.userRepository.save(existing);
+      }
+
+      return existing;
+    } catch (error) {
+      this.logger.error(`Failed to upsert user for phone ${phone}`, error instanceof Error ? error.stack : undefined);
       throw new InternalServerErrorException('Authentication failed — please try again');
     }
   }
