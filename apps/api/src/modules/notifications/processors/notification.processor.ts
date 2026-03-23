@@ -6,7 +6,7 @@ import { Repository, In } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Request } from '../../requests/entities/request.entity';
 import { NotificationsService } from '../notifications.service';
-import { NotificationType, getCompatibleDonorTypes, BloodType } from '@pulse/shared';
+import { NotificationType, getCompatibleDonorTypes, BloodType, UserMode } from '@pulse/shared';
 
 @Processor('notifications')
 export class NotificationProcessor {
@@ -33,6 +33,7 @@ export class NotificationProcessor {
       where: {
         isAvailable: true,
         bloodType: In(compatibleTypes),
+        mode: In([UserMode.DONOR, UserMode.BOTH]),
         notifyRequestMatch: true,
       },
     });
