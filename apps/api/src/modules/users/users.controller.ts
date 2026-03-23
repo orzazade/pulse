@@ -18,6 +18,8 @@ import {
   IsBoolean,
   IsEmail,
   MinLength,
+  Min,
+  Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BloodType, UserMode } from '@pulse/shared';
@@ -48,9 +50,9 @@ class UpdateNotificationPrefsDto {
 
 class NearbyDonorsQueryDto {
   @IsEnum(BloodType) bloodType: BloodType;
-  @IsNumber() @Type(() => Number) latitude: number;
-  @IsNumber() @Type(() => Number) longitude: number;
-  @IsOptional() @IsNumber() @Type(() => Number) radiusKm?: number;
+  @IsNumber() @Min(-90) @Max(90) @Type(() => Number) latitude: number;
+  @IsNumber() @Min(-180) @Max(180) @Type(() => Number) longitude: number;
+  @IsOptional() @IsNumber() @Min(1) @Max(500) @Type(() => Number) radiusKm?: number;
 }
 
 @Controller('users')
