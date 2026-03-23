@@ -11,6 +11,7 @@ import {
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { hasSeenOnboarding } from "../lib/onboarding";
+import { primaryColors, semanticColors } from "@/theme/tokens";
 
 export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -61,7 +62,7 @@ export default function Index() {
   if (!isLoaded || !onboardingChecked) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#dc2626" />
+        <ActivityIndicator size="large" color={primaryColors.primary} />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
@@ -98,7 +99,7 @@ export default function Index() {
   if (convexUser === undefined || convexUser === null || creatingUser) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#dc2626" />
+        <ActivityIndicator size="large" color={primaryColors.primary} />
         <Text style={styles.loadingText}>Loading profile...</Text>
       </View>
     );
@@ -139,13 +140,13 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: "#dc2626",
+    color: semanticColors.error,
     textAlign: "center",
     marginBottom: 16,
     paddingHorizontal: 32,
   },
   retryButton: {
-    backgroundColor: "#dc2626",
+    backgroundColor: primaryColors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
