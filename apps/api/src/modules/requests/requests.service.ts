@@ -163,20 +163,18 @@ export class RequestsService {
     request.acceptedDonorId = donorId;
     request.acceptedAt = acceptedAt;
 
-    const saved = request;
-
     // Notify seeker that request was accepted (best-effort)
     try {
       await this.notificationQueue.add('request-accepted', {
-        requestId: saved.id,
+        requestId: request.id,
         seekerId: request.seekerId,
         donorId,
       });
     } catch (error) {
-      this.logger.error(`Failed to queue acceptance notification for request ${saved.id}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(`Failed to queue acceptance notification for request ${request.id}`, error instanceof Error ? error.stack : undefined);
     }
 
-    return saved;
+    return request;
   }
 
   async declineRequest(requestId: string, donorId: string): Promise<Request> {
