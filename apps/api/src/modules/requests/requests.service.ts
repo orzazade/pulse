@@ -167,8 +167,8 @@ export class RequestsService {
       throw new BadRequestException('Only the seeker can cancel a request');
     }
 
-    if (request.status === RequestStatus.COMPLETED) {
-      throw new BadRequestException('Cannot cancel a completed request');
+    if (request.status !== RequestStatus.OPEN && request.status !== RequestStatus.ACCEPTED) {
+      throw new BadRequestException(`Cannot cancel request with status "${request.status}"`);
     }
 
     request.status = RequestStatus.CANCELLED;
