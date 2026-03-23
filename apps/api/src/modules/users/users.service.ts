@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { BloodType, RequestStatus, getCompatibleDonorTypes } from '@pulse/shared';
+import { BloodType, RequestStatus, UserMode, getCompatibleDonorTypes } from '@pulse/shared';
 
 @Injectable()
 export class UsersService {
@@ -78,7 +78,7 @@ export class UsersService {
       .andWhere('user.blood_type IN (:...types)', { types: compatibleTypes })
       .andWhere('user.latitude IS NOT NULL')
       .andWhere('user.longitude IS NOT NULL')
-      .andWhere('user.mode IN (:...modes)', { modes: ['donor', 'both'] })
+      .andWhere('user.mode IN (:...modes)', { modes: [UserMode.DONOR, UserMode.BOTH] })
       .having('distance <= :radius', { radius: radiusKm })
       .setParameters({ lat: latitude, lng: longitude })
       .orderBy('distance', 'ASC')
