@@ -17,21 +17,22 @@ import {
   IsNumber,
   IsBoolean,
   IsEmail,
+  MinLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BloodType, UserMode } from '@pulse/shared';
 
 class UpdateProfileDto {
-  @IsOptional() @IsString() fullName?: string;
+  @IsOptional() @IsString() @MinLength(1) fullName?: string;
   @IsOptional() @IsEmail() email?: string;
   @IsOptional() @IsEnum(BloodType) bloodType?: BloodType;
   @IsOptional() @IsEnum(UserMode) mode?: UserMode;
-  @IsOptional() @IsString() city?: string;
-  @IsOptional() @IsString() region?: string;
+  @IsOptional() @IsString() @MinLength(1) city?: string;
+  @IsOptional() @IsString() @MinLength(1) region?: string;
   @IsOptional() @IsNumber() @Type(() => Number) latitude?: number;
   @IsOptional() @IsNumber() @Type(() => Number) longitude?: number;
   @IsOptional() @IsBoolean() locationGranted?: boolean;
-  @IsOptional() @IsString() preferredDonationCenter?: string;
+  @IsOptional() @IsString() @MinLength(1) preferredDonationCenter?: string;
   @IsOptional() @IsBoolean() isAvailable?: boolean;
 }
 
