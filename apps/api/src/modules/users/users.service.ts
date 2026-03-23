@@ -55,7 +55,7 @@ export class UsersService {
     latitude: number,
     longitude: number,
     radiusKm: number = 50,
-  ): Promise<(User & { distance: number })[]> {
+  ): Promise<{ id: string; fullName: string; bloodType: BloodType; city: string; region: string; mode: string; distance: number }[]> {
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
       throw new BadRequestException('Invalid coordinates: latitude must be -90..90, longitude -180..180');
     }
@@ -86,7 +86,12 @@ export class UsersService {
       .getRawAndEntities();
 
     return donors.entities.map((entity, i) => ({
-      ...entity,
+      id: entity.id,
+      fullName: entity.fullName,
+      bloodType: entity.bloodType,
+      city: entity.city,
+      region: entity.region,
+      mode: entity.mode,
       distance: parseFloat(donors.raw[i]?.distance ?? '0'),
     }));
   }
