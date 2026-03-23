@@ -34,4 +34,9 @@ export class DonationsController {
   getLastDonationDate(@CurrentUser() user: User) {
     return this.donationsService.getLastDonationDate(user.id);
   }
+
+  @Get('impact')
+  getDonationImpact(@CurrentUser() user: User) {
+    return this.donationsService.getDonationImpact(user.id);
+  }
 }
