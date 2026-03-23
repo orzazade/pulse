@@ -11,6 +11,7 @@ import { BloodType, RequestStatus, Urgency } from '@pulse/shared';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('requests')
+@Index(['status', 'bloodType'])
 export class Request {
   @PrimaryGeneratedColumn('uuid')
   id: string;
