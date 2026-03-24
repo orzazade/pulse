@@ -11,7 +11,7 @@ import {
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { hasSeenOnboarding } from "../lib/onboarding";
-import { primaryColors, semanticColors, backgroundColors, textColors } from "@/theme/tokens";
+import { primaryColors, semanticColors, backgroundColors, textColors, radius } from "@/theme/tokens";
 
 export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: primaryColors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: radius.md,
   },
   retryText: {
     color: textColors.onPrimary,
