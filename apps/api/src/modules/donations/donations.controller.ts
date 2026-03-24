@@ -3,12 +3,12 @@ import { DonationsService } from './donations.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { IsDateString, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 class RecordDonationDto {
   @IsDateString() donationDate: string;
-  @IsOptional() @IsString() @MaxLength(200) donationCenter?: string;
-  @IsOptional() @IsString() @MaxLength(1000) notes?: string;
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(200) donationCenter?: string;
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(1000) notes?: string;
 }
 
 @Controller('donations')
