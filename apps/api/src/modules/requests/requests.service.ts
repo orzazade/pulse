@@ -183,7 +183,9 @@ export class RequestsService {
       { status: RequestStatus.ACCEPTED, acceptedDonorId: donorId, acceptedAt },
     );
     if (result.affected === 0) {
-      throw new ConflictException('Request has already been accepted by another donor');
+      const current = await this.requestRepository.findOne({ where: { id: requestId }, select: ['status'] });
+      const status = current?.status ?? 'unknown';
+      throw new ConflictException(`Cannot accept — request is now ${status}`);
     }
 
     request.status = RequestStatus.ACCEPTED;
