@@ -24,6 +24,7 @@ import {
   bodyStyles,
   buttonSpec,
   fontWeight,
+  radius,
 } from "@/theme/tokens";
 import { CoordinateStep } from "./CoordinateStep";
 import { NavigateStep } from "./NavigateStep";
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
   successCircle: {
     width: 100,
     height: 100,
-    borderRadius: 50,
+    borderRadius: radius.full,
     backgroundColor: illustrationColors.greenCircle,
     justifyContent: "center",
     alignItems: "center",
