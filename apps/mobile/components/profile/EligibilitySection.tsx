@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   statusDot: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: radius.full,
     marginRight: spacing(3),
   },
   dotEligible: {
