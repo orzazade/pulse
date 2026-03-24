@@ -25,6 +25,12 @@ export class NotificationProcessor {
     job: Job<{ requestId: string; bloodType: string; seekerId: string }>,
   ) {
     const { requestId, bloodType, seekerId } = job.data;
+
+    if (!Object.values(BloodType).includes(bloodType as BloodType)) {
+      this.logger.error(`Invalid bloodType "${bloodType}" in job ${job.id} for request ${requestId}`);
+      return;
+    }
+
     const compatibleTypes = getCompatibleDonorTypes(bloodType as BloodType);
 
     if (compatibleTypes.length === 0) return;
