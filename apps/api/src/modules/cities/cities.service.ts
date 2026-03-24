@@ -11,6 +11,6 @@ export class CitiesService {
   ) {}
 
   async listCities(): Promise<City[]> {
-    return this.cityRepository.find({ order: { name: 'ASC' } });
+    return this.cityRepository.find({ order: { name: 'ASC' }, take: 200 });
   }
 }
