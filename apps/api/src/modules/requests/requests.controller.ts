@@ -19,6 +19,7 @@ import {
   IsInt,
   Min,
   Max,
+  MinLength,
   MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -28,9 +29,9 @@ class CreateRequestDto {
   @IsEnum(BloodType) bloodType: BloodType;
   @IsOptional() @IsInt() @Min(1) @Max(10) @Type(() => Number) units?: number;
   @IsEnum(Urgency) urgency: Urgency;
-  @IsOptional() @IsString() @MaxLength(200) hospital?: string;
-  @IsOptional() @IsString() @MaxLength(100) city?: string;
-  @IsOptional() @IsString() @MaxLength(1000) notes?: string;
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(200) hospital?: string;
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(100) city?: string;
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(1000) notes?: string;
 }
 
 @Controller('requests')
