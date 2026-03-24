@@ -16,7 +16,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  IsNumber,
+  IsInt,
   Min,
   Max,
   MaxLength,
@@ -26,7 +26,7 @@ import { BloodType, Urgency } from '@pulse/shared';
 
 class CreateRequestDto {
   @IsEnum(BloodType) bloodType: BloodType;
-  @IsOptional() @IsNumber() @Min(1) @Max(10) @Type(() => Number) units?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(10) @Type(() => Number) units?: number;
   @IsEnum(Urgency) urgency: Urgency;
   @IsOptional() @IsString() @MaxLength(200) hospital?: string;
   @IsOptional() @IsString() @MaxLength(100) city?: string;
