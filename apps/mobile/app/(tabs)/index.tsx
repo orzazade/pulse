@@ -26,6 +26,7 @@ import {
 
   spacing,
   iconSpec,
+  radius,
 } from "@/theme/tokens";
 
 // Home components
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
   notificationDot: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: radius.full,
     backgroundColor: primaryColors.primary,
     borderWidth: 2,
     borderColor: backgroundColors.background, // White border for contrast
