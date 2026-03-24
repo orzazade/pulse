@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   unreadDot: {
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: radius.full,
     backgroundColor: primaryColors.primary, // #E53935
     borderWidth: 2,
     borderColor: textColors.onPrimary,
