@@ -23,6 +23,7 @@ import {
   spacing,
   shadows,
   fontWeight,
+  radius,
 } from "@/theme/tokens";
 
 type TabType = "my-requests" | "incoming";
@@ -370,7 +371,7 @@ const styles = StyleSheet.create({
     right: spacing(6),
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: radius.full,
     backgroundColor: primaryColors.primary,
     justifyContent: "center",
     alignItems: "center",
