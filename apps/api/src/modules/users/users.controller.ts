@@ -18,6 +18,7 @@ import {
   IsBoolean,
   IsEmail,
   MinLength,
+  MaxLength,
   Min,
   Max,
 } from 'class-validator';
@@ -39,7 +40,7 @@ class UpdateProfileDto {
 }
 
 class UpdatePushTokenDto {
-  @IsString() @MinLength(1) pushToken: string;
+  @IsString() @MinLength(1) @MaxLength(500) pushToken: string;
 }
 
 class UpdateNotificationPrefsDto {
