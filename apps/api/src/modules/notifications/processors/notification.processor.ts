@@ -225,4 +225,26 @@ export class NotificationProcessor {
       );
     }
   }
+
+  @Process('donor-withdrew')
+  async handleDonorWithdrew(
+    job: Job<{ requestId: string; seekerId: string }>,
+  ) {
+    const { requestId, seekerId } = job.data;
+
+    try {
+      await this.notificationsService.createNotification({
+        userId: seekerId,
+        type: NotificationType.DONOR_WITHDREW,
+        title: 'Donor Withdrew',
+        body: 'A donor has withdrawn from your blood request. We are looking for another donor.',
+        requestId,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to create withdrawal notification for seeker ${seekerId} on request ${requestId}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+  }
 }

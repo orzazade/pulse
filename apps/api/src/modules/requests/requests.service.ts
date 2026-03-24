@@ -226,6 +226,16 @@ export class RequestsService {
     request.acceptedAt = null;
     request.escalationCount = 0;
 
+    // Notify seeker that the donor withdrew (best-effort)
+    try {
+      await this.notificationQueue.add('donor-withdrew', {
+        requestId: request.id,
+        seekerId: request.seekerId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to queue withdrawal notification for request ${request.id}`, error instanceof Error ? error.stack : undefined);
+    }
+
     // Re-schedule escalation for the re-opened request (original chain stopped when ACCEPTED)
     try {
       const delay = ESCALATION_DELAY_MS[request.urgency] ?? ESCALATION_DELAY_MS[Urgency.STANDARD];
