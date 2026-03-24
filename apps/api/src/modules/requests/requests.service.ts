@@ -37,9 +37,12 @@ export class RequestsService {
       notes?: string;
     },
   ): Promise<Request> {
-    // Verify user is allowed to create requests (seeker or both mode)
+    // Verify user exists and is allowed to create requests (seeker or both mode)
     const user = await this.userRepository.findOne({ where: { id: seekerId } });
-    if (user?.mode === UserMode.DONOR) {
+    if (!user) {
+      throw new NotFoundException('User profile not found');
+    }
+    if (user.mode === UserMode.DONOR) {
       throw new BadRequestException('Donor-only users cannot create blood requests');
     }
 
