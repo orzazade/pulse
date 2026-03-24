@@ -262,6 +262,19 @@ export class RequestsService {
     }
 
     request.status = RequestStatus.COMPLETED;
+
+    // Notify the donor that the request is complete (best-effort)
+    if (request.acceptedDonorId) {
+      try {
+        await this.notificationQueue.add('request-completed', {
+          requestId: request.id,
+          donorId: request.acceptedDonorId,
+        });
+      } catch (error) {
+        this.logger.error(`Failed to queue completion notification for request ${request.id}`, error instanceof Error ? error.stack : undefined);
+      }
+    }
+
     return request;
   }
 

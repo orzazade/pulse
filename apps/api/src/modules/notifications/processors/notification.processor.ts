@@ -203,4 +203,26 @@ export class NotificationProcessor {
       );
     }
   }
+
+  @Process('request-completed')
+  async handleRequestCompleted(
+    job: Job<{ requestId: string; donorId: string }>,
+  ) {
+    const { requestId, donorId } = job.data;
+
+    try {
+      await this.notificationsService.createNotification({
+        userId: donorId,
+        type: NotificationType.REQUEST_COMPLETED,
+        title: 'Donation Complete',
+        body: 'Thank you! The blood request you helped with has been marked as complete.',
+        requestId,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to create completion notification for donor ${donorId} on request ${requestId}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+  }
 }
