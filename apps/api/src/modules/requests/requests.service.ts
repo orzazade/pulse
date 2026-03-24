@@ -215,7 +215,7 @@ export class RequestsService {
     // to prevent race condition with concurrent cancel or complete
     const result = await this.requestRepository.update(
       { id: requestId, status: RequestStatus.ACCEPTED, acceptedDonorId: donorId },
-      { status: RequestStatus.OPEN, acceptedDonorId: null, acceptedAt: null },
+      { status: RequestStatus.OPEN, acceptedDonorId: null, acceptedAt: null, escalationCount: 0 },
     );
     if (result.affected === 0) {
       throw new ConflictException('Request status changed before decline');
@@ -224,6 +224,7 @@ export class RequestsService {
     request.status = RequestStatus.OPEN;
     request.acceptedDonorId = null;
     request.acceptedAt = null;
+    request.escalationCount = 0;
     return request;
   }
 
