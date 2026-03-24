@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-import { colors, spacing, tabBarSpec, animationSpec, iconSpec, touchTargetSpec } from '../../theme';
+import { colors, spacing, radius, tabBarSpec, animationSpec, iconSpec, touchTargetSpec } from '../../theme';
 
 // =============================================================================
 // CONSTANTS
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     right: -8,
     minWidth: 18,
     height: 18,
-    borderRadius: 9,
+    borderRadius: radius.full,
     backgroundColor: colors.primary,
     borderWidth: 2,
     borderColor: colors.background,
