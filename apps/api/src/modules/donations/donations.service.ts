@@ -141,10 +141,12 @@ export class DonationsService {
         (now.getTime() - lastDonationDate.getTime()) / (1000 * 60 * 60 * 24),
       );
       isEligible = daysSinceLastDonation >= ELIGIBILITY_DAYS;
-      nextEligibleDate = new Date(lastDonationDate);
-      nextEligibleDate.setDate(
-        nextEligibleDate.getDate() + ELIGIBILITY_DAYS,
-      );
+      if (!isEligible) {
+        nextEligibleDate = new Date(lastDonationDate);
+        nextEligibleDate.setDate(
+          nextEligibleDate.getDate() + ELIGIBILITY_DAYS,
+        );
+      }
     }
 
     return {
