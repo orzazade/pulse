@@ -1,10 +1,10 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { CentersService } from './centers.service';
-import { IsOptional, IsString, IsNumber, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsNumber, MinLength, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class ListCentersQueryDto {
-  @IsOptional() @IsString() @MinLength(1) city?: string;
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(100) city?: string;
 }
 
 class NearbyCentersQueryDto {
