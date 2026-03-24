@@ -309,7 +309,9 @@ export class RequestsService {
       { status: RequestStatus.CANCELLED },
     );
     if (result.affected === 0) {
-      throw new ConflictException('Request status changed before cancellation');
+      const current = await this.requestRepository.findOne({ where: { id: requestId }, select: ['status'] });
+      const status = current?.status ?? 'unknown';
+      throw new ConflictException(`Cannot cancel — request is now ${status}`);
     }
 
     request.status = RequestStatus.CANCELLED;
