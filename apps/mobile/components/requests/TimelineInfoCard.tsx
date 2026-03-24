@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: radius.full,
     backgroundColor: backgroundColors.card,
     justifyContent: "center",
     alignItems: "center",
