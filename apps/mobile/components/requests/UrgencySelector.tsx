@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   radio: {
     width: 24, // Updated from 22px to 24px
     height: 24, // Updated from 22px to 24px
-    borderRadius: 12, // Updated from 11px
+    borderRadius: radius.full,
     borderWidth: 2,
     borderColor: borderColors.default,
     justifyContent: 'center',
