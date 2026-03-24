@@ -42,7 +42,7 @@ export class CentersService {
 
     return centers.entities.map((entity, i) => ({
       ...entity,
-      distance: parseFloat(centers.raw[i]?.distance ?? '0'),
+      distance: parseFloat(centers.raw[i]?.distance ?? '0') || 0,
     }));
   }
 }

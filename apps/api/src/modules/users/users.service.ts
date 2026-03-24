@@ -92,7 +92,7 @@ export class UsersService {
       bloodType: entity.bloodType,
       city: entity.city,
       region: entity.region,
-      distance: parseFloat(donors.raw[i]?.distance ?? '0'),
+      distance: parseFloat(donors.raw[i]?.distance ?? '0') || 0,
       isVerified: entity.isVerified,
     }));
   }
