@@ -225,6 +225,19 @@ export class RequestsService {
     request.acceptedDonorId = null;
     request.acceptedAt = null;
     request.escalationCount = 0;
+
+    // Re-schedule escalation for the re-opened request (original chain stopped when ACCEPTED)
+    try {
+      const delay = ESCALATION_DELAY_MS[request.urgency] ?? ESCALATION_DELAY_MS[Urgency.STANDARD];
+      await this.notificationQueue.add(
+        'escalate-request',
+        { requestId: request.id, bloodType: request.bloodType, seekerId: request.seekerId },
+        { delay },
+      );
+    } catch (error) {
+      this.logger.error(`Failed to schedule re-escalation for declined request ${request.id}`, error instanceof Error ? error.stack : undefined);
+    }
+
     return request;
   }
 
