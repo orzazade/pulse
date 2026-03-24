@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: radius.full,
     borderWidth: 3,
     borderColor: backgroundColors.background,
     ...shadows.medium,
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   avatarFallback: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: radius.full,
     borderWidth: 3,
     borderColor: backgroundColors.background,
     backgroundColor: borderColors.default,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   bloodBadge: {
     width: 50,
     height: 50,
-    borderRadius: 25,
+    borderRadius: radius.full,
     backgroundColor: primaryColors.primary,
     justifyContent: "center",
     alignItems: "center",
