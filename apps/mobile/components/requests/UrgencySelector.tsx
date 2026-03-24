@@ -9,6 +9,7 @@ import {
   semanticColors,
   touchTargetSpec,
   backgroundColors,
+  radius,
 } from '@/theme/tokens';
 
 type UrgencyLevel = 'critical' | 'urgent' | 'standard';
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     minHeight: touchTargetSpec.large, // 52px minimum height
     borderWidth: 1,
     borderColor: borderColors.default,
-    borderRadius: 12,
+    borderRadius: radius.lg,
     padding: spacing(4),
     backgroundColor: backgroundColors.card,
   },
