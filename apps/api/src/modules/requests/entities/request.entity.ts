@@ -56,6 +56,9 @@ export class Request {
   @Column({ name: 'accepted_at', type: 'timestamptz', nullable: true })
   acceptedAt: Date | null;
 
+  @Column({ name: 'escalation_count', default: 0 })
+  escalationCount: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }

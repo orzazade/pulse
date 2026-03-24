@@ -37,5 +37,6 @@ export enum NotificationType {
   DONOR_WITHDREW = 'donor_withdrew',
   ELIGIBILITY_REMINDER = 'eligibility_reminder',
   THANK_YOU = 'thank_you',
+  REQUEST_ESCALATED = 'request_escalated',
   GENERAL = 'general',
 }

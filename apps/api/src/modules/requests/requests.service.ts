@@ -13,6 +13,15 @@ import { Request } from './entities/request.entity';
 import { User } from '../users/entities/user.entity';
 import { BloodType, RequestStatus, Urgency, UserMode, getCompatibleDonorTypes } from '@pulse/shared';
 
+/** Delay before first escalation re-notification, by urgency level (ms) */
+const ESCALATION_DELAY_MS: Record<Urgency, number> = {
+  [Urgency.CRITICAL]: 5 * 60 * 1000,    // 5 minutes
+  [Urgency.URGENT]: 15 * 60 * 1000,      // 15 minutes
+  [Urgency.NORMAL]: 30 * 60 * 1000,      // 30 minutes
+  [Urgency.STANDARD]: 60 * 60 * 1000,    // 60 minutes
+};
+
+
 @Injectable()
 export class RequestsService {
   private readonly logger = new Logger(RequestsService.name);
@@ -76,6 +85,18 @@ export class RequestsService {
       });
     } catch (error) {
       this.logger.error(`Failed to queue donor notification for request ${saved.id}`, error instanceof Error ? error.stack : undefined);
+    }
+
+    // Schedule escalation check — re-notify donors if request stays OPEN
+    try {
+      const delay = ESCALATION_DELAY_MS[data.urgency] ?? ESCALATION_DELAY_MS[Urgency.STANDARD];
+      await this.notificationQueue.add(
+        'escalate-request',
+        { requestId: saved.id, bloodType: data.bloodType, seekerId },
+        { delay },
+      );
+    } catch (error) {
+      this.logger.error(`Failed to schedule escalation for request ${saved.id}`, error instanceof Error ? error.stack : undefined);
     }
 
     return saved;
