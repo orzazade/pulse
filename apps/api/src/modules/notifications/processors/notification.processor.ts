@@ -124,16 +124,16 @@ export class NotificationProcessor {
       return;
     }
 
-    // Increment escalation count
-    await this.requestRepository.update(
-      { id: requestId },
-      { escalationCount: request.escalationCount + 1 },
-    );
-
     if (!Object.values(BloodType).includes(bloodType as BloodType)) {
       this.logger.error(`Invalid bloodType "${bloodType}" in escalation job ${job.id} for request ${requestId}`);
       return;
     }
+
+    // Increment escalation count (after validation to avoid wasting slots on invalid data)
+    await this.requestRepository.update(
+      { id: requestId },
+      { escalationCount: request.escalationCount + 1 },
+    );
 
     const compatibleTypes = getCompatibleDonorTypes(bloodType as BloodType);
     if (compatibleTypes.length === 0) return;
