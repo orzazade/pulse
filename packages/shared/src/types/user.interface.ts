@@ -20,5 +20,7 @@ export interface IUser {
   notifyRequestAccepted: boolean;
   notifyEligibility: boolean;
   lastEligibilityReminder?: Date;
+  isVerified: boolean;
+  verifiedAt?: Date;
   createdAt: Date;
 }
