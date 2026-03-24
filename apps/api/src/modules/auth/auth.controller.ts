@@ -3,13 +3,14 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, MaxLength, Matches } from 'class-validator';
 
 class RequestOtpDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(7)
   @MaxLength(20)
+  @Matches(/^\+?[0-9]{7,20}$/, { message: 'phone must contain only digits, optionally prefixed with +' })
   phone: string;
 }
 
@@ -17,6 +18,7 @@ class VerifyOtpDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(20)
+  @Matches(/^\+?[0-9]{7,20}$/, { message: 'phone must contain only digits, optionally prefixed with +' })
   phone: string;
 
   @IsString()
