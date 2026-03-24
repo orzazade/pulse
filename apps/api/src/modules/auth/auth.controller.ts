@@ -17,6 +17,7 @@ class RequestOtpDto {
 class VerifyOtpDto {
   @IsString()
   @IsNotEmpty()
+  @MinLength(7)
   @MaxLength(20)
   @Matches(/^\+?[0-9]{7,20}$/, { message: 'phone must contain only digits, optionally prefixed with +' })
   phone: string;
