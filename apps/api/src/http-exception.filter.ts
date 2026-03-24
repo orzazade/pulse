@@ -32,6 +32,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         `Unhandled exception: ${exception.message}`,
         exception.stack,
       );
+    } else {
+      this.logger.error(`Unhandled non-Error exception: ${JSON.stringify(exception)}`);
     }
 
     response.status(status).json({
