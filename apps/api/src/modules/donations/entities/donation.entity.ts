@@ -10,6 +10,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 
 @Entity('donations')
+@Index(['userId', 'donationDate'])
 export class Donation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
