@@ -270,7 +270,9 @@ export class RequestsService {
       { status: RequestStatus.COMPLETED },
     );
     if (result.affected === 0) {
-      throw new ConflictException('Request status changed before completion');
+      const current = await this.requestRepository.findOne({ where: { id: requestId }, select: ['status'] });
+      const status = current?.status ?? 'unknown';
+      throw new ConflictException(`Cannot complete — request is now ${status}`);
     }
 
     request.status = RequestStatus.COMPLETED;
