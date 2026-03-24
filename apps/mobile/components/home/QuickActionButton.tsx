@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 52,
     height: 52,
-    borderRadius: 26,
+    borderRadius: radius.full,
     backgroundColor: illustrationColors.pinkCircle,
     justifyContent: 'center',
     alignItems: 'center',
