@@ -10,7 +10,7 @@ import { ConvexClientProvider } from "../convex/ConvexClientProvider";
 import { ModeProvider } from "../contexts/ModeContext";
 import { useBiometricAuth } from "../hooks/useBiometricAuth";
 import { getBiometricType } from "../lib/biometric";
-import { primaryColors, backgroundColors, textColors, spacing } from "../theme/tokens";
+import { primaryColors, backgroundColors, textColors, spacing, radius } from "../theme/tokens";
 import { registerForPushNotificationsAsync } from "../lib/notifications";
 import React, { useEffect, useState, useRef } from "react";
 
@@ -103,8 +103,8 @@ const lockStyles = StyleSheet.create({
     backgroundColor: primaryColors.primary,
     paddingVertical: 15,
     paddingHorizontal: 30,
-    borderRadius: 12,
-    gap: 12,
+    borderRadius: radius.lg,
+    gap: spacing(3),
   },
   unlockText: {
     color: textColors.onPrimary,
