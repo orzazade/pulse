@@ -21,6 +21,13 @@ export class UsersService {
     userId: string,
     updates: Partial<Pick<User, 'fullName' | 'email' | 'bloodType' | 'mode' | 'city' | 'region' | 'latitude' | 'longitude' | 'locationGranted' | 'preferredDonationCenter' | 'isAvailable'>>,
   ): Promise<User> {
+    // Coordinates must be updated together to prevent mismatched lat/lng in distance calculations
+    const hasLat = updates.latitude !== undefined;
+    const hasLng = updates.longitude !== undefined;
+    if (hasLat !== hasLng) {
+      throw new BadRequestException('Latitude and longitude must be updated together');
+    }
+
     const user = await this.getCurrentUser(userId);
     Object.assign(user, updates);
     return this.userRepository.save(user);
