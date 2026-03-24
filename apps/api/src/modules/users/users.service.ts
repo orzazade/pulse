@@ -55,7 +55,7 @@ export class UsersService {
     latitude: number,
     longitude: number,
     radiusKm: number = 50,
-  ): Promise<{ id: string; fullName: string; bloodType: BloodType; city: string; region: string; distance: number }[]> {
+  ): Promise<{ id: string; fullName: string; bloodType: BloodType; city: string; region: string; distance: number; isVerified: boolean }[]> {
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
       throw new BadRequestException('Invalid coordinates: latitude must be -90..90, longitude -180..180');
     }
@@ -81,7 +81,8 @@ export class UsersService {
       .andWhere('user.mode IN (:...modes)', { modes: [UserMode.DONOR, UserMode.BOTH] })
       .having('distance <= :radius', { radius: radiusKm })
       .setParameters({ lat: latitude, lng: longitude })
-      .orderBy('distance', 'ASC')
+      .orderBy('user.is_verified', 'DESC')
+      .addOrderBy('distance', 'ASC')
       .limit(50)
       .getRawAndEntities();
 
@@ -92,6 +93,7 @@ export class UsersService {
       city: entity.city,
       region: entity.region,
       distance: parseFloat(donors.raw[i]?.distance ?? '0'),
+      isVerified: entity.isVerified,
     }));
   }
 

@@ -73,6 +73,13 @@ export class User {
   @Column({ name: 'last_eligibility_reminder', type: 'timestamptz', nullable: true })
   lastEligibilityReminder: Date;
 
+  @Index()
+  @Column({ name: 'is_verified', default: false })
+  isVerified: boolean;
+
+  @Column({ name: 'verified_at', type: 'timestamptz', nullable: true })
+  verifiedAt: Date;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

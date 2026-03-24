@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Donation } from './entities/donation.entity';
 import { Request } from '../requests/entities/request.entity';
+import { User } from '../users/entities/user.entity';
 import { RequestStatus, Urgency, BloodType } from '@pulse/shared';
+
+/** Minimum confirmed donations required for automatic verification */
+const VERIFICATION_THRESHOLD = 3;
 
 @Injectable()
 export class DonationsService {
@@ -12,6 +16,8 @@ export class DonationsService {
     private readonly donationRepository: Repository<Donation>,
     @InjectRepository(Request)
     private readonly requestRepository: Repository<Request>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async recordDonation(
@@ -45,7 +51,29 @@ export class DonationsService {
       donationCenter: data.donationCenter,
       notes: data.notes,
     });
-    return this.donationRepository.save(donation);
+    const saved = await this.donationRepository.save(donation);
+
+    await this.checkAndUpdateVerification(userId);
+
+    return saved;
+  }
+
+  /**
+   * Auto-verify a donor once they reach the verification threshold.
+   * Verified donors get priority in nearby donor matching results.
+   */
+  async checkAndUpdateVerification(userId: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user || user.isVerified) return user?.isVerified ?? false;
+
+    const totalDonations = await this.donationRepository.count({ where: { userId } });
+    if (totalDonations >= VERIFICATION_THRESHOLD) {
+      user.isVerified = true;
+      user.verifiedAt = new Date();
+      await this.userRepository.save(user);
+      return true;
+    }
+    return false;
   }
 
   async getDonationHistory(userId: string): Promise<Donation[]> {

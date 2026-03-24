@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { DonationsService } from './donations.service';
 import { Donation } from './entities/donation.entity';
 import { Request } from '../requests/entities/request.entity';
+import { User } from '../users/entities/user.entity';
 import { RequestStatus, Urgency, BloodType } from '@pulse/shared';
 
 describe('DonationsService', () => {
@@ -20,12 +21,18 @@ describe('DonationsService', () => {
     find: jest.fn(),
   };
 
+  const mockUserRepo = {
+    findOne: jest.fn(),
+    save: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DonationsService,
         { provide: getRepositoryToken(Donation), useValue: mockDonationRepo },
         { provide: getRepositoryToken(Request), useValue: mockRequestRepo },
+        { provide: getRepositoryToken(User), useValue: mockUserRepo },
       ],
     }).compile();
 
@@ -124,6 +131,64 @@ describe('DonationsService', () => {
         },
         select: ['bloodType', 'urgency'],
       });
+    });
+  });
+
+  describe('checkAndUpdateVerification', () => {
+    const userId = 'user-123';
+
+    it('should not verify a donor with fewer than 3 donations', async () => {
+      mockUserRepo.findOne.mockResolvedValue({ id: userId, isVerified: false });
+      mockDonationRepo.count.mockResolvedValue(2);
+
+      const result = await service.checkAndUpdateVerification(userId);
+
+      expect(result).toBe(false);
+      expect(mockUserRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('should verify a donor once they reach 3 donations', async () => {
+      const user = { id: userId, isVerified: false, verifiedAt: null };
+      mockUserRepo.findOne.mockResolvedValue(user);
+      mockDonationRepo.count.mockResolvedValue(3);
+
+      const result = await service.checkAndUpdateVerification(userId);
+
+      expect(result).toBe(true);
+      expect(user.isVerified).toBe(true);
+      expect(user.verifiedAt).toBeInstanceOf(Date);
+      expect(mockUserRepo.save).toHaveBeenCalledWith(user);
+    });
+
+    it('should skip verification if donor is already verified', async () => {
+      mockUserRepo.findOne.mockResolvedValue({ id: userId, isVerified: true });
+
+      const result = await service.checkAndUpdateVerification(userId);
+
+      expect(result).toBe(true);
+      expect(mockDonationRepo.count).not.toHaveBeenCalled();
+      expect(mockUserRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('should return false if user is not found', async () => {
+      mockUserRepo.findOne.mockResolvedValue(null);
+
+      const result = await service.checkAndUpdateVerification(userId);
+
+      expect(result).toBe(false);
+      expect(mockDonationRepo.count).not.toHaveBeenCalled();
+    });
+
+    it('should verify a donor with more than 3 donations', async () => {
+      const user = { id: userId, isVerified: false, verifiedAt: null };
+      mockUserRepo.findOne.mockResolvedValue(user);
+      mockDonationRepo.count.mockResolvedValue(7);
+
+      const result = await service.checkAndUpdateVerification(userId);
+
+      expect(result).toBe(true);
+      expect(user.isVerified).toBe(true);
+      expect(mockUserRepo.save).toHaveBeenCalled();
     });
   });
 });
