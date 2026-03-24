@@ -137,7 +137,10 @@ export class RequestsService {
 
     // Verify donor has a compatible blood type
     const donor = await this.userRepository.findOne({ where: { id: donorId } });
-    if (!donor?.bloodType) {
+    if (!donor) {
+      throw new NotFoundException('Donor profile not found');
+    }
+    if (!donor.bloodType) {
       throw new BadRequestException('Your blood type must be set before accepting requests');
     }
     if (donor.mode === UserMode.SEEKER) {
