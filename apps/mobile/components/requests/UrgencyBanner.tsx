@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { primaryColors, semanticColors, textColors, spacing } from "@/theme/tokens";
+import { primaryColors, semanticColors, textColors, spacing, radius } from "@/theme/tokens";
 
 type UrgencyLevel = "critical" | "urgent" | "standard";
 
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing(5), // 20px
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 24, // Pill shape as shown in mockup
+    borderRadius: radius['2xl'], // Pill shape as shown in mockup
   },
   label: {
     color: textColors.onPrimary,
