@@ -24,6 +24,7 @@ describe('NotificationProcessor', () => {
   const mockRequestRepo = {
     findOne: jest.fn(),
     update: jest.fn(),
+    increment: jest.fn(),
   };
 
   const mockNotificationsService = {
@@ -91,7 +92,7 @@ describe('NotificationProcessor', () => {
         escalationCount: 0,
         urgency: Urgency.URGENT,
       });
-      mockRequestRepo.update.mockResolvedValue({ affected: 1 });
+      mockRequestRepo.increment.mockResolvedValue({ affected: 1 });
 
       const donor = {
         id: 'donor-1',
@@ -106,9 +107,10 @@ describe('NotificationProcessor', () => {
 
       await processor.handleEscalateRequest(makeJob(jobData));
 
-      expect(mockRequestRepo.update).toHaveBeenCalledWith(
+      expect(mockRequestRepo.increment).toHaveBeenCalledWith(
         { id: 'req-1' },
-        { escalationCount: 1 },
+        'escalationCount',
+        1,
       );
       expect(mockNotificationsService.createNotification).toHaveBeenCalledWith({
         userId: 'donor-1',
@@ -132,14 +134,15 @@ describe('NotificationProcessor', () => {
         escalationCount: 2,
         urgency: Urgency.CRITICAL,
       });
-      mockRequestRepo.update.mockResolvedValue({ affected: 1 });
+      mockRequestRepo.increment.mockResolvedValue({ affected: 1 });
       mockUserRepo.find.mockResolvedValue([]);
 
       await processor.handleEscalateRequest(makeJob(jobData));
 
-      expect(mockRequestRepo.update).toHaveBeenCalledWith(
+      expect(mockRequestRepo.increment).toHaveBeenCalledWith(
         { id: 'req-1' },
-        { escalationCount: 3 },
+        'escalationCount',
+        1,
       );
       // Should NOT schedule next escalation — this was the last one
       expect(mockQueue.add).not.toHaveBeenCalled();
@@ -152,7 +155,7 @@ describe('NotificationProcessor', () => {
         escalationCount: 0,
         urgency: Urgency.STANDARD,
       });
-      mockRequestRepo.update.mockResolvedValue({ affected: 1 });
+      mockRequestRepo.increment.mockResolvedValue({ affected: 1 });
 
       // Return the seeker as a "compatible donor" — should be skipped
       mockUserRepo.find.mockResolvedValue([

@@ -129,10 +129,11 @@ export class NotificationProcessor {
       return;
     }
 
-    // Increment escalation count (after validation to avoid wasting slots on invalid data)
-    await this.requestRepository.update(
+    // Atomic increment to prevent lost updates from concurrent escalation jobs
+    await this.requestRepository.increment(
       { id: requestId },
-      { escalationCount: request.escalationCount + 1 },
+      'escalationCount',
+      1,
     );
 
     const compatibleTypes = getCompatibleDonorTypes(bloodType as BloodType);
