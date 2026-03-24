@@ -286,6 +286,19 @@ export class RequestsService {
     }
 
     request.status = RequestStatus.CANCELLED;
+
+    // Notify the accepted donor that the request was cancelled (best-effort)
+    if (request.acceptedDonorId) {
+      try {
+        await this.notificationQueue.add('request-cancelled', {
+          requestId: request.id,
+          donorId: request.acceptedDonorId,
+        });
+      } catch (error) {
+        this.logger.error(`Failed to queue cancellation notification for request ${request.id}`, error instanceof Error ? error.stack : undefined);
+      }
+    }
+
     return request;
   }
 }

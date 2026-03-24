@@ -181,4 +181,26 @@ export class NotificationProcessor {
       }
     }
   }
+
+  @Process('request-cancelled')
+  async handleRequestCancelled(
+    job: Job<{ requestId: string; donorId: string }>,
+  ) {
+    const { requestId, donorId } = job.data;
+
+    try {
+      await this.notificationsService.createNotification({
+        userId: donorId,
+        type: NotificationType.REQUEST_CANCELLED,
+        title: 'Request Cancelled',
+        body: 'A blood request you accepted has been cancelled by the seeker.',
+        requestId,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to create cancellation notification for donor ${donorId} on request ${requestId}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+  }
 }
