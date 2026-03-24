@@ -77,7 +77,7 @@ export class AuthService {
 
       return existing;
     } catch (error) {
-      this.logger.error(`Failed to upsert user for phone ${phone}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(`Failed to upsert user for phone ***${phone.slice(-4)}`, error instanceof Error ? error.stack : undefined);
       throw new InternalServerErrorException('Authentication failed — please try again');
     }
   }
