@@ -35,6 +35,11 @@ export class DonationsService {
     // Enforce 56-day minimum interval between donations
     const lastDonation = await this.getLastDonationDate(userId);
     if (lastDonation) {
+      if (donationDate <= lastDonation) {
+        throw new BadRequestException(
+          'Donation date must be after your most recent donation',
+        );
+      }
       const daysSinceLast = Math.floor(
         (donationDate.getTime() - lastDonation.getTime()) / (1000 * 60 * 60 * 24),
       );
