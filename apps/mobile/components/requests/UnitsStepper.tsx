@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   button: {
     width: touchTargetSpec.comfortable, // 48px
     height: touchTargetSpec.comfortable, // 48px
-    borderRadius: 8,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: borderColors.default,
     backgroundColor: backgroundColors.input,
