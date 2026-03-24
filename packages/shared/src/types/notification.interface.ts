@@ -7,8 +7,6 @@ export interface INotification {
   title: string;
   body: string;
   read: boolean;
-  data?: {
-    requestId?: string;
-  };
+  requestId?: string;
   createdAt: Date;
 }
