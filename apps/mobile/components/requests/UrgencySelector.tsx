@@ -143,13 +143,13 @@ const styles = StyleSheet.create({
   radioInner: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: radius.full,
     backgroundColor: primaryColors.primary,
   },
   colorDot: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: radius.full,
     marginRight: spacing(3),
   },
   textContent: {
