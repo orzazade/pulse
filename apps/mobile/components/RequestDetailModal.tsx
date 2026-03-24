@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   bloodBadge: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: radius.full,
     backgroundColor: primaryColors.primary,
     justifyContent: "center",
     alignItems: "center",
