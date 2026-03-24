@@ -218,7 +218,9 @@ export class RequestsService {
       { status: RequestStatus.OPEN, acceptedDonorId: null, acceptedAt: null, escalationCount: 0 },
     );
     if (result.affected === 0) {
-      throw new ConflictException('Request status changed before decline');
+      const current = await this.requestRepository.findOne({ where: { id: requestId }, select: ['status'] });
+      const status = current?.status ?? 'unknown';
+      throw new ConflictException(`Cannot decline — request is now ${status}`);
     }
 
     request.status = RequestStatus.OPEN;
